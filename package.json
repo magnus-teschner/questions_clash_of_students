@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "amqplib": "^0.10.3",
     "cors": "^2.8.5",
     "ejs": "^3.1.9",
     "expres": "^0.0.5",
