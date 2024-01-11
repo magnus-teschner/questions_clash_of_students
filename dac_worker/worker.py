@@ -39,7 +39,6 @@ def main() -> None:
         create_table_query = "CREATE DATABASE IF NOT EXISTS questions;"
         # Execute the SQL query
         cursor.execute(create_table_query)
-        print("datbase")
         cursor.close()
     
     def create_table(connection):
@@ -58,7 +57,6 @@ def main() -> None:
         """
         # Execute the SQL query
         cursor.execute(create_table_query)
-        print("Table created successfully")
         cursor.close()
 
     connection = create_mysql_connection()
@@ -94,10 +92,8 @@ def main() -> None:
         decoded_body = body.decode('utf-8')
         decoded_body = json.loads(decoded_body)
         decoded_body = decoded_body["question"]
-        print(decoded_body)
         mysql_data = (decoded_body["frage"], decoded_body["a"], decoded_body["b"], decoded_body["c"], decoded_body["d"])
         write_in_table(connection, mysql_data)
-        print(decoded_body["frage"])
 
 
     channel1.basic_consume(queue=queue_name1, on_message_callback=callback, auto_ack=True)
