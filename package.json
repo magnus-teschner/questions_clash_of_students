@@ -4,7 +4,18 @@
     "cors": "^2.8.5",
     "ejs": "^3.1.9",
     "expres": "^0.0.5",
-    "express": "^4.18.2",
+    "express": "^4.18.3",
+    "pg": "^8.11.3",
     "stack": "^0.1.0"
-  }
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "questions_clash_of_students",
+  "version": "1.0.0",
+  "main": "server.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }

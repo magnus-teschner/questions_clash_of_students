@@ -12,6 +12,16 @@ app.use(cors({
     origin: '*'
 }));
 
+const { Pool } = require('pg');
+const { Console } = require('console');
+
+const pool = new Pool({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'users',
+    password: 'my-secret-pw',
+    port: 5432,
+  });
 
 async function connectRabbitMQ() {
     const connection = await amqp.connect('amqp://localhost');
@@ -32,6 +42,31 @@ app.post('/submit_question', async (req, res) => {
     res.json({ status: 'Success', message: 'Question sent to RabbitMQ' });
 });
 
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query('SELECT * FROM Benutzer WHERE email = $1', [email]);
+        const user = result.rows[0];
+
+        if (user && user.passwort === password) {
+            // Authentifizierung erfolgreich, hier kannst du eine Session erstellen oder einen Token senden
+            res.json({ status: 'Success', message: 'Login successful' });
+        } else {
+            res.status(401).json({ status: 'Error', message: 'Invalid email or password' });
+        }
+
+        client.release();
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({ status: 'Error', message: 'Internal Server Error' });
+    }
+});
+
+app.get('/', function(req, res) {
+    res.sendFile('views/index.html', { root: __dirname });
+});
 
 app.get('/question', function(req, res) {	
 	res.render('template.ejs', {});
