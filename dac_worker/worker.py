@@ -3,14 +3,16 @@ import pika, sys, os, json
 import mysql.connector
 
 
+
 def main() -> None:
     
     #parameters
-    host1 = "localhost"
+    host1 = "rabbit"
     port1 = 5672
     queue_name1 = "questionsQueue"
 
     def create_connection_channel(host: str, port: int, queue_name: str):
+        print(host)
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port = port))
         channel = connection.channel()
         return channel
@@ -20,7 +22,7 @@ def main() -> None:
 
 
     def create_mysql_connection():
-        db_host = "localhost"
+        db_host = "db"
         db_user = "root"
         db_password = "my-secret-pw"
 
@@ -59,10 +61,10 @@ def main() -> None:
         cursor.execute(create_table_query)
         cursor.close()
 
-    connection = create_mysql_connection()
+    #connection = create_mysql_connection()
 
-    create_database(connection)
-    create_table(connection)
+    #create_database(connection)
+    #create_table(connection)
     
 
     def write_in_table(connection, object):

@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 import mysql.connector
+import os
 
 def fetch_data():
     try:
         # Database connection parameters
-        db_host = "localhost"
+        db_host = "db"
         db_user = "root"
         db_password = "my-secret-pw"
         db_database = "questions"

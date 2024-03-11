@@ -14,9 +14,11 @@ app.use(cors({
 
 
 async function connectRabbitMQ() {
-    const connection = await amqp.connect('amqp://localhost');
+    const rabbitHost = process.env.RABBITMQ_HOST
+    const connection = await amqp.connect(`amqp://rabbit`);
     const channel = await connection.createChannel();
     await channel.assertQueue('questionsQueue');
+    console.log("connected_succesfully")
     return channel;
 }
 
