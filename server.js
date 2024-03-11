@@ -12,6 +12,7 @@ app.use(cors({
     origin: '*'
 }));
 
+/*
 const { Pool } = require('pg');
 const { Console } = require('console');
 
@@ -22,7 +23,7 @@ const pool = new Pool({
     password: 'my-secret-pw',
     port: 5432,
   });
-
+*/
 async function connectRabbitMQ() {
     const connection = await amqp.connect('amqp://localhost');
     const channel = await connection.createChannel();
@@ -41,7 +42,7 @@ app.post('/submit_question', async (req, res) => {
 
     res.json({ status: 'Success', message: 'Question sent to RabbitMQ' });
 });
-
+/*
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -63,7 +64,7 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ status: 'Error', message: 'Internal Server Error' });
     }
 });
-
+*/
 app.get('/', function(req, res) {
     res.sendFile('views/index.html', { root: __dirname });
 });
