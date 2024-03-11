@@ -1,119 +1,123 @@
+/* Import Google font - Poppins */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins",
+    sans-serif;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-image: url('../images/game.png'); 
-    background-size: cover;
-    background-position: center;
-    color: #fff;
-  }
-  
-  body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-  }
-  
-  /* Navigation */
-  .navbar {
-    background-color: #333;
-    color: #fff;
-    padding: 10px 20px;
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center;
-  }
-  
-  .navbar-container {
-    width: 100%;
-    margin: 0 auto;
-    padding: 20px;
-    overflow: hidden;
-  }
-  
-  .brand {
-    float: left;
-    font-size: 24px;
-  }
-  
-  .navbar-menu {
-    float: right;
-  }
-  
-  .profile-btn, .logout-btn {
-    background-color: transparent;
-    border: none;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    margin-left: 10px;
-    padding-top: 10px;
-  }
-  
-  .profile-btn:hover, .logout-btn:hover {
-    text-decoration: underline;
-  }
-  
-  /* Inhalt */
-  
-  .content {
-    position: relative;
-    z-index: 1; /* Damit dieser Inhalt über dem Hintergrund liegt */
-  }
-  
-  .container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  
-  h1 {
-    text-align: center;
-  }
-  
-  .course {
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 10px;
-    margin-bottom: 20px;
-  }
-  
-  .course-header {
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .lessons {
-    display: none;
-    padding: 10px;
-  }
-  
-  .lesson {
-    display: flex;
-    align-items: center;
-    padding: 5px 0;
-  }
-  
-  .play-btn {
-    background-color: #89c8fc;
-    border: none;
-    color: white;
-    padding: 8px 10px;
-    border-radius: 10%;
-    margin-right: 10px;
-    cursor: pointer;
-  }
-  
-  .toggle-btn {
-    background-color: transparent;
-    border: none;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  
-  .toggle-btn:focus {
-    outline: none;
-  }
+  background-image: url('../images/game.png');
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Navigation */
+.navbar {
+  background-color: #333;
+  color: #fff;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.title {
+  float: left;
+  font-size: 24px;
+}
+
+.navbar-menu {
+  float: right;
+}
+
+.profile-btn,
+.logout-btn {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 10px;
+  padding-top: 10px;
+}
+
+.profile-btn:hover,
+.logout-btn:hover {
+  text-decoration: underline;
+}
+
+/* Inhalt */
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.course {
+  margin-bottom: 20px;
+  border-radius: 12px;
+  background: rgb(51, 51, 51, 0.9);
+}
+
+.course-header {
+  background-color: #333;
+  padding: 20px;
+  border-radius: 12px;
+  background: #69d7ff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lessons {
+  display: none;
+  padding: 10px;
+}
+
+.lesson {
+  display: flex;
+  align-items: center;
+  padding: 5px 0;
+  margin-top: 10px;
+  color: white;
+}
+
+.play-btn {
+  background-color: #69d7ff;
+  border: none;
+  height: 40px;
+  width: 40px;
+  color: white;
+  padding: 8px 10px;
+  border-radius: 50%;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.toggle-btn {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
