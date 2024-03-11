@@ -14,21 +14,21 @@
   <section class="wrapper">
     <div class="form signup">
       <header>Clash of Students</header>
-      <form id="loginForm">
+      <form action="/question" method="get">
         <input type="text" id="email" name="email" placeholder="HHZ Email address" required />
         <input type="password" id="password" name="password" placeholder="Password" required />
-        <a href="#">Forgot password?</a>
-        <input type="submit" value="Login" onclick="submitForm()" />
+        <a href="https://letmegooglethat.com/?q=Wie+kann+ich+mir+meine+Passw%C3%B6rter+merken%3F">Forgot password?</a>
+        <input type="submit" value="Login" />
       </form>
     </div>
 
     <div class="form login">
       <header>Professors Hub</header>
-      <form action="/login" method="post">
+      <form action="/students" method="get" >
         <input type="text" name="email" placeholder="HHZ Email address" required />
         <input type="password" name="password" placeholder="Password" required />
-        <a href="#">Forgot password?</a>
-        <input type="submit" value="Login" />
+        <a href="https://letmegooglethat.com/?q=Wie+kann+ich+mir+meine+Passw%C3%B6rter+merken%3F">Forgot password?</a>
+        <input type="submit" value="Login"/>
       </form>
     </div>
 
@@ -49,24 +49,24 @@
         document.body.classList.remove('background-signup');
       });
 
-      function submitForm() {
+      //function submitForm() {
         // Get email and password values
-        var email = document.getElementById("email").value;
-        var password = document.getElementById("password").value;
+        //var email = document.getElementById("email").value;
+        //var password = document.getElementById("password").value;
 
         // Create JSON object
-        var userData = {
-          email: email,
-          password: password
-        };
+        //var userData = {
+        //  email: email,
+        //  password: password
+       // };
 
         // Create and send POST request
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/login", true);
-        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhr.send(JSON.stringify(userData));
+       // var xhr = new XMLHttpRequest();
+        //xhr.open("POST", "/login", true);
+        //xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        //xhr.send(JSON.stringify(userData));
 
-      }
+      //}
     </script>
   </section>
 </body>
