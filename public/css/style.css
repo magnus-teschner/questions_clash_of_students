@@ -1,44 +1,70 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-image: url('../images/faculty.png'); 
+    background-size: cover;
+    color: #333;
+    background-color: #f8f8f8;
+    line-height: 1.6;
+    padding: 0;
+    margin: 0;
+}
+
 .container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    background: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+.name {
+    font-size: 24px;
+    color: #007bff;
+    margin-bottom: 20px;
+}
+
+/* Form Styles */
+.question-selector, .question-entry, .answers, .answer-12, .answer-34, .question {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 10px;
 }
 
-.question-selector {
-    display: flex;
-    justify-content: center;
-    gap: 5px;
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
 }
 
-.question-entry {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 5px;
+/* Button Style */
+button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.answers {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    margin: 5px;
-
+button:hover {
+    background-color: #218838;
 }
 
-.answer-12, .answer-34 {
-    display: flex;
-    justify-content: center;
-    gap: 5px;
-    align-items: flex-start;
-}
+/* Responsive */
+@media (max-width: 600px) {
+    .container {
+        width: 100%;
+        padding: 10px;
+    }
 
-.answer-1, .answer-2, .answer-3, .answer-4 {
-    display: flex;
-    align-items: flex-start;
-}
-
-.question {
-    display: flex;
-    align-items: flex-start;
+    .answer-12, .answer-34 {
+        flex-direction: column;
+    }
 }

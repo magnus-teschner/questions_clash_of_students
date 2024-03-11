@@ -34,7 +34,15 @@ app.post('/submit_question', async (req, res) => {
 
 
 app.get('/question', function(req, res) {	
-	res.render('template.ejs', {});
+	res.render('questions.ejs', {});
+});
+
+app.get('/login', function(req, res) {	
+	res.render('login.ejs', {});
+});
+
+app.get('/course', function(req, res) {	
+	res.render('course.ejs', {});
 });
 
 

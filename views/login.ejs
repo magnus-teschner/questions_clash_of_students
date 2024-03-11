@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login & Signup Form</title>
+  <link rel="stylesheet" href="css/style_login.css" />
+</head>
+<body>
+  <section class="wrapper">
+    <div class="form signup">
+      <header>Clash of Students</header>
+      <form id="loginForm">
+        <input type="text" id="email" name="email" placeholder="HHZ Email address" required />
+        <input type="password" id="password" name="password" placeholder="Password" required />
+        <a href="#">Forgot password?</a>
+        <input type="submit1" value="Login" onclick="redirectToUrl('http://localhost:3000/course')" />
+      </form>
+    </div>
+
+    <div class="form login">
+      <header>Professors Hub</header>
+      <form action="/login" method="post">
+        <input type="text" name="email" placeholder="HHZ Email address" required />
+        <input type="password" name="password" placeholder="Password" required />
+        <a href="#">Forgot password?</a>
+        <input type="submit1" value="Login" onclick="redirectToUrl('http://localhost:3000/question')"/>
+      </form>
+    </div>
+
+    <script>
+      const wrapper = document.querySelector(".wrapper"),
+        signupHeader = document.querySelector(".signup header"),
+        loginHeader = document.querySelector(".login header");
+
+      loginHeader.addEventListener("click", () => {
+        wrapper.classList.add("active");
+        document.body.classList.add('background-signup');
+        document.body.classList.remove('background-login');
+      });
+
+      signupHeader.addEventListener("click", () => {
+        wrapper.classList.remove("active");
+        document.body.classList.add('background-login');
+        document.body.classList.remove('background-signup');
+      });
+
+    function redirectToUrl(url) {
+        window.location.href = url;
+    }
+    </script>
+  </section>
+</body>
+
+</html>
