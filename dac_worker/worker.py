@@ -48,13 +48,17 @@ def main() -> None:
 
 
         create_table_query = """
-        CREATE TABLE IF NOT EXISTS questions.quiz_questions (
+        CREATE TABLE IF NOT EXISTS questions.final_questions (
             id INT AUTO_INCREMENT PRIMARY KEY,
             frage TEXT,
             option_a VARCHAR(255),
             option_b VARCHAR(255),
             option_c VARCHAR(255),
-            option_d VARCHAR(255)
+            option_d VARCHAR(255),
+            correct_option VARCHAR(255),
+            course VARCHAR(255),
+            level INT,
+            position INT,
         );
         """
         # Execute the SQL query
