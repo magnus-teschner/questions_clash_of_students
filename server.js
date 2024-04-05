@@ -22,7 +22,7 @@ async function connectRabbitMQ() {
     return channel;
 }
 
-const channelPromise = connectRabbitMQ();
+//const channelPromise = connectRabbitMQ();
 
 app.post('/submit_question', async (req, res) => {
     const questionData = req.body;
