@@ -88,6 +88,40 @@ function create_4_answers(container){
 
 }
 
+function create_image_upload(container){
+    // Step 1: Create the div element
+    const dropArea = document.createElement('div');
+    dropArea.id = 'drop-area';
+
+    // Step 2: Create the form element
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.enctype = 'multipart/form-data';
+
+    // Step 3: Create the input element
+    const fileElem = document.createElement('input');
+    fileElem.type = 'file';
+    fileElem.id = 'fileElem';
+    fileElem.multiple = true;
+    fileElem.accept = 'image/*';
+
+    // Step 4: Create the label element
+    const label = document.createElement('label');
+    label.setAttribute('for', 'fileElem');
+    label.textContent = 'Drag and drop images here or click to select';
+
+    // Step 5: Append the input and label to the form
+    form.appendChild(fileElem);
+    form.appendChild(label);
+
+    // Step 6: Append the form to the div
+    dropArea.appendChild(form);
+
+    // Step 7: Append the div to the body or another container
+    container.appendChild(dropArea);
+
+}
+
 create_question_field(question_entry_container);
 create_4_answers(question_entry_container);
 
@@ -95,6 +129,7 @@ create_4_answers(question_entry_container);
 selector_questions.addEventListener('change', (e) => {
     delete_all_childs(question_entry_container);
     create_question_field(question_entry_container);
+    create_image_upload(question_entry_container);
     create_4_answers(question_entry_container);
     console.log(e.target.value)});
 

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Upload</title>
+<style>
+    #drop-area {
+        border: 2px dashed #ccc;
+        border-radius: 20px;
+        width: 300px;
+        height: 200px;
+        text-align: center;
+        line-height: 200px;
+        font-family: Arial, sans-serif;
+        color: #ccc;
+        margin: 20px;
+    }
+    input[type="file"] {
+        display: none;
+    }
+    #gallery {
+        margin-top: 20px;
+    }
+    img {
+        width: 100%;
+        margin-top: 10px;
+    }
+</style>
+</head>
+<body>
+
+<div id="drop-area">
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" id="fileElem" multiple accept="image/*">
+        <label for="fileElem">Drag and drop files here or click to select</label>
+    </form>
+</div>
+<div id="gallery"></div>
+
+<script>
+    let dropArea = document.getElementById('drop-area');
+    let gallery = document.getElementById('gallery');
+
+    ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        preventDefaults(e);
+        let dt = e.dataTransfer;
+        let files = dt.files;
+
+        handleFiles(files);
+    }
+
+    function handleFiles(files) {
+        ([...files]).forEach(uploadFile);
+    }
+
+    function uploadFile(file) {
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = function() {
+            let img = document.createElement('img');
+            img.src = reader.result;
+            gallery.appendChild(img);
+        }
+    }
+</script>
+
+</body>
+</html>
