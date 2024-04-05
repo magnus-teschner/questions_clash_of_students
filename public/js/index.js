@@ -25,8 +25,10 @@ function create_question_field(container){
     const questionTextArea = document.createElement('textarea');
     questionTextArea.id = 'question-content';
     questionTextArea.rows = 3;
-    container.appendChild(questionLabel);
-    container.appendChild(questionTextArea);
+    
+    questionDiv.appendChild(questionLabel);
+    questionDiv.appendChild(questionTextArea)
+    container.appendChild(questionDiv);
 }
 
 
@@ -81,9 +83,21 @@ function create_4_answers(container){
     answer4Div.appendChild(answerDTextArea);
     answer34Div.appendChild(answer4Div);
 
+    container.appendChild(answer12Div)
+    container.appendChild(answer34Div)
+
 }
 
-selector_questions.addEventListener('change', (e) => console.log(e.target.value));
+create_question_field(question_entry_container);
+create_4_answers(question_entry_container);
+
+
+selector_questions.addEventListener('change', (e) => {
+    delete_all_childs(question_entry_container);
+    create_question_field(question_entry_container);
+    create_4_answers(question_entry_container);
+    console.log(e.target.value)});
+
 absenden_button.addEventListener('click', () => {
     let question = {
         frage: question_content.value,
