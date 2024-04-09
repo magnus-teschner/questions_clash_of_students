@@ -162,9 +162,15 @@ div .link{
 .mode-button {
     background-color: grey;
     border: none;
+    padding: 5px;
+    transition: 1s;
 }
 
 button:hover {
     cursor: pointer;
   }
+
+.selected-mode {
+    background: #739b71;
+}
 
