@@ -21,6 +21,9 @@ body {
     flex-direction: column;
     background: gray;
     box-shadow: 1px 1px 9px rgb(7, 7, 7);
+    position: sticky;
+    top: 0;
+    height: 100vh;
 }
 
 #logo-container {
