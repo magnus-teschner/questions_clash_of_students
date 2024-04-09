@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Questions</title>
 	<link rel="stylesheet" href="css/style_questions.css">
+	<link rel="stylesheet" href="css/style_file_upload.css">
 </head>
 <body>
 	<div id="main-container">
@@ -14,40 +15,58 @@
 				Clash of Students
 			</div>
 			<div id="mode-container">
-				<a href="">
+				<button id="multiple-choice" class="mode-button">
                     <div class="link">
                         <img class="select-icon" src="../images/auswahl.png" alt="auswahl icon">
                         Multiple Choice
                     </div>
-                </a>
+                </button>
 
-				<a href="">
+				<button id="multiple-choice-image" class="mode-button">
                     <div class="link">
                         <img class="select-icon" src="../images/bild_auswahl.png" alt="bild auswahl icon">
                         Multiple Choice Image
                     </div>
-                </a>
+                </button>
 
-				<a href="">
+				<button id="image-description" class="mode-button">
                     <div class="link">
                         <img class="select-icon" src="../images/bild.png" alt="bild icon">
                         Image Description
                     </div>
-                </a>
+                </button>
 
-				<a href="">
+				<button id="text-description" class="mode-button">
                     <div class="link">
                         <img class="select-icon" src="../images/text.png" alt="text icon">
                         Text Description
                     </div>
-                </a>
+                </button>
 			</div>
 		</div>
 		<div id="content">
 			<div id="question-container">
-				<p class="in-box-p">Frage</p>
-				<input id="frage" type="text">
+				<div id="question-input">
+					<p class="in-box-p">Frage</p>
+					<input id="frage" type="text">
+				</div>
+				<div id="file-upload">
+					<label id = "upload-command" for="upload-image">Upload your file: </label>
+					<input type="file" id="upload-image" accept="image/*">
+					<div id="before-upload">
+						<div>
+							<img id="image-icon" src="../images/bild.png" alt="image icon">
+							<h4>Drag & Drop image file or Browse</h4>
+							<p>	Supports: JPEG, PNG, GIF, TIFF</p>
+						</div>
+					</div>
+					<div id="after-upload">
+						<div id="clear-btn">Entfernen</div>
+						<img id = "image-drop" src="" alt="">
+					</div>
+				</div>
 			</div>
+			
 
 			<div id="answers">
 				<div class="row-answers">
@@ -79,5 +98,7 @@
 			
 		</div>
 	</div>
+	<script src="../js/question.js"></script>
+	<script src="../js/image-upload.js"></script>
 </body>
 </html>
