@@ -175,3 +175,23 @@ button:hover {
     background: #739b71;
 }
 
+input {
+    font-size: 19px;
+}
+
+#confirm-button {
+    background-color: #28a745;
+    font-size: 20px;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 200px;
+}
+
+#confirm-button:hover {
+    background-color: #218838;
+}
+
