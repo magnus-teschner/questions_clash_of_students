@@ -48,6 +48,9 @@ multiple_choice.addEventListener('click', () => {
 
     const textA = document.querySelector('#answer1 .in-box-p');
     textA.textContent = "Answer A";
+
+    const rightAnswer = document.querySelector('#correct_answer_selector');
+    rightAnswer.style.display = "flex";
 })
 
 
@@ -72,6 +75,9 @@ multiple_choice_image.addEventListener('click', () => {
 
     const textA = document.querySelector('#answer1 .in-box-p');
     textA.textContent = "Answer A";
+
+    const rightAnswer = document.querySelector('#correct_answer_selector');
+    rightAnswer.style.display = "flex";
 })
 
 
@@ -97,6 +103,9 @@ image_description.addEventListener('click', () => {
 
     const textA = document.querySelector('#answer1 .in-box-p');
     textA.textContent = "Answer";
+
+    const rightAnswer = document.querySelector('#correct_answer_selector');
+    rightAnswer.style.display = "none";
     
 })
 
@@ -122,5 +131,27 @@ text_description.addEventListener('click', () => {
 
     const textA = document.querySelector('#answer1 .in-box-p');
     textA.textContent = "Answer";
+
+    const rightAnswer = document.querySelector('#correct_answer_selector');
+    rightAnswer.style.display = "none";
     
 })
+
+
+const checkboxes = document.querySelectorAll('.correct-checkbox-class');
+
+checkboxes.forEach((checkbox) => {
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            checkboxes.forEach((item) => {
+                if (item !== checkbox) {
+                    item.disabled = true;
+                }
+            });
+        } else {
+            checkboxes.forEach(function(item) {
+                item.disabled = false;
+            });
+        }
+    });
+});
