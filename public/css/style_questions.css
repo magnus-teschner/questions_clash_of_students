@@ -4,6 +4,9 @@ body {
     margin: 0;
     font-family: "Poppins", sans-serif;
     background-image: url('../images/faculty.png');
+    background-position: center; /* Center the background image */
+    background-repeat: no-repeat; /* Do not repeat the image */
+    background-attachment: fixed; /* This is the key property */
     background-size: cover;
     box-sizing: border-box;
     

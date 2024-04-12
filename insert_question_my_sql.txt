@@ -1,9 +1,0 @@
-INSERT INTO questions.quiz_questions (frage, option_a, option_b, option_c, option_d, correct_option, course, level, position)
-VALUES ("Was ist C in CAP?", "consistency", "availability", "partition tolerance", "crash", "option_a", "cloud_computing", 1, 1);
-
-
-INSERT INTO questions.final_questions (frage, option_a, option_b, option_c, option_d, correct_option, course, level, position)
-VALUES ('Was ist C in CAP?', 'consistency', 'availability', 'partition tolerance', 'crash', 'option_a', 'cloud_computing', 1, 1);
-
-INSERT INTO questions.final_questions (frage, option_a, option_b, option_c, option_d, correct_option, course, level, position)
-VALUES ('Was ist SaaS?', 'Infrastructure as a Service', 'Software as a Service', 'Plattform as a Service', 'Everything investoert 

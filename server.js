@@ -2,9 +2,10 @@ const express = require('express');
 const path = require('path');
 const multer = require("multer");
 const { GridFSBucket } = require('mongodb');
-const { GridFsStorage } = require("multer-gridfs-storage")
+const { GridFsStorage } = require("multer-gridfs-storage");
 const { ObjectId } = require("mongodb");
-const MongoClient = require("mongodb").MongoClient
+const MongoClient = require("mongodb").MongoClient;
+const sql = require('mysql');
 const app = express();
 const port = 3000;
 
@@ -13,7 +14,14 @@ const upload = multer({ storage });
 const url = 'mongodb://root:password@localhost:27017/images?authSource=admin';
 const mongoClient = new MongoClient(url)
 
+const config = {
+  user: "root",
+  password: "my-secret-pw",
+  host: "localhost",
+  database: "questions"
+};
 
+const con = sql.createConnection(config);
 
 // Serve static files from the "public" directory
 app.use(express.static('public'));
@@ -24,6 +32,8 @@ app.get('/questions', (req, res) => {
 });
 
 app.post('/upload', upload.single('image'), (req, res) => {
+  console.log(req.body.json);
+  //console.log(res);
   if (!req.file) {
       return res.status(400).send('No file uploaded');
   }
@@ -44,9 +54,24 @@ app.post('/upload', upload.single('image'), (req, res) => {
   });
 
   uploadStream.on('finish', (file) => {
+    let json_object = JSON.parse(req.body.json);
+    json_object.question.image = uploadStream.id.toString();
+    console.log(json_object);
+    let query = "INSERT INTO questions.final_questions (frage, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image) VALUES (?,?,?,?,?,?,?,?,?,?)";
+    const values = [json_object.question.frage, json_object.question.a, json_object.question.b, json_object.question.c, json_object.question.d, json_object.question.correct_answer, json_object.question.course, json_object.question.lection, json_object.question.position, json_object.question.image];
+    con.query(query, values, (err, result) => {
+    if (err) {
+      console.log(err);
+      res.status(500).send({ msg:'SERVER_ERROR' });
+    }
+    //res.status(200).send({ id:result.insertId });
+  })
+
       return res.status(201).send({
           message: 'File uploaded successfully',
           id: uploadStream.id.toString()
+
+          
       });
   });
 });
@@ -110,6 +135,8 @@ try {
   })
 }
 })
+
+
 
 
 app.listen(port, () => {
