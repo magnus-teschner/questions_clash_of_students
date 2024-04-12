@@ -64,6 +64,9 @@ send_button.addEventListener('click', (event) => {
     const optionC = document.querySelector('#optionC');
     const optionD = document.querySelector('#optionD');
 
+    const beforeUpload= document.querySelector("#before-upload");
+    const afterUpload = document.querySelector("#after-upload");
+
     const course = document.querySelector('#dropbtn-course');
     const lection = document.querySelector('#dropbtn-lection');
     const position = document.querySelector('#dropbtn-position');
@@ -119,6 +122,8 @@ send_button.addEventListener('click', (event) => {
             uploadImage(imageBlob, JSON.stringify({ question }));
 
     });
+      afterUpload.style.display = "none";
+      beforeUpload.style.display = "flex";
     }
 
     if (multiple_choice.classList.contains('selected-mode') == true){
@@ -198,6 +203,9 @@ send_button.addEventListener('click', (event) => {
       then(imageBlob => {
           uploadImage(imageBlob, JSON.stringify({ question }));
 
+      afterUpload.style.display = "none";
+      beforeUpload.style.display = "flex";
+
       });
     }
 
@@ -235,7 +243,29 @@ send_button.addEventListener('click', (event) => {
       .then(data => console.log(data))
       .catch((error) => console.error('Error:', error));
 
+      
+
   
     }
+
+    const inputs = [
+      document.querySelector('#frage'),
+      document.querySelector('#inputA'),
+      document.querySelector('#inputB'),
+      document.querySelector('#inputC'),
+      document.querySelector('#inputD')
+    ]
+    inputs.forEach((element) => {
+      element.value = '';
+    })
+
+    const checkboxes = document.querySelectorAll('.correct-checkbox-class');
+    checkboxes.forEach((item) => {
+      item.disabled = false;
+      item.checked = false;
+    })
+
+    
+
     
 })
