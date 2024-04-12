@@ -79,8 +79,6 @@ send_button.addEventListener('click', (event) => {
         return
     } 
 
-    
-    
     if (multiple_choice_image.classList.contains('selected-mode') == true){
         if (optionA.checked) {
             correct_answer = inputA.value;
@@ -102,7 +100,6 @@ send_button.addEventListener('click', (event) => {
         let position_text = position.textContent;
         const lection_split = lection_text.split(" ");
         const position_split = position_text.split(" ");
-        console.log(lection_split[-1]);
         let question = {
             frage: question_content.value,
             a : inputA.value,
@@ -122,6 +119,123 @@ send_button.addEventListener('click', (event) => {
             uploadImage(imageBlob, JSON.stringify({ question }));
 
     });
+    }
+
+    if (multiple_choice.classList.contains('selected-mode') == true){
+      if (optionA.checked) {
+          correct_answer = inputA.value;
+      } else if (optionB.checked) {
+          correct_answer = inputB.value;
+      } else if (optionC.checked) {
+          correct_answer = inputC.value;
+      } else if (optionD.checked) {
+          correct_answer = inputD.value;
+      }
+      if (typeof correct_answer === 'undefined'){
+        alert("Select correct answer!");
+        return
+    }
+    
+      let lection_text = lection.textContent;
+      let position_text = position.textContent;
+      const lection_split = lection_text.split(" ");
+      const position_split = position_text.split(" ");
+      let question = {
+          frage: question_content.value,
+          a : inputA.value,
+          b : inputB.value,
+          c : inputC.value,
+          d : inputD.value,
+          correct_answer: correct_answer,
+          course: course.textContent,
+          lection: lection_split[lection_split.length -1],
+          position: position_split[position_split.length -1],
+          image: null
+      }
+
+      const response =  fetch('http://localhost:3000/send/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question })
+      }).then(response => response.json())
+      .then(data => console.log(data))
+      .catch((error) => console.error('Error:', error));
+
+  
+    }
+
+    if (image_description.classList.contains('selected-mode') == true){
+
+      correct_answer = inputA.value;
+
+      if (typeof correct_answer === 'undefined'){
+          alert("Enter an answer!");
+          return
+
+      }
+
+      let lection_text = lection.textContent;
+      let position_text = position.textContent;
+      const lection_split = lection_text.split(" ");
+      const position_split = position_text.split(" ");
+      let question = {
+          frage: question_content.value,
+          a : inputA.value,
+          b : null,
+          c : null,
+          d : null,
+          correct_answer: correct_answer,
+          course: course.textContent,
+          lection: lection_split[lection_split.length -1],
+          position: position_split[position_split.length -1]
+      }
+
+      console.log(question);
+      const img_tag = document.querySelector('#image-drop');
+      getImageBlobFromImgTag(img_tag).
+      then(imageBlob => {
+          uploadImage(imageBlob, JSON.stringify({ question }));
+
+      });
+    }
+
+    if (text_description.classList.contains('selected-mode') == true){
+      correct_answer = inputA.value;
+      if (typeof correct_answer === 'undefined'){
+        alert("Enter an answer!");
+        return
+    }
+    
+      let lection_text = lection.textContent;
+      let position_text = position.textContent;
+      const lection_split = lection_text.split(" ");
+      const position_split = position_text.split(" ");
+      let question = {
+          frage: question_content.value,
+          a : inputA.value,
+          b : null,
+          c : null,
+          d : null,
+          correct_answer: correct_answer,
+          course: course.textContent,
+          lection: lection_split[lection_split.length -1],
+          position: position_split[position_split.length -1],
+          image: null
+      }
+
+      const response =  fetch('http://localhost:3000/send/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question })
+      }).then(response => response.json())
+      .then(data => console.log(data))
+      .catch((error) => console.error('Error:', error));
+
+  
     }
     
 })
