@@ -5,80 +5,98 @@ const { GridFSBucket } = require('mongodb');
 const { GridFsStorage } = require("multer-gridfs-storage");
 const { ObjectId } = require("mongodb");
 const MongoClient = require("mongodb").MongoClient;
+const { v4: uuidv4 } = require('uuid');
 const sql = require('mysql');
 const app = express();
 const port = 3000;
-
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
-const url = 'mongodb://root:password@localhost:27017/images?authSource=admin';
-const mongoClient = new MongoClient(url)
+const Minio = require('minio');
+app.use(express.static('public'));
+app.use(express.json());
 
-const config = {
+const url = 'mongodb://root:password@localhost:27017/images?authSource=admin';
+const mongoClient = new MongoClient(url);
+
+const config_mysql = {
   user: "root",
   password: "my-secret-pw",
   host: "localhost",
   database: "questions"
 };
 
-const con = sql.createConnection(config);
+const minioClient = new Minio.Client({
+  endPoint: 'localhost',
+  port: 9000,
+  useSSL: false,
+  accessKey: 'i3MOJsFCDZsKvKq7fgoH',
+  secretKey: 'DF9mgBxirqGzJ622lSv2s5RG2mHlgrInUlvKB0IY',
+})
 
-// Serve static files from the "public" directory
-app.use(express.static('public'));
-app.use(express.json());
+const con = sql.createConnection(config_mysql);
 
-// Send "questions.html" when the "/questions" route is accessed
+
 app.get('/questions', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/views', 'questions.html'));
 });
 
-app.post('/upload', upload.single('image'), (req, res) => {
-  if (!req.file) {
-      return res.status(400).send('No file uploaded');
+function getAfterLastSlash(str) {
+  const lastSlashIndex = str.lastIndexOf('/');
+  if (lastSlashIndex !== -1) {
+    return str.substring(lastSlashIndex + 1);
   }
-  
-  const bucket = new GridFSBucket(mongoClient.db("images"), {
-      bucketName: 'images'
-  });
+  return str;
+}
 
-  const uploadStream = bucket.openUploadStream(req.file.originalname, {
-      contentType: req.file.mimetype
-  });
+app.post('/upload_min', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No file uploaded');
+  }
 
-  // Since req.file.buffer is a Buffer, we can directly write it to the upload stream
-  uploadStream.end(req.file.buffer);
+  let fileending = getAfterLastSlash(req.file.mimetype);
+  let uuid = uuidv4();
+  let filename = uuid + '.' + fileending;
+  let bucket = 'images-questions-bucket';
 
-  uploadStream.on('error', (error) => {
-      return res.status(500).send(error);
-  });
-
-  uploadStream.on('finish', (file) => {
-    let json_object = JSON.parse(req.body.json);
-    json_object.question.image = uploadStream.id.toString();
-    let query = "INSERT INTO questions.final_questions (frage, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image) VALUES (?,?,?,?,?,?,?,?,?,?)";
-    const values = [json_object.question.frage, json_object.question.a, json_object.question.b, json_object.question.c, json_object.question.d, json_object.question.correct_answer, json_object.question.course, json_object.question.lection, json_object.question.position, json_object.question.image];
-    con.query(query, values, (err, result) => {
+  minioClient.putObject(bucket, filename, req.file.buffer, (err, objInfo) => {
     if (err) {
-      console.log(err);
-      res.status(500).send({ msg:'SERVER_ERROR' });
+      console.error('Error uploading file:', err);
+      return res.status(500).send('Error uploading file');
     }
-    //res.status(200).send({ id:result.insertId });
-  })
 
-      return res.status(201).send({
-          message: 'File uploaded successfully',
-          id: uploadStream.id.toString()
+    let file_url = `http://localhost:9000/${bucket}/${filename}`;
+    let json_object = JSON.parse(req.body.json);
+    let query = "INSERT INTO questions.final_questions (frage, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image) VALUES (?,?,?,?,?,?,?,?,?,?)";
+    const values = [
+      json_object.question.frage,
+      json_object.question.a,
+      json_object.question.b,
+      json_object.question.c,
+      json_object.question.d,
+      json_object.question.correct_answer,
+      json_object.question.course,
+      json_object.question.lection,
+      json_object.question.position,
+      file_url
+    ];
 
-          
-      });
+    con.query(query, values, (err) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).send('Database error');
+      }
+      
+      res.status(200).send({ id: file_url });
+    });
   });
 });
 
 app.post('/send', (req, res) => {
   let json_object = req.body;
+  console.log(json_object);
   
   let query = "INSERT INTO questions.final_questions (frage, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image) VALUES (?,?,?,?,?,?,?,?,?,?)";
-  const values = [json_object.question.frage, json_object.question.a, json_object.question.b, json_object.question.c, json_object.question.d, json_object.question.correct_answer, json_object.question.course, json_object.question.lection, json_object.question.position, json_object.question.image];
+  const values = [json_object.question.frage, json_object.question.a, json_object.question.b, json_object.question.c, json_object.question.d, json_object.question.correct_answer, json_object.question.course, json_object.question.lection, json_object.question.position, null];
   con.query(query, values, (err, result) => {
   if (err) {
     console.log(err);
@@ -90,68 +108,17 @@ app.post('/send', (req, res) => {
   
 });
 
-app.get("/images", async (req, res) => {
-try {
-  await mongoClient.connect()
+app.get("/all_entrys", async (req, res) => {
+  let query_retrieve = "select * from questions.final_questions;"
+  con.query(query_retrieve, (err, result) => {
+    if (err) {
+      console.log(err);
+      res.status(500).send({ msg:'SERVER_ERROR' });
+    }
+    res.status(200).send(result);
+    });
 
-  const database = mongoClient.db("images")
-  const images = database.collection("images.files")
-  const cursor = images.find({})
-  const count = await cursor.count()
-  if (count === 0) {
-    return res.status(404).send({
-      message: "Error: No Images found",
-    })
-  }
-
-  const allImages = []
-
-  await cursor.forEach(item => {
-    allImages.push(item)
-  })
-
-  res.send({ files: allImages })
-} catch (error) {
-  console.log(error)
-  res.status(500).send({
-    message: "Error Something went wrong",
-    error,
-  })
-}
 })
-
-app.get("/download", async (req, res) => {
-try {
-  await mongoClient.connect()
-
-  const database = mongoClient.db("images");
-
-  const imageBucket = new GridFSBucket(database, {
-    bucketName: "images",
-  })
-
-  let downloadStream = imageBucket.openDownloadStream(new ObjectId(req.query.id)
-  )
-
-  downloadStream.on("data", function (data) {
-    return res.status(200).write(data)
-  })
-
-
-  downloadStream.on("end", () => {
-    return res.end()
-  })
-} catch (error) {
-  console.log(error)
-  res.status(500).send({
-    message: "Error Something went wrong",
-    error,
-  })
-}
-})
-
-
-
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

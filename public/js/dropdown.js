@@ -5,55 +5,20 @@ const position = document.querySelector('#dropdown-content-position');
 
 
 function eventlistenerLinks(parentDiv) {
-    // Check if the parentDiv exists to avoid errors
-    
     if (parentDiv) {
-        // Select all <a> children within the parent div
         const links = parentDiv.querySelectorAll('a');
-
-        // Function to set parent div's text to the text of the clicked link
         const updateSiblingText = (event) => {
             if (event.currentTarget.getAttribute('id') == 'add-course'){
                 return
             }
-            event.preventDefault(); // Prevent the default link behavior
-            parentDiv.previousElementSibling.textContent = event.target.textContent; // Set parent div's text
+            event.preventDefault();
+            parentDiv.previousElementSibling.textContent = event.target.textContent;
         };
-
-        // Add the event listener to each link
         links.forEach(link => link.addEventListener('click', updateSiblingText));
     }
 };
 
-/*
-const add_course = document.querySelector('#add-course');
-add_course.addEventListener('click', function(event) {
 
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = 'Enter course!';
-    input.style.border = 'none';
-    input.style.borderRadius = '10px';
-    input.style.width = '80%';
-    input.style.alignSelf = 'center';
-    input.style.marginBottom = '5px';
-
-
-    this.parentElement..insertBefore(input, this);
-
-    input.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            const a_new_course = document.createElement('a');
-            a_new_course.textContent = e.target.value
-            this.parentElement..insertBefore(a_new_course, this);
-            this.remove()
-          
-        }
-    });
-
-});
-*/
 const add_course = document.querySelector('#add-course');
 add_course.addEventListener('click', function(event) {
     // Create a div container for the input field and the delete button
@@ -105,8 +70,7 @@ add_course.addEventListener('click', function(event) {
             a_new_course.textContent = e.target.value;
             this.parentElement.parentElement.insertBefore(a_new_course, this.parentElement);
             eventlistenerLinks(this.parentElement.parentElement);
-            // Insert the new course link before the container
-            this.parentElement.remove(); // Remove the container after submission
+            this.parentElement.remove();
         }
     });
 });

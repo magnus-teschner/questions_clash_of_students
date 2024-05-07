@@ -13,7 +13,6 @@ const elements = [
     });
   }
   
-
   elements.forEach(element => {
     element.addEventListener('click', function() {
       removeClassFromAll('selected-mode');
