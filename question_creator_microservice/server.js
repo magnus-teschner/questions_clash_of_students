@@ -128,8 +128,9 @@ app.get('/get_question', (req, res) => {
   let lection = req.query.lection
   let position = req.query.position
 
-  let query_retrieve = `select * from questions where course = "${course}" AND lection = "${lection}" AND position = "${position}";`
-  con.query(query_retrieve, (err, result) => {
+  let query_retrieve = `select * from questions where course = ? AND lection = ? AND position = ?;`
+  const values = [course, lection, position]
+  con.query(query_retrieve, values, (err, result) => {
     if (err) {
       console.log(err);
       res.status(500).send({ msg:'SERVER_ERROR' });
