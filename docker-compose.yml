@@ -38,16 +38,24 @@ services:
     command: server /data --console-address ":9001"
 
 
-  backend:
-    build: ./backend
+
+  questionmicroservice:
+    build: ./question_creator_microservice
     ports:
-      - "80:80"
+      - "81:80"
+    restart: always
     environment:
       MYSQL_USER: admin
       MYSQL_PASSWORD: admin
       BLOB: minio1
       DB: mysqldb
-      BE: backend
+
+  backend:
+    build: ./backend
+    ports:
+      - "80:80"
+    environment:
+      QUESTIONCREATOR: questionmicroservice
 
 volumes:
   dbdata:

@@ -46,7 +46,7 @@ async function uploadImageQuestion(blob, question) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ question })
+      body: question
     }).then(response => response.json())
     .then(data => console.log(data))
     .catch((error) => console.error('Error:', error));
@@ -189,7 +189,7 @@ send_button.addEventListener('click', (event) => {
     }
   
     let question = create_question_json_multiple("multiple-choice", correct_answer);
-    uploadQuestion(question);
+    uploadQuestion(JSON.stringify({ question }));
   }
 
   if (image_description.classList.contains('selected-mode') == true){
@@ -216,7 +216,7 @@ send_button.addEventListener('click', (event) => {
       return
   }
     let question = create_question_json_single_answer("text-description", correct_answer);
-    uploadQuestion(question);
+    uploadQuestion(JSON.stringify({ question }));
   }
   cleanUp();  
 })

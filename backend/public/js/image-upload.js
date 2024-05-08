@@ -39,9 +39,9 @@ function applyDnDFile(){
     clearBtn.addEventListener("click", (e) => {
         afterUpload.style.display = "none";
         beforeUpload.style.display = "flex";
+        inputFile.value = '';
     });
 
 }
 
-    
 applyDnDFile();
