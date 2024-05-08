@@ -3,7 +3,7 @@ const multer = require("multer");
 const { v4: uuidv4 } = require('uuid');
 const mysql = require('mysql2');
 const app = express();
-const port = 81;
+const port = 80;
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const Minio = require('minio');
@@ -121,6 +121,22 @@ app.get("/all_entrys", async (req, res) => {
     });
 
 })
+
+// Define your endpoint
+app.get('/get_question', (req, res) => {
+  let course = req.query.course
+  let lection = req.query.lection
+  let position = req.query.position
+
+  let query_retrieve = `select * from questions where course = "${course}" AND lection = "${lection}" AND position = "${position}";`
+  con.query(query_retrieve, (err, result) => {
+    if (err) {
+      console.log(err);
+      res.status(500).send({ msg:'SERVER_ERROR' });
+    }
+    res.status(200).json(result);
+    });
+});
 
 app.listen(port, () => {
   console.log(`Server running at port ${port}`);
