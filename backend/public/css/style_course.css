@@ -50,18 +50,19 @@ html {
 }
 
 .profile-btn,
-.logout-btn {
+.logout-a {
   background-color: transparent;
   border: none;
   color: #fff;
   font-size: 16px;
   cursor: pointer;
+  text-decoration: none;
   margin-left: 10px;
   padding-top: 10px;
 }
 
 .profile-btn:hover,
-.logout-btn:hover {
+.logout-a:hover {
   text-decoration: underline;
 }
 
@@ -120,4 +121,30 @@ html {
   color: white;
   font-size: 16px;
   cursor: pointer;
+}
+
+#login-hint {
+  width: 500px;
+  height: 200px;
+  background: white;
+  align-self: center;
+  border-radius: 10px;
+  margin-top: 100px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  color: black;
+}
+
+#login-hint a{
+  text-decoration: underline;
+  margin-left: 5px;
+  margin-right: 5px;
+  color: blue;
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
 }

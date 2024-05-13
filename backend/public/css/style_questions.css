@@ -9,6 +9,8 @@ body {
     background-attachment: fixed; /* This is the key property */
     background-size: cover;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
     
 }
 
@@ -235,4 +237,37 @@ input {
     padding-top: 7px;
     padding-left: 7px;
     padding-right: 7px;
+}
+
+#login-hint {
+    width: 500px;
+    height: 200px;
+    background: white;
+    align-self: center;
+    border-radius: 10px;
+    margin-top: 100px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+#login-hint a{
+    text-decoration: underline;
+    margin-left: 5px;
+    margin-right: 5px;
+    color: blue;
+}
+
+#logout {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+#logout a{
+    text-decoration: underline;
+    color: blue;
 }
