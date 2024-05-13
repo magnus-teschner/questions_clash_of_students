@@ -1,0 +1,62 @@
+version: '3'
+
+services:
+  mysqldb:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: clashOfStudents
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      TZ: Europe/Berlin
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./mysql/DatabaseDump.sql:/docker-entrypoint-initdb.d/DatabaseDump.sql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: mysqldb
+    restart: always
+    ports:
+      - "8081:80"
+
+  minio1:
+    image: quay.io/minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - mindata:/data
+    environment:
+      MINIO_ROOT_USER: ROOTUSER
+      MINIO_ROOT_PASSWORD: CHANGEME123
+      MINIO_ACCESS_KEY: IQ8WmkoR6EoyZtWIH4Pc
+      MINIO_SECRET_KEY: c7SiP3sIexrTxQH8yTak5zSxBYdIpLTCuxA1qsSk
+    command: server /data --console-address ":9001"
+
+
+
+  questionmicroservice:
+    build: ./question_creator_microservice
+    ports:
+      - "81:80"
+    restart: always
+    environment:
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      BLOB: minio1
+      DB: mysqldb
+
+  backend:
+    build: ./backend
+    ports:
+      - "80:80"
+    environment:
+      QUESTIONCREATOR: questionmicroservice
+
+volumes:
+  dbdata:
+  mindata:
