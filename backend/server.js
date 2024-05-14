@@ -7,9 +7,10 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const mysql = require('mysql2');
 
-const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const session = require("express-session");
+
 const bcrypt = require('bcryptjs');
 
 app.use(express.static('public'));
@@ -112,15 +113,29 @@ app.get('/courses', (req, res) => {
   res.render("courses", { user: req.user});
 });
 
-app.get('/', (req, res) => {
-  res.render("login");
+
+app.get("/log-in-prof-failure", (req, res) => {
+  const error = req.session.messages.length > 0 ? req.session.messages[req.session.messages.length - 1] : undefined;
+  res.render("login", { user: req.user, error: error, target: "professor" });
 });
+
+app.get("/log-in-student-failure", (req, res) => {
+  const error = req.session.messages.length > 0 ? req.session.messages[req.session.messages.length - 1] : undefined;
+  res.render("login", { user: req.user, error: error, target: "student" });
+});
+
+
+app.get('/', (req, res) => {
+  res.render("login", { user: req.user, error: undefined, target: undefined });
+});
+
 
 app.post(
   "/log-in-prof",
   passport.authenticate("local", {
     successRedirect: "/questions",
-    failureRedirect: "/",
+    failureRedirect: "/log-in-prof-failure",
+    failureMessage: true
   })
 );
 
@@ -128,12 +143,13 @@ app.post(
   "/log-in-student",
   passport.authenticate("local", {
     successRedirect: "/courses",
-    failureRedirect: "/",
+    failureRedirect: "/log-in-student-failure",
+    failureMessage: true
   })
 );
 
 app.get('/sign-up-student', (req, res) => {
-  res.render("sign-up-student");
+  res.render("sign-up-student", {error: undefined});
 });
 
 app.post("/sign-up-student", (req, res, next) => {
@@ -169,7 +185,7 @@ app.post("/sign-up-student", (req, res, next) => {
 });
 
 app.get('/sign-up-prof', (req, res) => {
-  res.render("sign-up-prof");
+  res.render("sign-up-prof", {error: undefined});
 });
 
 app.post("/sign-up-prof", (req, res, next) => {
@@ -245,12 +261,10 @@ app.post('/send', (req, res) => {
 
 app.get('/get_question', (req, res) => {
 
-  // Construct the query parameters
   const queryParams = new URLSearchParams({
     course: req.query.course,
     lection: req.query.lection,
     position: req.query.position
-    // Add more parameters as needed
   });
 
   // Construct the URL with parameters
@@ -267,8 +281,6 @@ app.get('/get_question', (req, res) => {
     res.status(500).send('Internal Server Error');
   });
 });
-
-
 
 
 

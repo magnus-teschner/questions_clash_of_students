@@ -143,3 +143,17 @@ form
   background: #fff;
   cursor: pointer;
 }
+
+#red-dot {
+  border-radius: 50%;
+  max-height: 1rem;
+  max-width: 1rem;
+  margin-right: 5px;
+}
+
+#error-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+

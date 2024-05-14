@@ -10,6 +10,11 @@
   <section class="wrapper">
     <div class="form students">
       <header>Clash of Students</header>
+      <% if (target === "student" && error) {%>
+        <div id = "error-container">
+          <img id = "red-dot" src="../images/red_dot.png" alt="a red dot">
+          <%=error%></div>
+        <%}%>
       <form id="loginForm" action="/log-in-student" method="post" >
         <input type="text" id="email" name="email" placeholder="HHZ Email address" required />
         <input type="password" id="password" name="password" placeholder="Password" required />
@@ -21,6 +26,11 @@
 
     <div class="form profs">
       <header>Professors Hub</header>
+      <% if ((target === "professor" && error)) {%>
+        <div id = "error-container">
+          <img id = "red-dot" src="../images/red_dot.png" alt="a red dot">
+          <%=error%></div>
+        <%}%>
       <form action="/log-in-prof" method="post">
         <input type="text" name="email" placeholder="HHZ Email address" required />
         <input type="password" name="password" placeholder="Password" required />
@@ -45,6 +55,19 @@
         wrapper.classList.remove("active");
         document.body.classList.add('background-students');
         document.body.classList.remove('background-profs');
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const target = "<%= target %>";
+        if (target === "professor") {
+          wrapper.classList.add("active");
+          document.body.classList.add('background-profs');
+          document.body.classList.remove('background-students');
+        } else if (target === "student") {
+          wrapper.classList.remove("active");
+          document.body.classList.add('background-students');
+          document.body.classList.remove('background-profs');
+        }
       });
     </script>
   </section>

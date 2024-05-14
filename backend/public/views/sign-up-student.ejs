@@ -10,7 +10,12 @@
     <div id="main-container">
       <div id="sign-up-container">
         <header id="signup-header">Student Sign up</header>
-        <form id="sign-up-form" action="/sign-up-prof" method="post" >
+        <% if (error) {%>
+          <div id = "error-container">
+            <img id = "red-dot" src="../images/red_dot.png" alt="a red dot">
+            <%=error%></div>
+          <%}%>
+        <form id="sign-up-form" action="/sign-up-student" method="post" >
         <input type="text" id="fname" name="fname" placeholder="First name" required />
         <input type="text" id="lname" name="lname" placeholder="Last name" required />
         <input type="text" id="email" name="email" placeholder="HHZ Email address" required />
