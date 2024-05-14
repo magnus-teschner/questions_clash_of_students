@@ -36,7 +36,7 @@ const config_mysql = {
 
 const con = mysql.createConnection(config_mysql);
 
-passport.use(
+passport.use('stud',
   new LocalStrategy({usernameField: 'email', passwordField: 'password'}, async (email, password, done) => {
       try {
           const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
@@ -49,7 +49,48 @@ passport.use(
               }
   
               if (!result || result.length === 0) {
-                  return done(null, false, { message: "Incorrect email" });
+                  return done(null, false, { message: "Email not found" });
+              }
+  
+              const db_first = result[0].firstname;
+              const db_last = result[0].lastname;
+              const db_email = result[0].email;
+              const db_password = result[0].password;
+  
+              try {
+                  const match = await bcrypt.compare(password, db_password);
+                  if (!match) {
+                      // passwords do not match!
+                      return done(null, false, { message: "Incorrect password" })
+                  } else {            
+                      let user = { firstname: db_first, lastname: db_last, email: db_email };
+                      return done(null, user);
+                  }
+              } catch (bcryptError) {
+                  return done(bcryptError);
+              }
+          });
+          
+      } catch(err) {
+          return done(err);
+      }
+  })
+);
+
+passport.use('prof',
+  new LocalStrategy({usernameField: 'email', passwordField: 'password'}, async (email, password, done) => {
+      try {
+          const query_retrieve = 'SELECT * FROM accounts WHERE email = ? AND role = ?';
+          const values = [email, "professor"];
+          
+          
+          con.query(query_retrieve, values, async (err, result) => {
+              if (err) {
+                  return done(err);
+              }
+  
+              if (!result || result.length === 0) {
+                  return done(null, false, { message: "Email not found" });
               }
   
               const db_first = result[0].firstname;
@@ -136,7 +177,7 @@ app.get('/', (req, res) => {
 
 app.post(
   "/log-in-prof",
-  passport.authenticate("local", {
+  passport.authenticate("prof", {
     successRedirect: "/questions",
     failureRedirect: "/log-in-prof",
     failureMessage: true
@@ -145,7 +186,7 @@ app.post(
 
 app.post(
   "/log-in-student",
-  passport.authenticate("local", {
+  passport.authenticate("stud", {
     successRedirect: "/courses",
     failureRedirect: "/log-in-student",
     failureMessage: true
