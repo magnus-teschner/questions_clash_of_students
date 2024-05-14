@@ -154,6 +154,12 @@ app.get('/sign-up-student', (req, res) => {
 
 app.post("/sign-up-student", (req, res, next) => {
   try {
+      const emailPattern = /^[a-zA-Z0-9._%+-]+@student.reutlingen-university\.de$/;
+      if (emailPattern.test(req.body.email) === false){
+        return res.render("sign-up-student", { error: "Not a reutlingen university student email."} )
+
+      }
+
       let query_check = "SELECT * FROM accounts WHERE email = ?";
       const values_check = [req.body.email];
 
@@ -168,8 +174,8 @@ app.post("/sign-up-student", (req, res, next) => {
 
           bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
               // If the email is not in use, proceed with the insertion
-              let query_insert = "INSERT INTO accounts (firstname, lastname, email, password) VALUES (?,?,?,?)";
-              const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword];
+              let query_insert = "INSERT INTO accounts (firstname, lastname, email, password, role) VALUES (?,?,?,?,?)";
+              const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword, "student"];
 
               con.query(query_insert, values_insert, (err) => {
                   if (err) {
@@ -190,6 +196,11 @@ app.get('/sign-up-prof', (req, res) => {
 
 app.post("/sign-up-prof", (req, res, next) => {
   try {
+      const emailPattern = /^[a-zA-Z0-9._%+-]+@reutlingen-university\.de$/;
+      if (emailPattern.test(req.body.email) === false){
+        return res.render("sign-up-student", { error: "Not a reutlingen university professor email."} )
+
+      }
       let query_check = "SELECT * FROM accounts WHERE email = ?";
       const values_check = [req.body.email];
 
@@ -204,8 +215,8 @@ app.post("/sign-up-prof", (req, res, next) => {
 
           bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
               // If the email is not in use, proceed with the insertion
-              let query_insert = "INSERT INTO accounts (firstname, lastname, email, password) VALUES (?,?,?,?)";
-              const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword];
+              let query_insert = "INSERT INTO accounts (firstname, lastname, email, password, role) VALUES (?,?,?,?,?)";
+              const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword, "professor"];
 
               con.query(query_insert, values_insert, (err) => {
                   if (err) {

@@ -65,7 +65,7 @@ form a:hover {
   text-decoration: underline;
 }
 
-.submitBtn {
+#submitBtn {
   height: 60px;
   border: none;
   border-radius: 8px;

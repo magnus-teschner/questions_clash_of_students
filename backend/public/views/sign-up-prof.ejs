@@ -16,16 +16,22 @@
             <%=error%></div>
           <%}%>
         <form id="sign-up-form" action="/sign-up-prof" method="post" >
-        <input type="text" id="fname" name="fname" placeholder="First name" required />
-        <input type="text" id="lname" name="lname" placeholder="Last name" required />
-        <input type="text" id="email" name="email" placeholder="HHZ Email address" required />
-        <input type="password" id="first-password" name="password" placeholder="Password" required />
-        <input type="password" id="second-password" name="second-password" placeholder="Confirm Password" required />
-        <button class = "submitBtn">Signup</button>
-        <a href="/">Already have an account? Login</a>
-        </form>
+          <input type="text" id="fname" name="fname" placeholder="First name" required />
+          <div class="error"></div>
+          <input type="text" id="lname" name="lname" placeholder="Last name" required />
+          <div class="error"></div>
+          <input type="text" id="email" name="email" placeholder="HHZ Email address" required />
+          <div class="error"></div>
+          <input type="password" id="first-password" name="password" placeholder="Password" required />
+          <div class="error"></div>
+          <input type="password" id="second-password" name="second-password" placeholder="Confirm Password" required />
+          <div class="error"></div>
+          <button id = "submitBtn">Signup</button>
+          <a href="/">Already have an account? Login</a>
+          </form>
       </div>
     </div>
+    <script src="../js/signup_prof.js"></script>
     
 
 </body>
