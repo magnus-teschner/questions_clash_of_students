@@ -8,47 +8,52 @@
 </head>
 <body>
   <section class="wrapper">
-    <div class="form signup">
+    <div class="form students">
       <header>Clash of Students</header>
-      <form id="loginForm">
+      <% if (target === "student" && error) {%>
+        <div id = "error-container">
+          <img id = "red-dot" src="../images/red_dot.png" alt="a red dot">
+          <%=error%></div>
+        <%}%>
+      <form id="loginForm" action="/log-in-student" method="post" >
         <input type="text" id="email" name="email" placeholder="HHZ Email address" required />
         <input type="password" id="password" name="password" placeholder="Password" required />
         <a href="#">Forgot password?</a>
-        <input type="submit1" value="Login" onclick="redirectToUrl(`course`)" />
+        <button class = "loginBtn">Log In</button>
+        <a href="/sign-up-student">No account yet? Sign up</a>
       </form>
     </div>
 
-    <div class="form login">
+    <div class="form profs">
       <header>Professors Hub</header>
-      <form action="/login" method="post">
+      <% if ((target === "professor" && error)) {%>
+        <div id = "error-container">
+          <img id = "red-dot" src="../images/red_dot.png" alt="a red dot">
+          <%=error%></div>
+        <%}%>
+      <form action="/log-in-prof" method="post">
         <input type="text" name="email" placeholder="HHZ Email address" required />
         <input type="password" name="password" placeholder="Password" required />
         <a href="#">Forgot password?</a>
-        <input type="submit1" value="Login" onclick="redirectToUrl(`question`)"/>
+        <button class = "loginBtn">Log In</button>
+        <a href="/sign-up-prof">No account yet? Sign up</a>
       </form>
     </div>
-
     <script>
-      const wrapper = document.querySelector(".wrapper"),
-        signupHeader = document.querySelector(".signup header"),
-        loginHeader = document.querySelector(".login header");
-
-      loginHeader.addEventListener("click", () => {
-        wrapper.classList.add("active");
-        document.body.classList.add('background-signup');
-        document.body.classList.remove('background-login');
-      });
-
-      signupHeader.addEventListener("click", () => {
-        wrapper.classList.remove("active");
-        document.body.classList.add('background-login');
-        document.body.classList.remove('background-signup');
-      });
-
-    function redirectToUrl(url) {
-        window.location.href = url;
-    }
+      document.addEventListener("DOMContentLoaded", () => {
+      const target = "<%= target %>";
+      if (target === "professor") {
+          wrapper.classList.add("active");
+          document.body.classList.add('background-profs');
+          document.body.classList.remove('background-students');
+      } else if (target === "student") {
+          wrapper.classList.remove("active");
+          document.body.classList.add('background-students');
+          document.body.classList.remove('background-profs');
+      }
+  });
     </script>
+    <script src="../js/login.js"></script>
   </section>
 </body>
 

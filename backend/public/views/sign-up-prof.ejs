@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login & Signup Form</title>
+  <link rel="stylesheet" href="css/style_prof_signup.css" />
+</head>
+<body>
+    <div id="main-container">
+      <div id="sign-up-container">
+        <header id="signup-header">Professor Sign up</header>
+        <% if (error) {%>
+          <div id = "error-container">
+            <img id = "red-dot" src="../images/red_dot.png" alt="a red dot">
+            <%=error%></div>
+          <%}%>
+        <form id="sign-up-form" action="/sign-up-prof" method="post" >
+          <input type="text" id="fname" name="fname" placeholder="First name" required />
+          <div class="error"></div>
+          <input type="text" id="lname" name="lname" placeholder="Last name" required />
+          <div class="error"></div>
+          <input type="text" id="email" name="email" placeholder="HHZ Email address" required />
+          <div class="error"></div>
+          <input type="password" id="first-password" name="password" placeholder="Password" required />
+          <div class="error"></div>
+          <input type="password" id="second-password" name="second-password" placeholder="Confirm Password" required />
+          <div class="error"></div>
+          <button id = "submitBtn">Signup</button>
+          <a href="/">Already have an account? Login</a>
+          </form>
+      </div>
+    </div>
+    <script src="../js/signup_prof.js"></script>
+    
+
+</body>
+
+</html>

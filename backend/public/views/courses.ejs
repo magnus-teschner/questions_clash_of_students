@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style_course.css">
+</head>
+
+<body>
+  <% if (user) {%>
+    <nav class="navbar">
+      <div class="navbar-container">
+        <div>
+          <span class="title">Meine Kurse</span>
+        </div>
+        <div class="navbar-menu">
+          <button class="profile-btn">Profil</button>
+          <a class="logout-a" href="log-out">Logout</a>
+        </div>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="course">
+        <div class="course-header">
+          <h2>WS 23/24</h2>
+          <button class="toggle-btn">▼</button>
+        </div>
+        <div class="lessons">
+          <div class="lesson">
+            <button class="play-btn">▶</button>
+            <span>Cloud Computing</span>
+          </div>
+          <div class="lesson">
+            <button class="play-btn">▶</button>
+            <span>Entrepreneurship</span>
+          </div>
+          <div class="lesson">
+            <button class="play-btn">▶</button>
+            <span>Digital Business</span>
+          </div>
+          <div class="lesson">
+            <button class="play-btn">▶</button>
+            <span>Distributed Systems</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% } else { %>
+      <div id="container">
+        <div id="login-hint">
+          Please <a href="/"> log in</a> to view this page!
+        </div>
+
+      </div>      
+    <% } %>
+
+  <script src="js/course.js"></script>
+</body>
+
+</html>

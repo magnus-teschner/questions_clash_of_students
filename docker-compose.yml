@@ -56,6 +56,9 @@ services:
       - "80:80"
     environment:
       QUESTIONCREATOR: questionmicroservice
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      DB: mysqldb
 
 volumes:
   dbdata:

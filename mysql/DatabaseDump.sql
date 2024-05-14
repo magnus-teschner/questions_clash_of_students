@@ -12,3 +12,14 @@ CREATE TABLE IF NOT EXISTS questions (
     position  int,
     image_url VARCHAR(255)
 );
+
+CREATE TABLE IF NOT EXISTS `accounts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `firstname` varchar(50) NOT NULL,
+  `lastname` varchar(50) NOT NULL,
+  `email` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` varchar(255) NOT NULL,
+  
+  PRIMARY KEY (`id`)
+);

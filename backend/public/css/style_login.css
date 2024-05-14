@@ -17,14 +17,14 @@ body {
   background-size: cover;
 }
 
-.background-login {
+.background-students {
     background-image: url('../images/game.png'); 
     transition: all
     0.6s
     ease;
   }
   
-  .background-signup {
+  .background-profs {
     background-image: url('../images/faculty.png'); 
     transition: all
     0.6s
@@ -52,7 +52,7 @@ body {
     );
   overflow: hidden;
 }
-.form.login {
+.form.profs {
   position: absolute;
   left: 50%;
   bottom: -86%;
@@ -73,7 +73,7 @@ body {
     ease;
 }
 .wrapper.active
-  .form.login {
+  .form.profs {
   bottom: -15%;
   border-radius: 35%;
   box-shadow: 0 -5px
@@ -87,18 +87,18 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
-.form.login
+.form.profs
   header {
   color: #333;
   opacity: 0.6;
 }
 .wrapper.active
-  .form.login
+  .form.profs
   header {
   opacity: 1;
 }
 .wrapper.active
-  .signup
+  .students
   header {
   opacity: 0.6;
 }
@@ -122,37 +122,11 @@ form
   border-radius: 8px;
   background: #fff;
 }
-.form.login
-  input {
-  border: 1px
-    solid
-    #aaaaaa;
+
+form input:focus {
+  box-shadow: 2px 2px 0 #ddd;
 }
-.form.login
-  input:focus {
-  box-shadow: 0
-    1px 0
-    #ddd;
-}
-form
-  .checkbox {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.checkbox
-  input[type="checkbox"] {
-  height: 16px;
-  width: 16px;
-  accent-color: #fff;
-  cursor: pointer;
-}
-form
-  .checkbox
-  label {
-  cursor: pointer;
-  color: #fff;
-}
+
 form a {
   color: #333;
   text-decoration: none;
@@ -161,17 +135,25 @@ form
   a:hover {
   text-decoration: underline;
 }
-form
-  input[type="submit"] {
-  margin-top: 25px;
-  padding: none;
-  font-size: 18px;
-  font-weight: 500;
+
+.loginBtn {
+  height: 60px;
+  border: none;
+  border-radius: 8px;
+  background: #fff;
   cursor: pointer;
 }
-.form.login
-  input[type="submit"] {
-  background: #c3c2c3;
-  color: #fff;
-  border: none;
+
+#red-dot {
+  border-radius: 50%;
+  max-height: 1rem;
+  max-width: 1rem;
+  margin-right: 5px;
 }
+
+#error-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
