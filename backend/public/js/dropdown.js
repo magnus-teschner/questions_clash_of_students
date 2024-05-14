@@ -13,6 +13,7 @@ function eventlistenerLinks(parentDiv) {
             }
             event.preventDefault();
             parentDiv.previousElementSibling.textContent = event.target.textContent;
+            parentDiv.style.display= 'none';
         };
         links.forEach(link => link.addEventListener('click', updateSiblingText));
     }
@@ -21,6 +22,13 @@ function eventlistenerLinks(parentDiv) {
 
 const add_course = document.querySelector('#add-course');
 add_course.addEventListener('click', function(event) {
+    const pref = add_course.previousElementSibling;
+
+    if (add_course.previousElementSibling.tagName === 'DIV'){
+        return
+    }
+
+
     // Create a div container for the input field and the delete button
     const container = document.createElement('div');
     container.style.display = 'flex';
@@ -79,3 +87,21 @@ add_course.addEventListener('click', function(event) {
 eventlistenerLinks(course);
 eventlistenerLinks(lection);
 eventlistenerLinks(position);
+
+const parentDivs = document.querySelectorAll('.dropdown');
+
+// Loop through each parent div and add event listeners
+parentDivs.forEach(parentDiv => {
+    // Get the child div dynamically
+    const childDiv = parentDiv.querySelector('.content-dropdown');
+
+    // Add event listener for mouseenter
+    parentDiv.addEventListener('mouseenter', () => {
+        childDiv.style.display = 'flex';
+    });
+
+    // Add event listener for mouseleave
+    parentDiv.addEventListener('mouseleave', () => {
+        childDiv.style.display = 'none';
+    });
+});

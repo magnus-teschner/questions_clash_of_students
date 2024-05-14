@@ -160,8 +160,13 @@ app.get('/courses', (req, res) => {
 
 
 app.get("/log-in-prof", (req, res) => {
-  const error = req.session.messages.length > 0 ? req.session.messages[req.session.messages.length - 1] : undefined;
-  res.render("login", { user: req.user, error: error, target: "professor" });
+  if (req.session.messages){
+    const error = req.session.messages.length > 0 ? req.session.messages[req.session.messages.length - 1] : undefined;
+    res.render("login", { user: req.user, error: error, target: "professor" });
+  } else {
+    res.render("login", { user: req.user, error: undefined, target: "professor" });
+  }
+  
 });
 
 app.get("/log-in-student", (req, res) => {
