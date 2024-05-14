@@ -1,3 +1,6 @@
+/* Import Google font - Poppins */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+
 /* General Styles */
 body {
     padding: 0;
@@ -24,7 +27,7 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background: gray;
+    background: #333;
     box-shadow: 1px 1px 9px rgb(7, 7, 7);
     position: sticky;
     top: 0;
@@ -33,12 +36,15 @@ body {
 
 #logo-container {
     margin-left: 15px;
+    width: 100%;
     margin-top: 15px;
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: start;
     font-size: 22px;
     font-weight: 700;
+    margin-left: 70px;
 }
 
 #mode-container {
@@ -58,12 +64,11 @@ body {
 }
 
 #question-container {
-    background: gray;
+    background: #69d7ff;
     min-height: 200px;
     width: 700px;
     margin-top: 10px;
     border-radius: 15px;
-    border: 2px solid black;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -83,9 +88,8 @@ body {
 .answer {
     width: 340px;
     height: 100px;
-    background: gray;
+    background: #69d7ff;
     border-radius: 15px;
-    border: 2px solid black;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -145,11 +149,14 @@ div .link{
     gap: 10px;
     margin-left: 25px;
     font-size: 19px;
-    font-weight: 700;
+    font-weight: 400;
+    font-family: "Poppins", sans-serif;
 }
 
 .in-box-p {
-    font-weight: 700;
+    font-weight: 400;
+    color: white;
+    font-size: 1.5em;
     margin: 0px;
 }
 
@@ -157,17 +164,20 @@ div .link{
     width: 175px;
     height: 30px;
     border-radius: 7px;
+    border: none;
 }
 
 #frage {
     width: 575px;
     height: 50px;
     border-radius: 7px;
+    border: none;
 
 }
 
 .mode-button {
-    background-color: grey;
+    background-color: #333;
+    color: white;
     border: none;
     padding: 5px;
     transition: 1s;
@@ -206,14 +216,14 @@ input {
     flex-direction: column;
     align-items: center;
     margin-bottom: 15px;
+    color: white;
 }
 
 #correct_answer_selector {
     display: flex;
     flex-direction: column;
-    background: grey;
+    background: #69d7ff;
     border-radius: 10px;
-    border: 2px solid black;
     align-items: center;
 }
 
@@ -222,9 +232,11 @@ input {
     height: 30px;
     border-radius: 50%;
     cursor: pointer; 
+    outline: none;
 }
 
 #prompt-select-correct-answer {
+    color: white;
     font-weight: 700;
     margin: 0px;
     padding-top: 5px;
@@ -259,15 +271,28 @@ input {
     color: blue;
 }
 
-#logout {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    margin-top: 50px;
+
+#profile-btn,
+#logout-a {
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  margin-left: 10px;
+  padding-top: 10px;
 }
 
-#logout a{
-    text-decoration: underline;
-    color: blue;
+#profile-btn:hover,
+#logout-a:hover {
+  text-decoration: underline;
+}
+
+#profile-logout {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
 }

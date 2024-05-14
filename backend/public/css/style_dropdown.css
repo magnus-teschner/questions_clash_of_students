@@ -1,5 +1,9 @@
+/* Import Google font - Poppins */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+
 .button-dropdown {
     background-color: #04AA6D;
+    font-family: "Poppins", sans-serif;
     color: white;
     padding: 16px;
     font-size: 16px;
@@ -22,6 +26,7 @@
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
     border-radius: 5px;
+    
   }
   
   .content-dropdown a {
