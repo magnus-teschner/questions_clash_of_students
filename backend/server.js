@@ -25,12 +25,16 @@ app.use(express.urlencoded({ extended: false }));
 
 question_creator_service = process.env.QUESTIONCREATOR;
 
-const con = mysql.createConnection({
-	host     : 'localhost',
-	user     : 'admin',
-	password : 'admin',
-	database : 'login'
-});
+
+const config_mysql = {
+  user: "admin",
+  password: "admin",
+  host: process.env.DB,
+  database: "clashOfStudents"
+};
+
+
+const con = mysql.createConnection(config_mysql);
 
 passport.use(
   new LocalStrategy({usernameField: 'email', passwordField: 'password'}, async (email, password, done) => {
