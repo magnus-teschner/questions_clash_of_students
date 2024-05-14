@@ -4,21 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login & Signup Form</title>
-  <link rel="stylesheet" href="css/style_student_login.css" />
+  <link rel="stylesheet" href="css/style_student_signup.css" />
 </head>
 <body>
-    <div class="students">
-        <header>Student Sign up</header>
-        <form id="sign-up-form" action="/sign-up-student" method="post" >
+    <div id="main-container">
+      <div id="sign-up-container">
+        <header id="signup-header">Student Sign up</header>
+        <form id="sign-up-form" action="/sign-up-prof" method="post" >
         <input type="text" id="fname" name="fname" placeholder="First name" required />
         <input type="text" id="lname" name="lname" placeholder="Last name" required />
         <input type="text" id="email" name="email" placeholder="HHZ Email address" required />
         <input type="password" id="first-password" name="password" placeholder="Password" required />
         <input type="password" id="second-password" name="second-password" placeholder="Confirm Password" required />
-        <button class = "loginBtn">Signup</button>
+        <button class = "submitBtn">Signup</button>
         <a href="/">Already have an account? Login</a>
         </form>
+      </div>
     </div>
+    
 
 </body>
 

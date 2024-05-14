@@ -1,45 +1,46 @@
-/* Import Google font - Poppins */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Poppins",
-    sans-serif;
-}
 body {
+  margin: 0px;
+}
+
+#main-container {
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0faff;
-  background-image: url('../images/faculty.png'); 
+  background-image: url('../images/game.png'); 
   background-size: cover;
 }
 
-
-.students header {
+#signup-header {
   font-size: 30px;
   text-align: center;
   color: #333;
   font-weight: 600;
-  cursor: pointer;
+
 }
 
-.students {
+#sign-up-container {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    background: #a1a1a1;
+    background: #69d7ff;
     box-shadow: 0 5px 10px rgba(0,0,0,0.1);
     padding-left: 50px;
     padding-right: 50px;
-    border-radius: 10px;
     padding-top: 30px;
-
+    border-radius: 10px;
 }
 
-.students input {
+#sign-up-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#sign-up-container input {
     height: 60px;
     width: 380px;
     outline: none;
@@ -64,7 +65,7 @@ form a:hover {
   text-decoration: underline;
 }
 
-.loginBtn {
+.submitBtn {
   height: 60px;
   border: none;
   border-radius: 8px;
@@ -72,8 +73,3 @@ form a:hover {
   cursor: pointer;
 }
 
-#sign-up-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
