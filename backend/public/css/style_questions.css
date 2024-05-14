@@ -298,3 +298,30 @@ input {
     flex-direction: row;
     justify-content: center;
 }
+
+#profile-options {
+    position: absolute;
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    left: 76px; /* Adjust according to the height of your profile button */
+    top: 60px; /* Adjust according to your layout */
+    display: none; /* Initially hidden */
+    flex-direction: column;
+    z-index: 1000;
+}
+
+#profile-options a {
+    font-family: "Poppins", sans-serif;
+    color: white;
+
+}
+
+#profile-options a:hover {
+    text-decoration: underline;
+}
+
+.hidden {
+    display: none;
+}
