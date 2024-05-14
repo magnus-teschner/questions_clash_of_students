@@ -181,6 +181,8 @@ div .link{
     border: none;
     padding: 5px;
     transition: 1s;
+    transition-timing-function: cubic-bezier(0.2, -2, 0.8, 2);
+    border-radius: 15px;
 }
 
 button:hover {
