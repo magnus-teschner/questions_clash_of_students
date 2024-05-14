@@ -114,12 +114,12 @@ app.get('/courses', (req, res) => {
 });
 
 
-app.get("/log-in-prof-failure", (req, res) => {
+app.get("/log-in-prof", (req, res) => {
   const error = req.session.messages.length > 0 ? req.session.messages[req.session.messages.length - 1] : undefined;
   res.render("login", { user: req.user, error: error, target: "professor" });
 });
 
-app.get("/log-in-student-failure", (req, res) => {
+app.get("/log-in-student", (req, res) => {
   const error = req.session.messages.length > 0 ? req.session.messages[req.session.messages.length - 1] : undefined;
   res.render("login", { user: req.user, error: error, target: "student" });
 });
@@ -134,7 +134,7 @@ app.post(
   "/log-in-prof",
   passport.authenticate("local", {
     successRedirect: "/questions",
-    failureRedirect: "/log-in-prof-failure",
+    failureRedirect: "/log-in-prof",
     failureMessage: true
   })
 );
@@ -143,7 +143,7 @@ app.post(
   "/log-in-student",
   passport.authenticate("local", {
     successRedirect: "/courses",
-    failureRedirect: "/log-in-student-failure",
+    failureRedirect: "/log-in-student",
     failureMessage: true
   })
 );

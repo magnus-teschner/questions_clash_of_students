@@ -39,37 +39,21 @@
         <a href="/sign-up-prof">No account yet? Sign up</a>
       </form>
     </div>
-
     <script>
-      const wrapper = document.querySelector(".wrapper"),
-        studentsHeader = document.querySelector(".students header"),
-        profsHeader = document.querySelector(".profs header");
-
-        profsHeader.addEventListener("click", () => {
-        wrapper.classList.add("active");
-        document.body.classList.add('background-profs');
-        document.body.classList.remove('background-students');
-      });
-
-      studentsHeader.addEventListener("click", () => {
-        wrapper.classList.remove("active");
-        document.body.classList.add('background-students');
-        document.body.classList.remove('background-profs');
-      });
-
       document.addEventListener("DOMContentLoaded", () => {
-        const target = "<%= target %>";
-        if (target === "professor") {
+      const target = "<%= target %>";
+      if (target === "professor") {
           wrapper.classList.add("active");
           document.body.classList.add('background-profs');
           document.body.classList.remove('background-students');
-        } else if (target === "student") {
+      } else if (target === "student") {
           wrapper.classList.remove("active");
           document.body.classList.add('background-students');
           document.body.classList.remove('background-profs');
-        }
-      });
+      }
+  });
     </script>
+    <script src="../js/login.js"></script>
   </section>
 </body>
 
