@@ -7,14 +7,13 @@ body {
     margin: 0;
     font-family: "Poppins", sans-serif;
     background-image: url('../images/faculty.png');
-    background-position: center; /* Center the background image */
-    background-repeat: no-repeat; /* Do not repeat the image */
-    background-attachment: fixed; /* This is the key property */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     background-size: cover;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    
 }
 
 #main-container {
@@ -42,6 +41,31 @@ body {
 #profile-logout {
     margin-right: 40px;
 }
+
+#profile-options {
+    position: absolute;
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    right: 9px; /* Adjust according to the height of your profile button */
+    top: 60px; /* Adjust according to your layout */
+    display: none; /* Initially hidden */
+    flex-direction: column;
+    z-index: 1000;
+}
+
+#profile-options a {
+    font-family: "Poppins", sans-serif;
+    color: white;
+    text-decoration: none;
+
+}
+
+#profile-options a:hover {
+    text-decoration: underline;
+}
+
 #profile-btn,
 #logout-a {
   font-family: "Poppins", sans-serif;
@@ -72,7 +96,7 @@ body {
     justify-content: center;
 }
 
-#login-hint a{
+#login-hint a {
     text-decoration: underline;
     margin-left: 5px;
     margin-right: 5px;
@@ -81,72 +105,190 @@ body {
 
 h1 {
     text-align: center;
-    color: #4CAF50;
+    color: black;
     margin-bottom: 20px;
 }
-table {
-    width: 100%;
-    border-collapse: collapse;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
-}
-th, td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-th {
-    background-color: #4CAF50;
-    color: #fff;
-    text-transform: uppercase;
-    font-size: 14px;
-}
-tr:hover {
-    background-color: #f1f1f1;
-}
-img {
-    width: 100px;
-    border-radius: 5px;
-}
-td img {
-    display: block;
-    margin: 0 auto;
-}
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
+
+#content-container {
+    background-color: rgba(255, 255, 255, 0.9);
     padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    align-self: center;
+    margin-top: 50px;
 }
-@media screen and (max-width: 768px) {
-    table, thead, tbody, th, td, tr {
+
+table {
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    table-layout: fixed;
+}
+
+table caption {
+    font-size: 1.5em;
+    margin: .5em 0 .75em;
+}
+
+table tr {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    padding: .35em;
+}
+
+table th,
+table td {
+    padding: .625em;
+    text-align: center;
+    white-space: nowrap; /* Prevent text from overflowing */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+table th {
+    font-size: .85em;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+@media screen and (max-width: 1400px) {
+    table {
+        border: 0;
+    }
+
+    table caption {
+        font-size: 1.3em;
+    }
+  
+    table thead {
+        border: none;
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+    }
+  
+    table tr {
+        border-bottom: 3px solid #ddd;
         display: block;
+        margin-bottom: .625em;
+        border-radius: 15px;
     }
-    tr {
-        margin-bottom: 15px;
-    }
-    th, td {
-        padding: 10px;
-        text-align: right;
-    }
-    th {
-        background-color: transparent;
-        color: #333;
-    }
-    td {
+  
+    table td {
         border-bottom: 1px solid #ddd;
-        text-align: left;
+        display: block;
+        font-size: .8em;
+        text-align: right;
+        white-space: normal; /* Allow text to wrap */
     }
-    td:before {
+  
+    table td::before {
         content: attr(data-label);
         float: left;
         font-weight: bold;
         text-transform: uppercase;
     }
-    th, td:before {
-        text-align: left;
+  
+    table td:last-child {
+        border-bottom: 0;
     }
 }
 
+/* Image styling */
+table img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-left: auto;
+    border-radius: 4px;
+}
+
+/* Modal Styles */
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+}
+
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.save-btn,
+.cancel-btn {
+    background-color: #4CAF50;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.cancel-btn {
+    background-color: #f44336;
+}
+
+.hidden {
+    display: none;
+}

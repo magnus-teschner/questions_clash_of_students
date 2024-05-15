@@ -1,76 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Manage Questions</title>
-	<link rel="stylesheet" href="css/style_manage_questions.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Questions</title>
+    <link rel="stylesheet" href="css/style_manage_questions.css">
 </head>
 <body>
-	<% if (user) {%>
+    <% if (user) { %>
+        <div id="main-container">
+            <div id="top-menu">
+                <div id="profile-logout">
+                    <button id="profile-btn">Profile</button>
+                    <a id="logout-a" href="/log-out">Logout</a>
+                </div>
 
-		<div id="main-container">
-			<div id="top-menu">
-					<div id = "profile-logout">
-						<button id="profile-btn">Profil</button>
-						<a id="logout-a" href="/log-out">Logout</a>
-					</div>
-
-				<div id="profile-options" class="hidden">
+                <div id="profile-options" class="hidden">
 					<a href="">Manage account</a>
 					<a href="">Manage questions</a>
 				</div>
-		</div>
-        <div id="content-container">
-            <h1>Question Table</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Question Type</th>
-                <th>Question</th>
-                <th>Answer A</th>
-                <th>Answer B</th>
-                <th>Answer C</th>
-                <th>Answer D</th>
-                <th>Correct Answer</th>
-                <th>Course</th>
-                <th>Lection</th>
-                <th>Position</th>
-                <th>Image URL</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% for(let i = 0; i < data.length; i++) { %>
-                <tr>
-                    <td><%= data[i].id %></td>
-                    <td><%= data[i].question_type %></td>
-                    <td><%= data[i].frage %></td>
-                    <td><%= data[i].answer_a %></td>
-                    <td><%= data[i].answer_b %></td>
-                    <td><%= data[i].answer_c %></td>
-                    <td><%= data[i].answer_d %></td>
-                    <td><%= data[i].correct_answer %></td>
-                    <td><%= data[i].course %></td>
-                    <td><%= data[i].lection %></td>
-                    <td><%= data[i].position %></td>
-                    <td>
-                        <% if(data[i].image_url) { %>
-                            <img src="<%= 'http://localhost:9000/images-questions-bucket/' + data[i].image_url %>" alt="Image" style="width: 100px;">
-                        <% } else { %>
-                            N/A
+            </div>
+            <div id="content-container">
+                <h1>Question Table</h1>
+                <table class="rwd-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Question Type</th>
+                            <th>Question</th>
+                            <th>Answer A</th>
+                            <th>Answer B</th>
+                            <th>Answer C</th>
+                            <th>Answer D</th>
+                            <th>Correct Answer</th>
+                            <th>Course</th>
+                            <th>Lection</th>
+                            <th>Position</th>
+                            <th>Image URL</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(let i = 0; i < data.length; i++) { %>
+                            <tr>
+                                <td data-label="ID"><%= data[i].id %></td>
+                                <td data-label="Question Type"><%= data[i].question_type %></td>
+                                <td data-label="Question"><%= data[i].frage %></td>
+                                <td data-label="Answer A"><%= data[i].answer_a %></td>
+                                <td data-label="Answer B"><%= data[i].answer_b %></td>
+                                <td data-label="Answer C"><%= data[i].answer_c %></td>
+                                <td data-label="Answer D"><%= data[i].answer_d %></td>
+                                <td data-label="Correct Answer"><%= data[i].correct_answer %></td>
+                                <td data-label="Course"><%= data[i].course %></td>
+                                <td data-label="Lection"><%= data[i].lection %></td>
+                                <td data-label="Position"><%= data[i].position %></td>
+                                <td data-label="Image URL">
+                                    <% if(data[i].image_url) { %>
+                                        <img src="<%= 'http://localhost:9000/images-questions-bucket/' + data[i].image_url %>" alt="Image" style="width: 100px;">
+                                    <% } else { %>
+                                        N/A
+                                    <% } %>
+                                </td>
+                                <td data-label="Actions">
+                                    <button class="edit-btn">⋮</button>
+                                </td>
+                            </tr>
                         <% } %>
-                    </td>
-                </tr>
-            <% } %>
-        </tbody>
-    </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
-	<% } else { %>
-		<div id="login-hint">
-			Please <a href="/log-in-prof"> log in</a> to view this page!
-		</div>
-		
-	<% } %>
+
+        <!-- Modal -->
+        <div id="edit-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h2>Edit Row</h2>
+                <form id="edit-form">
+                    <div class="form-group">
+                        <label for="edit-question-type">Question Type</label>
+                        <select id="edit-question-type">
+                            <option value="multiple-choice">Multiple Choice</option>
+                            <option value="image-multiple-choice">Image Multiple Choice</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-question">Question</label>
+                        <input type="text" id="edit-question">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-answer-a">Answer A</label>
+                        <input type="text" id="edit-answer-a">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-answer-b">Answer B</label>
+                        <input type="text" id="edit-answer-b">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-answer-c">Answer C</label>
+                        <input type="text" id="edit-answer-c">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-answer-d">Answer D</label>
+                        <input type="text" id="edit-answer-d">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-correct-answer">Correct Answer</label>
+                        <input type="text" id="edit-correct-answer">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-course">Course</label>
+                        <select id="edit-course">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-lection">Lection</label>
+                        <select id="edit-lection">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-position">Position</label>
+                        <select id="edit-position">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-image-url">Image URL</label>
+                        <input type="text" id="edit-image-url">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="save-btn">Save</button>
+                        <button type="button" class="cancel-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <% } else { %>
+        <div id="login-hint">
+            Please <a href="/log-in-prof">log in</a> to view this page!
+        </div>
+    <% } %>
+    <script src="../js/manage_question.js"></script>
 </body>
 </html>
