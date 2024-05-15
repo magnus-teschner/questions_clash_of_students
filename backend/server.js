@@ -33,6 +33,34 @@ const config_mysql = {
   database: "clashOfStudents"
 };
 
+// Middleware to store the original URL
+app.use((req, res, next) => {
+  if (!req.isAuthenticated() && req.method === 'GET' && req.path !== '/log-in-prof') {
+    req.session.returnTo = req.originalUrl;
+  }
+  next();
+});
+
+app.post('/log-in-prof', (req, res, next) => {
+  let returnTo = req.session.returnTo
+  passport.authenticate('prof', (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.redirect('/log-in-prof');
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      const redirectUrl = returnTo || '/questions';
+      delete req.session.returnTo;
+      return res.redirect(redirectUrl);
+    });
+  })(req, res, next);
+});
+
 
 const con = mysql.createConnection(config_mysql);
 
@@ -156,7 +184,6 @@ app.get('/questions', (req, res) => {
 
 
 app.get('/manage-questions', (req, res) => {
-  
   fetch(`http://${question_creator_service}:80/all_entrys/`, {
     method: 'GET'
   })
@@ -166,6 +193,8 @@ app.get('/manage-questions', (req, res) => {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
   });
+  
+
   
 
 });
@@ -194,16 +223,6 @@ app.get("/log-in-student", (req, res) => {
 app.get('/', (req, res) => {
   res.render("login", { user: req.user, error: undefined, target: undefined });
 });
-
-
-app.post(
-  "/log-in-prof",
-  passport.authenticate("prof", {
-    successRedirect: "/questions",
-    failureRedirect: "/log-in-prof",
-    failureMessage: true
-  })
-);
 
 app.post(
   "/log-in-student",
