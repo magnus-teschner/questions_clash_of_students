@@ -53,9 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-image-url').value = imageUrl;
 
         modal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+        document.getElementById('main-container').classList.add('modal-bg-blur');
     }
 
     function closeModalFunction() {
+        document.body.classList.remove('modal-open');
+        document.getElementById('main-container').classList.remove('modal-bg-blur');
         modal.classList.add('hidden');
     }
 

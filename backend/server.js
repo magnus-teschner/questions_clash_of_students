@@ -237,20 +237,6 @@ app.get('/manage-questions', (req, res) => {
         "lection": "5",
         "position": 7,
         "image_url": "208d6ba4-c0c4-458c-bb50-392c6a198deb.png"
-    },
-    {
-        "id": 6,
-        "question_type": "multiple-choice-image",
-        "frage": "xyxyx",
-        "answer_a": "12",
-        "answer_b": "12",
-        "answer_c": "2",
-        "answer_d": "2",
-        "correct_answer": "2",
-        "course": "Cloud Computing",
-        "lection": "3",
-        "position": 8,
-        "image_url": "http://localhost:9000/images-questions-bucket/2f07ef49-ac0c-4709-b88d-a07c9e19d933.png"
     }
 ];
 res.render("show-manage-questions", { user: req.user, data: data})
