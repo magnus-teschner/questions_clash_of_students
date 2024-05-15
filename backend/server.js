@@ -156,7 +156,7 @@ app.get('/questions', (req, res) => {
 
 
 app.get('/manage-questions', (req, res) => {
-  /*
+  
   fetch(`http://${question_creator_service}:80/all_entrys/`, {
     method: 'GET'
   })
@@ -166,38 +166,7 @@ app.get('/manage-questions', (req, res) => {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
   });
-  */
-  const data = [
-    {
-        "id": 4,
-        "question_type": "image-description",
-        "frage": "Was ist 5*5?",
-        "answer_a": "25",
-        "answer_b": null,
-        "answer_c": null,
-        "answer_d": null,
-        "correct_answer": "25",
-        "course": "AI",
-        "lection": "4",
-        "position": 5,
-        "image_url": "2c9fc397-9d5b-4dbb-a57f-818009860cd6.png"
-    },
-    {
-        "id": 5,
-        "question_type": "multiple-choice-image",
-        "frage": "Was ist auf diesem schönen Bild zu sehen?",
-        "answer_a": "Haus",
-        "answer_b": "Affe",
-        "answer_c": "Swimming Pool",
-        "answer_d": "Giraffe",
-        "correct_answer": "Haus",
-        "course": "AI",
-        "lection": "5",
-        "position": 7,
-        "image_url": "208d6ba4-c0c4-458c-bb50-392c6a198deb.png"
-    }
-];
-res.render("show-manage-questions", { user: req.user, data: data})
+  
 
 });
 
@@ -350,7 +319,6 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
 
 
 app.post('/send', (req, res) => {
-  console.log(req.body)
   fetch(`http://${question_creator_service}:80/send/`, {
     method: 'POST',
     headers: {
@@ -365,6 +333,42 @@ app.post('/send', (req, res) => {
     res.status(500).send('Internal Server Error');
   });
 });
+
+app.post('/update', (req, res) => {
+  fetch(`http://${question_creator_service}:80/change/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(req.body)
+  })
+  .then(response => res.redirect('/manage-questions'))
+  .catch(error => {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  });
+});
+
+
+
+app.post('/update_img', upload.single('image'), (req, res) => {
+  const formData = new FormData();
+  const blob = new Blob([req.file.buffer], { mimetype: req.file.mimetype });
+  formData.append('image', blob);
+  formData.append('json', req.body.json)
+  formData.append('mimetype', req.file.mimetype)
+
+  fetch(`http://${question_creator_service}:80/change-img/`, {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => res.redirect('/manage-questions'))
+  .catch(error => {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  });
+});
+
 
 
 app.get('/get_question', (req, res) => {
@@ -389,7 +393,6 @@ app.get('/get_question', (req, res) => {
     res.status(500).send('Internal Server Error');
   });
 });
-
 
 
 app.listen(port, () => {

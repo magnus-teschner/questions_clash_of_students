@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openModal(row) {
+        const id = row.cells[0].innerText;
         const questionType = row.cells[1].innerText;
         const question = row.cells[2].innerText;
         const answerA = row.cells[3].innerText;
@@ -120,16 +121,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-course').value = course;
         document.getElementById('edit-lection').value = lection;
         document.getElementById('edit-position').value = position;
+        document.getElementById('id-container').innerText = id;
 
         deactivateAfterType(questionType);
-
 
         if (image_url !== 'N/A'){
             image.src = `http://localhost:9000/images-questions-bucket/${image_url}`;
             
         } else {
             image.src = 'none';
-            document.getElementById('edit-image-url').value = image_url;
         };
 
         modal.classList.remove('hidden');
@@ -144,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function saveChanges(row) {
+        
         row.cells[1].innerText = document.getElementById('edit-question-type').value;
         row.cells[2].innerText = document.getElementById('edit-question').value;
         row.cells[3].innerText = document.getElementById('edit-answer-a').value;
@@ -154,38 +155,27 @@ document.addEventListener('DOMContentLoaded', () => {
         row.cells[8].innerText = document.getElementById('edit-course').value;
         row.cells[9].innerText = document.getElementById('edit-lection').value;
         row.cells[10].innerText = document.getElementById('edit-position').value;
+
+        let type_selector_value = document.getElementById('edit-question-type').value
+        if (type_selector_value === 'multiple-choice' || type_selector_value === 'text-description'){
+            row.cells[11].querySelector('.store-url').innerText = '';
+            row.cells[11].querySelector('.row-image').src = '';
+            row.cells[11].querySelector('.row-image').classList.add('hidden');
+
+        } else {
+            row.cells[11].querySelector('.store-url').innerText = document.querySelector('#img-modal').src;
+            row.cells[11].querySelector('.row-image').src = document.querySelector('#img-modal').src;
+            row.cells[11].querySelector('.row-image').classList.remove('hidden');
+
+        }
     }
+
+
     function uploadNewImage(file) {
         if (file) {
             const blobUrl = URL.createObjectURL(file);
             document.querySelector('#img-modal').src = blobUrl;
-        }/*
-
-            const formData = new FormData();
-            formData.append('image', file);
-
-            fetch('/upload-image', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const imageUrl = data.imageUrl; // Assuming the response contains the URL of the uploaded image
-                    document.getElementById('edit-image-url').value = imageUrl;
-                    document.querySelector('#img-modal').src = `http://localhost:9000/images-questions-bucket/${imageUrl}`;
-                } else {
-                    alert('Image upload failed. Please try again.');
-                }
-            })
-            .catch(error => {
-                console.error('Error uploading image:', error);
-                alert('Error uploading image. Please try again.');
-            });
-        } else {
-            alert('Please select an image to upload.');
         }
-        */
     }
     
 

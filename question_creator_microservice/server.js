@@ -37,6 +37,8 @@ function getAfterLastSlash(str) {
   return str;
 }
 
+
+
 app.post('/upload_min', upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded');
@@ -53,7 +55,7 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
       return res.status(500).send('Error uploading file');
     }
 
-    let file_url = `http://${minHost}:9000/${bucket}/${filename}`;
+    console.log(`http://${minHost}:9000/${bucket}/${filename}`);
     let json_object = JSON.parse(req.body.json);
     let query = "INSERT INTO questions (frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image_url) VALUES (?,?, ?,?,?,?,?,?,?,?,?)";
     const values = [
@@ -81,9 +83,94 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
   });
 });
 
+
+
+app.post('/change-img', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No file uploaded');
+  }
+
+
+  let fileending = getAfterLastSlash(req.body.mimetype);
+  let uuid = uuidv4();
+  let filename = uuid + '.' + fileending;
+  let bucket = 'images-questions-bucket';
+
+  minioClient.putObject(bucket, filename, req.file.buffer, (err, objInfo) => {
+    if (err) {
+      console.error('Error uploading file:', err);
+      return res.status(500).send('Error uploading file');
+    }
+    console.log(`http://${minHost}:9000/${bucket}/${filename}`);
+    let json_object = JSON.parse(req.body.json);
+    
+    let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ?;"
+  const values = [
+    
+    json_object.question.frage,
+    json_object.question.type,
+    json_object.question.a, 
+    json_object.question.b, 
+    json_object.question.c, 
+    json_object.question.d, 
+    json_object.question.correct_answer, 
+    json_object.question.course, 
+    json_object.question.lection, 
+    json_object.question.position, 
+    filename,
+    json_object.question.id,
+  ];
+  console.log(values);
+
+    con.query(query, values, (err) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).send('Database error');
+      }
+      
+      res.status(200).send("Row updated");
+    });
+  });
+});
+
+
+
+
+app.post('/change', (req, res) => {
+  let json_object = req.body;
+  
+  let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ?;"
+  const values = [
+    json_object.question.frage,
+    json_object.question.type,
+    json_object.question.a, 
+    json_object.question.b, 
+    json_object.question.c, 
+    json_object.question.d, 
+    json_object.question.correct_answer, 
+    json_object.question.course, 
+    json_object.question.lection, 
+    json_object.question.position, 
+    null,
+    json_object.question.id,
+  ];
+console.log(values);
+
+  con.query(query, values, (err, result) => {
+  if (err) {
+    console.log(err);
+    res.status(500).send('SERVER_ERROR');
+  }
+  console.log("successfull")
+  res.status(200).send('Row updated');
+  
+  });
+  
+
+})
+
 app.post('/send', (req, res) => {
   let json_object = req.body;
-  console.log(json_object);
   
   let query = "INSERT INTO questions (frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image_url) VALUES (?,?, ?,?,?,?,?,?,?,?,?)";
   const values = [
@@ -122,7 +209,7 @@ app.get("/all_entrys", async (req, res) => {
 
 })
 
-// Define your endpoint
+
 app.get('/get_question', (req, res) => {
   let course = req.query.course
   let lection = req.query.lection
