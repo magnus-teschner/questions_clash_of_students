@@ -1,7 +1,5 @@
 const send_button = document.querySelector('#confirm-button');
 
-console.log("Test")
-
 async function getImageBlobFromImgTag(imgElement) {
     if (!imgElement || !imgElement.src) {
       throw new Error('Invalid or missing image element.');
