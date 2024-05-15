@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Manage Questions</title>
+	<link rel="stylesheet" href="css/style_manage_questions.css">
+</head>
+<body>
+	<% if (user) {%>
+
+		<div id="main-container">
+			<div id="top-menu">
+					<div id = "profile-logout">
+						<button id="profile-btn">Profil</button>
+						<a id="logout-a" href="/log-out">Logout</a>
+					</div>
+
+				<div id="profile-options" class="hidden">
+					<a href="">Manage account</a>
+					<a href="">Manage questions</a>
+				</div>
+		</div>
+        <div id="content-container">
+            <h1>Question Table</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Question Type</th>
+                <th>Question</th>
+                <th>Answer A</th>
+                <th>Answer B</th>
+                <th>Answer C</th>
+                <th>Answer D</th>
+                <th>Correct Answer</th>
+                <th>Course</th>
+                <th>Lection</th>
+                <th>Position</th>
+                <th>Image URL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(let i = 0; i < data.length; i++) { %>
+                <tr>
+                    <td><%= data[i].id %></td>
+                    <td><%= data[i].question_type %></td>
+                    <td><%= data[i].frage %></td>
+                    <td><%= data[i].answer_a %></td>
+                    <td><%= data[i].answer_b %></td>
+                    <td><%= data[i].answer_c %></td>
+                    <td><%= data[i].answer_d %></td>
+                    <td><%= data[i].correct_answer %></td>
+                    <td><%= data[i].course %></td>
+                    <td><%= data[i].lection %></td>
+                    <td><%= data[i].position %></td>
+                    <td>
+                        <% if(data[i].image_url) { %>
+                            <img src="<%= 'http://localhost:9000/images-questions-bucket/' + data[i].image_url %>" alt="Image" style="width: 100px;">
+                        <% } else { %>
+                            N/A
+                        <% } %>
+                    </td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+        </div>
+	<% } else { %>
+		<div id="login-hint">
+			Please <a href="/log-in-prof"> log in</a> to view this page!
+		</div>
+		
+	<% } %>
+</body>
+</html>

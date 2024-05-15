@@ -1,0 +1,152 @@
+/* Import Google font - Poppins */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+
+/* General Styles */
+body {
+    padding: 0;
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background-image: url('../images/faculty.png');
+    background-position: center; /* Center the background image */
+    background-repeat: no-repeat; /* Do not repeat the image */
+    background-attachment: fixed; /* This is the key property */
+    background-size: cover;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    
+}
+
+#main-container {
+    display: flex;
+    flex-direction: column;
+}
+
+#top-menu {
+    height: 95px;
+    background-color: #333;
+    width: 100vw;
+    max-width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.hidden {
+    display: none;
+}
+
+#profile-logout {
+    margin-right: 40px;
+}
+#profile-btn,
+#logout-a {
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+#profile-btn:hover,
+#logout-a:hover {
+  text-decoration: underline;
+}
+
+#login-hint {
+    width: 500px;
+    height: 200px;
+    background: white;
+    align-self: center;
+    border-radius: 10px;
+    margin-top: 100px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+#login-hint a{
+    text-decoration: underline;
+    margin-left: 5px;
+    margin-right: 5px;
+    color: blue;
+}
+
+h1 {
+    text-align: center;
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+th {
+    background-color: #4CAF50;
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+tr:hover {
+    background-color: #f1f1f1;
+}
+img {
+    width: 100px;
+    border-radius: 5px;
+}
+td img {
+    display: block;
+    margin: 0 auto;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+@media screen and (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+    tr {
+        margin-bottom: 15px;
+    }
+    th, td {
+        padding: 10px;
+        text-align: right;
+    }
+    th {
+        background-color: transparent;
+        color: #333;
+    }
+    td {
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+    td:before {
+        content: attr(data-label);
+        float: left;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    th, td:before {
+        text-align: left;
+    }
+}
+

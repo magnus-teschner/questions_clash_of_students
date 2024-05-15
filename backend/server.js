@@ -154,6 +154,109 @@ app.get('/questions', (req, res) => {
   res.render("questions", { user: req.user});
 });
 
+
+app.get('/manage-questions', (req, res) => {
+  /*
+  fetch(`http://${question_creator_service}:80/all_entrys/`, {
+    method: 'GET'
+  })
+  .then(response => response.json())
+  .then(data => res.render("show-manage-questions", { user: req.user, data: data}))
+  .catch(error => {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  });
+  */
+  const data = [
+    {
+        "id": 1,
+        "question_type": "multiple-choice",
+        "frage": "Test",
+        "answer_a": "1",
+        "answer_b": "2",
+        "answer_c": "3",
+        "answer_d": "4",
+        "correct_answer": "2",
+        "course": "Cloud Computing",
+        "lection": "3",
+        "position": 7,
+        "image_url": null
+    },
+    {
+        "id": 2,
+        "question_type": "text-description",
+        "frage": "sdsdsdsd",
+        "answer_a": "sdsdsdsdsdsd",
+        "answer_b": null,
+        "answer_c": null,
+        "answer_d": null,
+        "correct_answer": "sdsdsdsdsdsd",
+        "course": "Cloud Computing",
+        "lection": "3",
+        "position": 8,
+        "image_url": null
+    },
+    {
+        "id": 3,
+        "question_type": "multiple-choice-image",
+        "frage": "sdsdsd",
+        "answer_a": "sdsd",
+        "answer_b": "sdsd",
+        "answer_c": "sdsdsd",
+        "answer_d": "sdsd",
+        "correct_answer": "sdsdsd",
+        "course": "AI",
+        "lection": "4",
+        "position": 5,
+        "image_url": "3f5cca98-a688-4d0b-b4f2-dca983fdd797.png"
+    },
+    {
+        "id": 4,
+        "question_type": "image-description",
+        "frage": "sdsdsdsdsdq321",
+        "answer_a": "sdasd",
+        "answer_b": null,
+        "answer_c": null,
+        "answer_d": null,
+        "correct_answer": "sdasd",
+        "course": "AI",
+        "lection": "4",
+        "position": 5,
+        "image_url": "2c9fc397-9d5b-4dbb-a57f-818009860cd6.png"
+    },
+    {
+        "id": 5,
+        "question_type": "multiple-choice-image",
+        "frage": "yxyxyxyx",
+        "answer_a": "yxyx",
+        "answer_b": "yxyx",
+        "answer_c": "yxy<x",
+        "answer_d": "yxyx",
+        "correct_answer": "yxyx",
+        "course": "AI",
+        "lection": "5",
+        "position": 7,
+        "image_url": "208d6ba4-c0c4-458c-bb50-392c6a198deb.png"
+    },
+    {
+        "id": 6,
+        "question_type": "multiple-choice-image",
+        "frage": "xyxyx",
+        "answer_a": "12",
+        "answer_b": "12",
+        "answer_c": "2",
+        "answer_d": "2",
+        "correct_answer": "2",
+        "course": "Cloud Computing",
+        "lection": "3",
+        "position": 8,
+        "image_url": "http://localhost:9000/images-questions-bucket/2f07ef49-ac0c-4709-b88d-a07c9e19d933.png"
+    }
+];
+res.render("show-manage-questions", { user: req.user, data: data})
+
+});
+
 app.get('/courses', (req, res) => {
   res.render("courses", { user: req.user});
 });
