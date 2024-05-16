@@ -12,6 +12,7 @@ const LocalStrategy = require("passport-local").Strategy;
 const session = require("express-session");
 
 const bcrypt = require('bcryptjs');
+const { type } = require('os');
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -40,27 +41,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
-app.post('/log-in-prof', (req, res, next) => {
-  let returnTo = req.session.returnTo
-  passport.authenticate('prof', (err, user, info) => {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      return res.redirect('/log-in-prof');
-    }
-    req.logIn(user, (err) => {
-      if (err) {
-        return next(err);
-      }
-      const redirectUrl = returnTo || '/questions';
-      delete req.session.returnTo;
-      return res.redirect(redirectUrl);
-    });
-  })(req, res, next);
-});
-
 
 const con = mysql.createConnection(config_mysql);
 
@@ -184,8 +164,16 @@ app.get('/questions', (req, res) => {
 
 
 app.get('/manage-questions', (req, res) => {
+  if (!req.user){
+    res.render("show-manage-questions", { user: req.user, data: undefined});
+    return;
+  }
+  let user = req.user;
   fetch(`http://${question_creator_service}:80/all_entrys/`, {
-    method: 'GET'
+    method: 'GET',
+    headers: {
+      'user': user.email
+    }
   })
   .then(response => response.json())
   .then(data => res.render("show-manage-questions", { user: req.user, data: data}))
@@ -193,10 +181,6 @@ app.get('/manage-questions', (req, res) => {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
   });
-  
-
-  
-
 });
 
 app.get('/courses', (req, res) => {
@@ -232,6 +216,37 @@ app.post(
     failureMessage: true
   })
 );
+
+app.post(
+  "/log-in-prof",
+  passport.authenticate("prof", {
+    successRedirect: "/questions",
+    failureRedirect: "/log-in-prof",
+    failureMessage: true
+  })
+);
+
+/*
+app.post('/log-in-prof', (req, res, next) => {
+  let returnTo = req.session.returnTo
+  passport.authenticate('prof', (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.redirect('/log-in-prof');
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      const redirectUrl = returnTo || '/questions';
+      delete req.session.returnTo;
+      return res.redirect(redirectUrl);
+    });
+  })(req, res, next);
+});
+*/
 
 app.get('/sign-up-student', (req, res) => {
   res.render("sign-up-student", {error: undefined});
@@ -318,10 +333,19 @@ app.post("/sign-up-prof", (req, res, next) => {
 
 
 app.post('/upload_min', upload.single('image'), (req, res) => {
+  if (!req.session.passport.user){
+    return res.status(500).send('No User signed in!')
+  }
+
+  let userData = {
+    user: req.session.passport.user,
+    ...JSON.parse(req.body.json)
+  };
+  userData = JSON.stringify(userData);
   const formData = new FormData();
   const blob = new Blob([req.file.buffer], { mimetype: req.file.mimetype });
   formData.append('image', blob);
-  formData.append('json', req.body.json)
+  formData.append('json', userData)
   formData.append('mimetype', req.file.mimetype)
 
   fetch(`http://${question_creator_service}:80/upload_min/`, {
@@ -338,12 +362,19 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
 
 
 app.post('/send', (req, res) => {
+  if (!req.session.passport.user){
+    return res.status(500).send('No User signed in!')
+  }
+  const userData = {
+    user: req.session.passport.user,
+    ...req.body
+  };
   fetch(`http://${question_creator_service}:80/send/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(req.body)
+    body: JSON.stringify(userData)
   })
   .then(response => response.json())
   .then(data => res.send(data))
@@ -354,12 +385,20 @@ app.post('/send', (req, res) => {
 });
 
 app.post('/update', (req, res) => {
+  if (!req.session.passport.user){
+    return res.status(500).send('No User signed in!')
+  }
+
+  const userData = {
+    user: req.session.passport.user,
+    ...req.body
+  };
   fetch(`http://${question_creator_service}:80/change/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(req.body)
+    body: JSON.stringify(userData)
   })
   .then(response => res.redirect('/manage-questions'))
   .catch(error => {
@@ -371,10 +410,19 @@ app.post('/update', (req, res) => {
 
 
 app.post('/update_img', upload.single('image'), (req, res) => {
+  if (!req.session.passport.user){
+    return res.status(500).send('No User signed in!')
+  }
+
+  let userData = {
+    user: req.session.passport.user,
+    ...JSON.parse(req.body.json)
+  };
+  userData = JSON.stringify(userData);
   const formData = new FormData();
   const blob = new Blob([req.file.buffer], { mimetype: req.file.mimetype });
   formData.append('image', blob);
-  formData.append('json', req.body.json)
+  formData.append('json', userData)
   formData.append('mimetype', req.file.mimetype)
 
   fetch(`http://${question_creator_service}:80/change-img/`, {

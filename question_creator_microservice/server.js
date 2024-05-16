@@ -57,8 +57,9 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
 
     console.log(`http://${minHost}:9000/${bucket}/${filename}`);
     let json_object = JSON.parse(req.body.json);
-    let query = "INSERT INTO questions (frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image_url) VALUES (?,?, ?,?,?,?,?,?,?,?,?)";
+    let query = "INSERT INTO questions (user, frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image_url) VALUES (?,?,?, ?,?,?,?,?,?,?,?,?)";
     const values = [
+      json_object.user,
       json_object.question.frage,
       json_object.question.type,
       json_object.question.a,
@@ -104,7 +105,7 @@ app.post('/change-img', upload.single('image'), (req, res) => {
     console.log(`http://${minHost}:9000/${bucket}/${filename}`);
     let json_object = JSON.parse(req.body.json);
     
-    let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ?;"
+    let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ? AND user = ?;"
   const values = [
     
     json_object.question.frage,
@@ -119,8 +120,8 @@ app.post('/change-img', upload.single('image'), (req, res) => {
     json_object.question.position, 
     filename,
     json_object.question.id,
+    json_object.user
   ];
-  console.log(values);
 
     con.query(query, values, (err) => {
       if (err) {
@@ -139,7 +140,7 @@ app.post('/change-img', upload.single('image'), (req, res) => {
 app.post('/change', (req, res) => {
   let json_object = req.body;
   
-  let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ?;"
+  let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ? AND user = ?;"
   const values = [
     json_object.question.frage,
     json_object.question.type,
@@ -153,8 +154,9 @@ app.post('/change', (req, res) => {
     json_object.question.position, 
     null,
     json_object.question.id,
+    json_object.user
+
   ];
-console.log(values);
 
   con.query(query, values, (err, result) => {
   if (err) {
@@ -172,8 +174,9 @@ console.log(values);
 app.post('/send', (req, res) => {
   let json_object = req.body;
   
-  let query = "INSERT INTO questions (frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image_url) VALUES (?,?, ?,?,?,?,?,?,?,?,?)";
+  let query = "INSERT INTO questions (user, frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image_url) VALUES (?, ?,?, ?,?,?,?,?,?,?,?,?)";
   const values = [
+    json_object.user,
     json_object.question.frage,
     json_object.question.type,
     json_object.question.a, 
@@ -198,8 +201,13 @@ app.post('/send', (req, res) => {
 });
 
 app.get("/all_entrys", async (req, res) => {
-  let query_retrieve = "select * from questions;"
-  con.query(query_retrieve, (err, result) => {
+  let user = req.headers['user'];
+  if (!user) {
+    return res.status(400).send({ msg: 'USER_REQUIRED' });
+  }
+  let query_retrieve = "select * from questions WHERE user = ?;"
+  let values = [user];
+  con.query(query_retrieve, values, (err, result) => {
     if (err) {
       console.log(err);
       res.status(500).send({ msg:'SERVER_ERROR' });
