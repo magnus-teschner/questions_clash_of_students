@@ -15,11 +15,18 @@
           <span class="title">Meine Kurse</span>
         </div>
         <div class="navbar-menu">
-          <button class="profile-btn">Profil</button>
-          <a class="logout-a" href="log-out">Logout</a>
+          <button class="icon icon-profile" title="Profil" onclick="toggleProfile()"></button>
+          <button class="icon icon-logout" title="Logout" href="log-out"></button>
         </div>
       </div>
     </nav>
+    <div class="dropdown-menu" id="profile-dropdown" style="display: none;">
+      <div class="profile-info">
+        <p id="profile-name"><%= user.firstname %> <%= user.lastname %></p>
+        <p id="profile-email"><%= user.email %></p>
+        <a href="/change-password">Passwort ändern</a>
+      </div>
+    </div>
     <div class="container">
       <div class="course">
         <div class="course-header">
