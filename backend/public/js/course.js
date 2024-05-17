@@ -1,10 +1,38 @@
+var profileIcon = document.querySelector('.icon-profile');
+var dropdown = document.getElementById('profile-dropdown');
+
+document.addEventListener('click', function (event) {
+  var isClickOnIcon = profileIcon.contains(event.target)
+  var isOpen = dropdown.style.display === 'block';
+
+  if (isClickOnIcon) {
+    if (!isOpen) {
+      dropdown.style.display = 'block';
+      profileIcon.focus();
+    } else {
+      dropdown.style.display = 'none';
+      profileIcon.blur();
+    }
+  } else {
+    if (!dropdown.contains(event.target)) {
+      dropdown.style.display = 'none';
+    } else {
+      profileIcon.focus();
+    }
+  }
+});
+
+document.querySelector('.icon-logout').addEventListener('click', function () {
+  window.location.href = 'log-out';
+});
+
 document.querySelectorAll('.toggle-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const lessons = btn.parentNode.nextElementSibling;
-      lessons.style.display = lessons.style.display === 'block' ? 'none' : 'block';
-      btn.textContent = btn.textContent === '▼' ? '▲' : '▼';
-    });
+  btn.addEventListener('click', () => {
+    const lessons = btn.parentNode.nextElementSibling;
+    lessons.style.display = lessons.style.display === 'block' ? 'none' : 'block';
+    btn.textContent = btn.textContent === '▼' ? '▲' : '▼';
   });
+});
 
 
 document.querySelectorAll('.play-btn').forEach(btn => {
@@ -13,33 +41,3 @@ document.querySelectorAll('.play-btn').forEach(btn => {
     window.location.href = url;
   })
 });
-
-//Öffnen und schließen des Profils bei Klick auf Icon
-function toggleProfile() {
-  var dropdown = document.getElementById('profile-dropdown');
-  var profileIcon = document.querySelector('.icon-profile');
-  var isOpen = dropdown.style.display === 'block';
-
-  if (!isOpen) {
-    dropdown.style.display = 'block';
-    profileIcon.focus();
-    document.addEventListener('click', closeProfileClickOutside);
-  } else {
-    dropdown.style.display = 'none';
-    profileIcon.blur();
-    document.removeEventListener('click', closeProfileClickOutside);
-  }
-}
-
-//Schließen des Profils bei Klick außerhalb von Icon und Dropdown
-function closeProfileClickOutside(event) {
-  var dropdown = document.getElementById('profile-dropdown');
-  var profileIcon = document.querySelector('.icon-profile');
-  var isClickInsideDropdown = dropdown.contains(event.target);
-  var isClickOnIcon = profileIcon.contains(event.target);
-
-  if (!isClickInsideDropdown && !isClickOnIcon) {
-    dropdown.style.display = 'none';
-    document.removeEventListener('click', closeProfileClickOutside);
-  }
-}
