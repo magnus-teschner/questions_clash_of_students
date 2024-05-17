@@ -15,16 +15,21 @@
           <span class="title">Meine Kurse</span>
         </div>
         <div class="navbar-menu">
-          <button class="icon icon-profile" title="Profil" onclick="toggleProfile()"></button>
-          <button class="icon icon-logout" title="Logout" href="log-out"></button>
+          <button class="icon icon-profile" title="Profil"></button>
+          <button class="icon icon-logout" title="Logout"></button>
         </div>
       </div>
     </nav>
-    <div class="dropdown-menu" id="profile-dropdown" style="display: none;">
+    <div class="dropdown-menu hidden" id="profile-dropdown">
       <div class="profile-info">
-        <p id="profile-name"><%= user.firstname %> <%= user.lastname %></p>
-        <p id="profile-email"><%= user.email %></p>
-        <a href="/change-password">Passwort ändern</a>
+        <p id="profile-name">
+          <%= user.firstname %>
+            <%= user.lastname %>
+        </p>
+        <p id="profile-email">
+          <%= user.email %>
+        </p>
+        <a href="/change-password" class="password-link">Passwort ändern</a>
       </div>
     </div>
     <div class="container">
@@ -58,10 +63,8 @@
         <div id="login-hint">
           Please <a href="/"> log in</a> to view this page!
         </div>
-
       </div>      
     <% } %>
-
   <script src="js/course.js"></script>
 </body>
 
