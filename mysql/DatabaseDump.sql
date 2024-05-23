@@ -23,3 +23,10 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   
   PRIMARY KEY (`id`)
 );
+
+CREATE TABLE IF NOT EXISTS `scores` (
+  `account_id` int(11) NOT NULL,
+  `score` int(11),
+  PRIMARY KEY (`account_id`),
+  FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE
+);
