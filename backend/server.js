@@ -62,9 +62,23 @@ passport.use('stud',
                   if (!match) {
                       // passwords do not match!
                       return done(null, false, { message: "Incorrect password" })
-                  } else {            
-                      let user = { firstname: db_first, lastname: db_last, email: db_email };
+                  } else {
+                    let query_score = "SELECT score FROM scores WHERE account_id =?";
+                    const id_account = [result[0].id];
+
+                    con.query(query_score, id_account, (err, accountScore) => {
+                      if (err) {
+                        return done(err);
+                      }
+                      const db_score = accountScore[0].score;
+                      let user = {
+                        firstname: db_first,
+                        lastname: db_last,
+                        email: db_email,
+                        score: db_score,
+                      };
                       return done(null, user);
+                    });
                   }
               } catch (bcryptError) {
                   return done(bcryptError);
@@ -130,11 +144,16 @@ try {
       const db_first = result[0].firstname;
       const db_last = result[0].lastname;
       const db_email = result[0].email;
-
+  
+  const query_score = "SELECT score FROM scores WHERE account_id =?";
+  const account_id = [result[0].id]; 
+  con.query(query_score, account_id, (err, accountScore) => {
+      const db_score = accountScore[0].score;
       
-      let user = { firstname: db_first, lastname: db_last, email: db_email }
+      let user = { firstname: db_first, lastname: db_last, email: db_email, score: db_score}
       return done(null, user);
   });
+});
 } catch(err) {
   done(err);
 };
@@ -230,10 +249,27 @@ app.post("/sign-up-student", (req, res, next) => {
               con.query(query_insert, values_insert, (err) => {
                   if (err) {
                       return next(err);
+                }
+
+                con.query("SELECT LAST_INSERT_ID() as id", (err, idResult) => {
+                  if (err) {
+                    return next(err);
                   }
-                  res.redirect("/");
-              });
-            });   
+                  // Get the ID of the newly inserted account
+                  const accountId = idResult[0].id;
+
+                  let query_insert_score = "INSERT INTO score (account_id, score) VALUES (?,?)";
+                  const values_insert_score = [accountId, 0];
+
+                  con.query(query_insert_score, values_insert_score, (err) => {
+                    if (err) {
+                      return next(err);
+                    }
+                    res.redirect("/");
+                  });
+                });   
+              }); 
+            }); 
       });
   } catch (error) {
       next(error);
