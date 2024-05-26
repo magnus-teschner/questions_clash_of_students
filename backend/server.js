@@ -177,6 +177,31 @@ app.get('/courses', (req, res) => {
   res.render("courses", { user: req.user});
 });
 
+app.get('/ranking', (req, res) => {
+  const ranking = `
+  SELECT a.firstname, a.lastname, s.score
+  FROM accounts a
+  JOIN scores s ON a.id = s.account_id
+`;
+
+con.query(ranking, [], (err, rows) => {
+  if (err) {
+      return next(err);
+  }
+  const sortedData = rows.sort((a, b) => b.score - a.score);
+
+  const rankingList = sortedData.map ((user, index) => ({
+    rank: index +1,
+    firstname: user.firstname,
+    lastname: user.lastname,
+    score: user.score
+  }));
+
+  // Ranking-Liste an die Template-Engine übergeben
+  res.render('ranking', { user: req.user, rankingList: rankingList });
+});
+});
+
 
 app.get("/log-in-prof", (req, res) => {
   if (req.session.messages){
@@ -258,7 +283,7 @@ app.post("/sign-up-student", (req, res, next) => {
                   // Get the ID of the newly inserted account
                   const accountId = idResult[0].id;
 
-                  let query_insert_score = "INSERT INTO score (account_id, score) VALUES (?,?)";
+                  let query_insert_score = "INSERT INTO scores (account_id, score) VALUES (?,?)";
                   const values_insert_score = [accountId, 0];
 
                   con.query(query_insert_score, values_insert_score, (err) => {
