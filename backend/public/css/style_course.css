@@ -5,8 +5,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Poppins",
-    sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 body {
@@ -16,29 +15,24 @@ body {
   color: #fff;
 }
 
-body,
-html {
+body, html {
   margin: 0;
   padding: 0;
   height: 100%;
 }
 
-#main-container {
-  display: flex;
-  flex-direction: column;
-}
-
-#top-menu {
-  height: 95px;
+/* Navigation */
+.navbar {
   background-color: #333;
-  width: 100vw;
-  max-width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: end;
+  color: #fff;
+  padding: 10px 20px;
+  justify-content: space-between;
   align-items: center;
   gap: 40px;
   width: 100%;
+  margin: 0 auto;
+  padding: 10px;
+  overflow: hidden;
 }
 
 .hidden {
@@ -60,17 +54,87 @@ cursor: pointer;
 text-decoration: none;
 }
 
-#profile-btn:hover,
-#logout-a:hover {
-text-decoration: underline;
+.hidden {
+  display: none;
 }
 
-#logout-a {
-  margin-left: 10px;
+.show {
+  display: block;
+}
+/* Icons Navbar */
+.icon {
+  display: inline-block;
+  width: 35px;
+  height: 35px;
+  background-color: #333;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-left: 20px;
+}
+
+.icon:hover {
+  background-color: #555;
+}
+
+.icon:focus {
+  box-shadow: 0 0 0 2px #69d7ff;
+}
+
+
+
+/* Profil Anzeige */
+.dropdown-menu {
+  position: absolute;
+  display: flex;
+  background-color: #fff;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  padding: 10px;
+  right: 10px;
+  top: 90px;
+  width: auto;
+}
+
+.dropdown-menu.hidden {
+  display: none;
+}
+
+.dropdown-menu .profile-info p {
+  margin: 5px 0;
+  color: #333;
+}
+
+.dropdown-menu .profile-info a {
+  color: #333;
+  text-decoration: none;
+}
+
+.dropdown-menu .profile-info a:hover {
+  text-decoration: underline;
+}
+
+.password-link {
+  display: inline-block;
+  color: #333;
+  text-decoration: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+#setting-svg {
+  margin-right: 5px;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.password-link:hover {
+  text-decoration: underline;
 }
 
 /* Inhalt */
-
 .container {
   max-width: 800px;
   margin: 0 auto;
@@ -141,7 +205,7 @@ text-decoration: underline;
   color: black;
 }
 
-#login-hint a{
+#login-hint a {
   text-decoration: underline;
   margin-left: 5px;
   margin-right: 5px;
