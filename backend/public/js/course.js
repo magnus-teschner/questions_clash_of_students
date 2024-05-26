@@ -32,6 +32,10 @@ document.querySelector('#icon-logout').addEventListener('click', function () {
   window.location.href = 'log-out';
 });
 
+document.querySelector('#icon-ranking').addEventListener('click', function () {
+  window.location.href = 'ranking';
+});
+
 document.querySelectorAll('.toggle-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const lessons = btn.parentNode.nextElementSibling;
