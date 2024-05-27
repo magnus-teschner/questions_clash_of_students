@@ -61,9 +61,9 @@
 					<div id="dropdown-program" class="dropdown">
 						<button id="dropbtn-program" class="button-dropdown">Program</button>
 						<div id="dropdown-content-program" class="content-dropdown">
-							<a href="#">Digital Business Engineering</a>
-							<a href="#">Digital Business</a>
-							<a href="#" class="add-button" id = "add-program">Add course</a>
+							<% programs.forEach(function(program_json) { %>
+								<a href="#"><%= program_json.program_name %></a>
+							  <% }) %>
 						</div>
 					</div>
 

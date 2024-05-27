@@ -159,7 +159,15 @@ app.get("/log-out", (req, res, next) => {
 });
 
 app.get('/questions', (req, res) => {
-  res.render("questions", { user: req.user});
+  fetch(`http://${question_creator_service}:80/programs/`, {
+    method: 'GET',
+  })
+  .then(response => response.json())
+  .then(data => res.render("questions", { user: req.user, programs:data}))
+  .catch(error => {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  });
 });
 
 

@@ -20,7 +20,6 @@ function eventlistenerLinks(parentDiv) {
 };
 
 const add_course = document.querySelector('#add-course');
-const add_program = document.querySelector('#add-program');
 
 function add_link_dropdown(placeholder, adder) {
     if (adder.previousElementSibling.tagName === 'DIV') {
@@ -85,10 +84,7 @@ add_course.addEventListener('click', function(event) {
     add_link_dropdown('Enter course', add_course);
 });
 
-add_program.addEventListener('click', function(event) {
-    event.preventDefault();
-    add_link_dropdown('Enter program', add_program);
-});
+
 
 eventlistenerLinks(program);
 eventlistenerLinks(course);

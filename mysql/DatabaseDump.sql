@@ -24,3 +24,10 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   
   PRIMARY KEY (`id`)
 );
+
+CREATE TABLE IF NOT EXISTS program (
+    program_name VARCHAR(255) NOT NULL PRIMARY KEY
+);
+
+INSERT INTO `programs`(`program_name`) VALUES ('Digital Business');
+INSERT INTO `programs`(`program_name`) VALUES ('Digital Business Engineering');

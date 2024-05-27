@@ -218,6 +218,18 @@ app.get("/all_entrys", async (req, res) => {
 })
 
 
+app.get("/programs", async (req, res) => {
+  let query_retrieve = "select * from programs;"
+  con.query(query_retrieve, (err, result) => {
+    if (err) {
+      console.log(err);
+      res.status(500).send({ msg:'SERVER_ERROR' });
+    }
+    res.status(200).send(result);
+    });
+})
+
+
 app.get('/get_question', (req, res) => {
   let course = req.query.course
   let lection = req.query.lection
