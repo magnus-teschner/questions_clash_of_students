@@ -1,33 +1,31 @@
 // Select the parent div by its ID or any other selector
+const program = document.querySelector('#dropdown-content-program');
 const course = document.querySelector('#dropdown-content-course');
 const lection = document.querySelector('#dropdown-content-lection');
 const position = document.querySelector('#dropdown-content-position');
-
 
 function eventlistenerLinks(parentDiv) {
     if (parentDiv) {
         const links = parentDiv.querySelectorAll('a');
         const updateSiblingText = (event) => {
-            if (event.currentTarget.getAttribute('id') == 'add-course'){
-                return
+            if (event.currentTarget.getAttribute('class') == 'add-button') {
+                return;
             }
             event.preventDefault();
             parentDiv.previousElementSibling.textContent = event.target.textContent;
-            parentDiv.style.display= 'none';
+            parentDiv.style.display = 'none';
         };
         links.forEach(link => link.addEventListener('click', updateSiblingText));
     }
 };
 
-
 const add_course = document.querySelector('#add-course');
-add_course.addEventListener('click', function(event) {
-    const pref = add_course.previousElementSibling;
+const add_program = document.querySelector('#add-program');
 
-    if (add_course.previousElementSibling.tagName === 'DIV'){
-        return
+function add_link_dropdown(placeholder, adder) {
+    if (adder.previousElementSibling.tagName === 'DIV') {
+        return;
     }
-
 
     // Create a div container for the input field and the delete button
     const container = document.createElement('div');
@@ -38,11 +36,10 @@ add_course.addEventListener('click', function(event) {
     container.style.marginLeft = '10px';
     container.style.marginRight = '10px';
 
-
     // Create the input field
     const input = document.createElement('input');
     input.type = 'text';
-    input.placeholder = 'Enter course!';
+    input.placeholder = placeholder;
     input.style.border = 'none';
     input.style.borderRadius = '10px';
     input.style.width = '80%';
@@ -64,7 +61,7 @@ add_course.addEventListener('click', function(event) {
     container.appendChild(deleteBtn);
 
     // Insert the div container before the add button
-    this.parentElement.insertBefore(container, this);
+    adder.parentElement.insertBefore(container, adder);
 
     // Add event listener to the delete button to remove the container
     deleteBtn.addEventListener('click', function() {
@@ -76,14 +73,24 @@ add_course.addEventListener('click', function(event) {
         if (e.key === 'Enter') {
             const a_new_course = document.createElement('a');
             a_new_course.textContent = e.target.value;
-            this.parentElement.parentElement.insertBefore(a_new_course, this.parentElement);
-            eventlistenerLinks(this.parentElement.parentElement);
-            this.parentElement.remove();
+            adder.parentElement.insertBefore(a_new_course, container);
+            eventlistenerLinks(adder.parentElement);
+            container.remove();
         }
     });
+}
+
+add_course.addEventListener('click', function(event) {
+    event.preventDefault();
+    add_link_dropdown('Enter course', add_course);
 });
 
+add_program.addEventListener('click', function(event) {
+    event.preventDefault();
+    add_link_dropdown('Enter program', add_program);
+});
 
+eventlistenerLinks(program);
 eventlistenerLinks(course);
 eventlistenerLinks(lection);
 eventlistenerLinks(position);

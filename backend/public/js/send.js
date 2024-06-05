@@ -1,7 +1,5 @@
 const send_button = document.querySelector('#confirm-button');
 
-console.log("Test")
-
 async function getImageBlobFromImgTag(imgElement) {
     if (!imgElement || !imgElement.src) {
       throw new Error('Invalid or missing image element.');
@@ -28,7 +26,7 @@ async function uploadImageQuestion(blob, question) {
   
     try {
       // Send the POST request to the server endpoint with the FormData
-      const response = await fetch(`http://localhost:80/upload_min/`, {
+      const response = await fetch(`/upload_min`, {
         method: 'POST',
         body: formData
       });
@@ -41,7 +39,7 @@ async function uploadImageQuestion(blob, question) {
 
   async function uploadQuestion(question) {
     console.log(question);
-    const response =  fetch(`http://localhost:80/send/`, {
+    const response =  fetch(`/send`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

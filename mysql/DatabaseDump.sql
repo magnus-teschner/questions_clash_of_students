@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS questions (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    user VARCHAR(255),
     question_type VARCHAR(255),
     frage TEXT,
     answer_a VARCHAR(255),

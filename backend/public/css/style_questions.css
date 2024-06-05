@@ -36,7 +36,6 @@ body {
 
 #logo-container {
     margin-left: 15px;
-    width: 100%;
     margin-top: 15px;
     display: flex;
     flex-direction: row;
@@ -297,6 +296,7 @@ input {
     display: flex;
     flex-direction: row;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 #profile-options {

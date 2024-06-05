@@ -54,6 +54,7 @@ services:
     build: ./backend
     ports:
       - "80:80"
+    restart: always
     environment:
       QUESTIONCREATOR: questionmicroservice
       MYSQL_USER: admin
