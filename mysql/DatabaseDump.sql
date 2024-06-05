@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS questions (
     answer_c VARCHAR(255),
     answer_d VARCHAR(255),
     correct_answer VARCHAR(255),
+    program VARCHAR(255),
     course VARCHAR(255),
     lection VARCHAR(255),
     position  int,
@@ -27,6 +28,14 @@ CREATE TABLE IF NOT EXISTS `accounts` (
 
 CREATE TABLE IF NOT EXISTS program (
     program_name VARCHAR(255) NOT NULL PRIMARY KEY
+);
+
+CREATE TABLE IF NOT EXISTS course (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    course_name VARCHAR(255) NOT NULL,
+	  program_name VARCHAR(255),
+    user VARCHAR(255),
+    FOREIGN KEY (program_name) REFERENCES program(program_name)
 );
 
 INSERT INTO `programs`(`program_name`) VALUES ('Digital Business');

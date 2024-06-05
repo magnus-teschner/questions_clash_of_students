@@ -39,8 +39,6 @@
   
   .content-dropdown a:hover {background-color: #ddd;}
   
-  .dropdown:hover .content-dropdown {display: flex;}
-  
   .dropdown:hover .button-dropdown {background-color: #3e8e41;}
 
   #all-dropdowns {

@@ -159,6 +159,7 @@ app.get("/log-out", (req, res, next) => {
 });
 
 app.get('/questions', (req, res) => {
+  /*
   fetch(`http://${question_creator_service}:80/programs/`, {
     method: 'GET',
   })
@@ -168,6 +169,10 @@ app.get('/questions', (req, res) => {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
   });
+  */
+ const data = [{ program_name: 'Digital Business Engineering' },
+ { program_name: 'Digital Business' },]
+  res.render("questions", { user: req.user, programs:data})
 });
 
 
@@ -472,4 +477,24 @@ app.get('/get_question', (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server running at port ${port}`);
+});
+
+
+
+app.get('/get_courses', (req, res) => {
+
+  let user = req.user.email
+  let program = req.query.program
+
+  let query_retrieve = `select course_name from course where user = ? and program_name = ?;`
+  const values = [user, program]
+
+  console.log(values);
+  con.query(query_retrieve, values, (err, result) => {
+    if (err) {
+      console.log(err);
+      res.status(500).send({ msg:'SERVER_ERROR' });
+    }
+    res.status(200).json(result);
+    });
 });
