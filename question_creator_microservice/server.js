@@ -57,7 +57,7 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
 
     console.log(`http://${minHost}:9000/${bucket}/${filename}`);
     let json_object = JSON.parse(req.body.json);
-    let query = "INSERT INTO questions (user, frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image_url) VALUES (?,?,?, ?,?,?,?,?,?,?,?,?)";
+    let query = "INSERT INTO questions (user, frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, program, course, lection, position, image_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
     const values = [
       json_object.user,
       json_object.question.frage,
@@ -67,6 +67,7 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
       json_object.question.c,
       json_object.question.d,
       json_object.question.correct_answer,
+      json_object.question.program,
       json_object.question.course,
       json_object.question.lection,
       json_object.question.position,
@@ -105,7 +106,7 @@ app.post('/change-img', upload.single('image'), (req, res) => {
     console.log(`http://${minHost}:9000/${bucket}/${filename}`);
     let json_object = JSON.parse(req.body.json);
     
-    let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ? AND user = ?;"
+    let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, program = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ? AND user = ?;"
   const values = [
     
     json_object.question.frage,
@@ -114,7 +115,8 @@ app.post('/change-img', upload.single('image'), (req, res) => {
     json_object.question.b, 
     json_object.question.c, 
     json_object.question.d, 
-    json_object.question.correct_answer, 
+    json_object.question.correct_answer,
+    json_object.question.program, 
     json_object.question.course, 
     json_object.question.lection, 
     json_object.question.position, 
@@ -140,7 +142,7 @@ app.post('/change-img', upload.single('image'), (req, res) => {
 app.post('/change', (req, res) => {
   let json_object = req.body;
   
-  let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ? AND user = ?;"
+  let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, program = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ? AND user = ?;"
   const values = [
     json_object.question.frage,
     json_object.question.type,
@@ -148,7 +150,8 @@ app.post('/change', (req, res) => {
     json_object.question.b, 
     json_object.question.c, 
     json_object.question.d, 
-    json_object.question.correct_answer, 
+    json_object.question.correct_answer,
+    json_object.question.program, 
     json_object.question.course, 
     json_object.question.lection, 
     json_object.question.position, 
@@ -174,7 +177,7 @@ app.post('/change', (req, res) => {
 app.post('/send', (req, res) => {
   let json_object = req.body;
   
-  let query = "INSERT INTO questions (user, frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image_url) VALUES (?, ?,?, ?,?,?,?,?,?,?,?,?)";
+  let query = "INSERT INTO questions (user, frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, program, course, lection, position, image_url) VALUES (?, ?,?, ?,?,?,?,?,?,?,?,?,?)";
   const values = [
     json_object.user,
     json_object.question.frage,
@@ -183,7 +186,8 @@ app.post('/send', (req, res) => {
     json_object.question.b, 
     json_object.question.c, 
     json_object.question.d, 
-    json_object.question.correct_answer, 
+    json_object.question.correct_answer,
+    json_object.question.program, 
     json_object.question.course, 
     json_object.question.lection, 
     json_object.question.position, 

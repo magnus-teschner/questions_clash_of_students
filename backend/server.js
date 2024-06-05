@@ -159,7 +159,7 @@ app.get("/log-out", (req, res, next) => {
 });
 
 app.get('/questions', (req, res) => {
-  /*
+  
   fetch(`http://${question_creator_service}:80/programs/`, {
     method: 'GET',
   })
@@ -169,10 +169,6 @@ app.get('/questions', (req, res) => {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
   });
-  */
- const data = [{ program_name: 'Digital Business Engineering' },
- { program_name: 'Digital Business' },]
-  res.render("questions", { user: req.user, programs:data})
 });
 
 

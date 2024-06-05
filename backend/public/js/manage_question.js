@@ -105,10 +105,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const answerC = row.cells[5].innerText;
         const answerD = row.cells[6].innerText;
         const correctAnswer = row.cells[7].innerText;
-        const course = row.cells[8].innerText;
-        const lection = row.cells[9].innerText;
-        const position = row.cells[10].innerText;
-        const image_url = row.cells[11].querySelector('.store-url').innerText;
+        const program = row.cells[8].innerText;
+        const course = row.cells[9].innerText;
+        const lection = row.cells[10].innerText;
+        const position = row.cells[11].innerText;
+        const image_url = row.cells[12].querySelector('.store-url').innerText;
         const image = document.querySelector('#img-modal');
 
         document.getElementById('edit-question-type').value = questionType;
@@ -118,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-answer-c').value = answerC;
         document.getElementById('edit-answer-d').value = answerD;
         document.getElementById('edit-correct-answer').value = correctAnswer;
+        document.getElementById('edit-program').value = program;
         document.getElementById('edit-course').value = course;
         document.getElementById('edit-lection').value = lection;
         document.getElementById('edit-position').value = position;
@@ -152,20 +154,21 @@ document.addEventListener('DOMContentLoaded', () => {
         row.cells[5].innerText = document.getElementById('edit-answer-c').value;
         row.cells[6].innerText = document.getElementById('edit-answer-d').value;
         row.cells[7].innerText = document.getElementById('edit-correct-answer').value;
-        row.cells[8].innerText = document.getElementById('edit-course').value;
-        row.cells[9].innerText = document.getElementById('edit-lection').value;
-        row.cells[10].innerText = document.getElementById('edit-position').value;
+        row.cells[8].innerText = document.getElementById('edit-program').value;
+        row.cells[9].innerText = document.getElementById('edit-course').value;
+        row.cells[10].innerText = document.getElementById('edit-lection').value;
+        row.cells[11].innerText = document.getElementById('edit-position').value;
 
         let type_selector_value = document.getElementById('edit-question-type').value
         if (type_selector_value === 'multiple-choice' || type_selector_value === 'text-description'){
-            row.cells[11].querySelector('.store-url').innerText = '';
-            row.cells[11].querySelector('.row-image').src = '';
-            row.cells[11].querySelector('.row-image').classList.add('hidden');
+            row.cells[12].querySelector('.store-url').innerText = '';
+            row.cells[12].querySelector('.row-image').src = '';
+            row.cells[12].querySelector('.row-image').classList.add('hidden');
 
         } else {
-            row.cells[11].querySelector('.store-url').innerText = document.querySelector('#img-modal').src;
-            row.cells[11].querySelector('.row-image').src = document.querySelector('#img-modal').src;
-            row.cells[11].querySelector('.row-image').classList.remove('hidden');
+            row.cells[12].querySelector('.store-url').innerText = document.querySelector('#img-modal').src;
+            row.cells[12].querySelector('.row-image').src = document.querySelector('#img-modal').src;
+            row.cells[12].querySelector('.row-image').classList.remove('hidden');
 
         }
     }
