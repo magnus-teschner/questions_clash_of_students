@@ -16,19 +16,19 @@
           <h2>Ranking Liste</h2>
         </div>
         <ul>
-          <% rankingList.forEach(user => { %>
-            <li>
-              <span class="rank"><%= user.rank %>.</span>
+          <% rankingList.forEach(userItem => { %>
+            <% const isCurrentUser = user.id === userItem.id; %>
+            <li class="<%= isCurrentUser ? 'highlight' : '' %>">
+              <span class="rank"><%= userItem.rank %>.</span>
               <div class="name-score">
-                <span><%= user.firstname %> <%= user.lastname %></span>
-                <span><%= user.score %></span>
+                <span><%= userItem.firstname %> <%= userItem.lastname %></span>
+                <span><%= userItem.score %></span>
               </div>
             </li>
           <% }) %>
         </ul>
         </div>
       </div>
-    </div>
     <% } else { %>
       <div id="container">
         <div id="login-hint">
@@ -38,5 +38,4 @@
     <% } %>
   <script src="js/ranking.js"></script>
 </body>
-
 </html>

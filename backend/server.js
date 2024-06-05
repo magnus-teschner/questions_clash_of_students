@@ -141,6 +141,7 @@ try {
   const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
   const values = [email];
   con.query(query_retrieve, values, (err, result) => {
+      const db_id = result[0].id;
       const db_first = result[0].firstname;
       const db_last = result[0].lastname;
       const db_email = result[0].email;
@@ -150,7 +151,7 @@ try {
   con.query(query_score, account_id, (err, accountScore) => {
       const db_score = accountScore[0].score;
       
-      let user = { firstname: db_first, lastname: db_last, email: db_email, score: db_score}
+      let user = {id: db_id, firstname: db_first, lastname: db_last, email: db_email, score: db_score}
       return done(null, user);
   });
 });
@@ -179,27 +180,27 @@ app.get('/courses', (req, res) => {
 
 app.get('/ranking', (req, res) => {
   const ranking = `
-  SELECT a.firstname, a.lastname, s.score
+  SELECT a.id, a.firstname, a.lastname, s.score
   FROM accounts a
   JOIN scores s ON a.id = s.account_id
 `;
 
-con.query(ranking, [], (err, rows) => {
-  if (err) {
+  con.query(ranking, [], (err, rows) => {
+    if (err) {
       return next(err);
-  }
-  const sortedData = rows.sort((a, b) => b.score - a.score);
+    }
+    const sortedData = rows.sort((a, b) => b.score - a.score);
 
-  const rankingList = sortedData.map ((user, index) => ({
-    rank: index +1,
-    firstname: user.firstname,
-    lastname: user.lastname,
-    score: user.score
-  }));
+    const rankingList = sortedData.map((user, index) => ({
+      rank: index + 1,
+      id: user.id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      score: user.score
+    }));
 
-  // Ranking-Liste an die Template-Engine übergeben
-  res.render('ranking', { user: req.user, rankingList: rankingList });
-});
+    res.render('ranking', { user: req.user, rankingList: rankingList });
+  });
 });
 
 
