@@ -92,6 +92,14 @@
 .icon:focus svg path {
     fill: #69d7ff;
 }
+
+.icon.focus {
+    transform: scale(1.1);
+}
+
+.icon.focus svg path {
+    fill: #69d7ff;
+}
   /* Profil Anzeige */
   .dropdown-menu {
     position: absolute;

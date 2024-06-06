@@ -4,15 +4,19 @@ document.addEventListener('click', function (event) {
     const isClickOnIcon = profileIcon.contains(event.target);
     const isOpen = dropdown.classList.contains('show');
     const currentPage = window.location.pathname.split('/').pop();
-    const rakingIcon = document.querySelector('#icon-ranking');
+    const rankingIcon = document.querySelector('#icon-ranking');
     const coursesIcon = document.querySelector('#icon-course');
 
-    // Funktion, um den Fokus auf das aktuelle Icon zu setzen
-    function focusCurrentIcon() {
+    function highlightCurrentIcon() {
         if (currentPage === "ranking") {
-            rakingIcon.focus();
+            rankingIcon.classList.add('focus');
+            coursesIcon.classList.remove('focus');
         } else if (currentPage === "courses") {
-            coursesIcon.focus();
+            coursesIcon.classList.add('focus');
+            rankingIcon.classList.remove('focus');
+        } else {
+            rankingIcon.classList.remove('focus');
+            coursesIcon.classList.remove('focus');
         }
     }
 
@@ -25,8 +29,7 @@ document.addEventListener('click', function (event) {
             dropdown.classList.remove('show');
             dropdown.classList.add('hidden');
             profileIcon.blur();
-            // Fokus auf das aktuelle Icon setzen
-            focusCurrentIcon();
+            highlightCurrentIcon();
         }
     } else {
         if (!dropdown.contains(event.target)) {
@@ -40,14 +43,23 @@ document.addEventListener('click', function (event) {
 
 document.addEventListener('DOMContentLoaded', function () {
     const currentPage = window.location.pathname.split('/').pop();
-    const rakingIcon = document.querySelector('#icon-ranking');
+    const rankingIcon = document.querySelector('#icon-ranking');
     const coursesIcon = document.querySelector('#icon-course');
 
-    if (currentPage === "ranking") {
-        rakingIcon.focus();
-    } else if (currentPage === "courses") {
-        coursesIcon.focus();
-    }  
+    function highlightCurrentIcon() {
+        if (currentPage === "ranking") {
+            rankingIcon.classList.add('focus');
+            coursesIcon.classList.remove('focus');
+        } else if (currentPage === "courses") {
+            coursesIcon.classList.add('focus');
+            rankingIcon.classList.remove('focus');
+        } else {
+            rankingIcon.classList.remove('focus');
+            coursesIcon.classList.remove('focus');
+        }
+    }
+
+    highlightCurrentIcon();
 });
 
 document.querySelector('#icon-ranking').addEventListener('click', function () {
@@ -61,4 +73,3 @@ document.querySelector('#icon-course').addEventListener('click', function () {
 document.querySelector('#icon-logout').addEventListener('click', function () {
     window.location.href = 'log-out';
 });
-
