@@ -516,8 +516,6 @@ app.get('/get_courses', (req, res) => {
 });
 
 
-
-
 app.get('/get_positions', (req, res) => {
   const queryParams = new URLSearchParams({
     user: req.user.email,
