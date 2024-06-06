@@ -38,7 +38,6 @@ async function uploadImageQuestion(blob, question) {
   }
 
   async function uploadQuestion(question) {
-    console.log(question);
     const response =  fetch(`/send`, {
       method: 'POST',
       headers: {
@@ -154,6 +153,18 @@ send_button.addEventListener('click', (event) => {
       item.disabled = false;
       item.checked = false;
     })
+
+    const pos_value = document.querySelector('#dropbtn-position').innerText;
+    const dropdown = document.querySelector('#dropdown-content-position');
+    const links = dropdown.querySelectorAll('a');
+
+    links.forEach(element => {
+      if (element.innerText == pos_value){
+        element.remove();
+        document.querySelector('#dropbtn-position').innerText = "Position"
+      }
+    })
+
   }
 
   if (checkDropdown(program, "Please select program!") ||

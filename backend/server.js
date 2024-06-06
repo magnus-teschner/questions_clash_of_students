@@ -393,6 +393,31 @@ app.post('/send', (req, res) => {
   });
 });
 
+app.post('/add_course', (req, res) => {
+  if (!req.session.passport.user){
+    return res.status(500).send('No User signed in!')
+  }
+  const userData = {
+    user: req.session.passport.user,
+    ...req.body
+  };
+  fetch(`http://${question_creator_service}:80/add_course/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userData)
+  })
+  .then(response => response.json())
+  .then(data => res.send(data))
+  .catch(error => {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  });
+});
+
+
+
 app.post('/update', (req, res) => {
   if (!req.session.passport.user){
     return res.status(500).send('No User signed in!')
@@ -454,7 +479,6 @@ app.get('/get_question', (req, res) => {
     lection: req.query.lection,
     position: req.query.position
   });
-
   // Construct the URL with parameters
   let url = `http://${question_creator_service}:80/get_question/?${queryParams}`;
 
@@ -471,26 +495,54 @@ app.get('/get_question', (req, res) => {
 });
 
 
-app.listen(port, () => {
-  console.log(`Server running at port ${port}`);
+app.get('/get_courses', (req, res) => {
+  const queryParams = new URLSearchParams({
+    user: req.user.email,
+    program: req.query.program
+  });
+
+  // Construct the URL with parameters
+  let url = `http://${question_creator_service}:80/get_courses/?${queryParams}`;
+
+  // Make the GET request
+  fetch(url, {
+    method: 'GET',
+  })
+  .then(response => response.json())
+  .then(data => res.send(data))
+  .catch(error => {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  });
 });
 
 
 
-app.get('/get_courses', (req, res) => {
 
-  let user = req.user.email
-  let program = req.query.program
+app.get('/get_positions', (req, res) => {
+  const queryParams = new URLSearchParams({
+    user: req.user.email,
+    program: req.query.program,
+    course: req.query.course,
+    lection: req.query.lection
 
-  let query_retrieve = `select course_name from course where user = ? and program_name = ?;`
-  const values = [user, program]
+  });
 
-  console.log(values);
-  con.query(query_retrieve, values, (err, result) => {
-    if (err) {
-      console.log(err);
-      res.status(500).send({ msg:'SERVER_ERROR' });
-    }
-    res.status(200).json(result);
-    });
+  // Construct the URL with parameters
+  let url = `http://${question_creator_service}:80/get_positions/?${queryParams}`;
+
+  // Make the GET request
+  fetch(url, {
+    method: 'GET',
+  })
+  .then(response => response.json())
+  .then(data => res.send(data))
+  .catch(error => {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  });
+});
+
+app.listen(port, () => {
+  console.log(`Server running at port ${port}`);
 });

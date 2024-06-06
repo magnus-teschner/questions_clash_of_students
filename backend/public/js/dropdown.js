@@ -18,9 +18,7 @@ const childPosition = positionParent.querySelector('.content-dropdown');
 
 function eventlistenerLinksCourses(parentDiv) {
     if (parentDiv) {
-        console.log("activated")
         const links = parentDiv.querySelectorAll('a');
-        console.log(links);
         const updateSiblingText = (event) => {
             if (event.currentTarget.getAttribute('class') == 'add-button') {
                 return;
@@ -78,6 +76,10 @@ function eventlistenerLinksProgram(parentDiv) {
     }
 };
 
+function split(str){
+    let splitted = str.split(" ");
+    return splitted[splitted.length -1]
+}
 
 
 function eventlistenerLinksLection(parentDiv) {
@@ -87,6 +89,37 @@ function eventlistenerLinksLection(parentDiv) {
             event.preventDefault();
             parentDiv.previousElementSibling.textContent = event.target.textContent;
             parentDiv.style.display = 'none';
+            const queryParams = new URLSearchParams({
+                program: document.querySelector('#dropbtn-program').textContent,
+                course: document.querySelector('#dropbtn-course').textContent,
+                lection: split(document.querySelector('#dropbtn-lection').textContent),
+              });
+            
+              // Construct the URL with parameters
+              let url = `/get_positions/?${queryParams}`;
+              fetch(url, {
+                method: 'GET',
+              })
+              .then(response => response.json())
+              .then(data => {
+                document.querySelector('#dropbtn-position').textContent = 'Position';
+
+                while (position.children.length > 0) {
+                    position.removeChild(position.firstChild);
+                  }
+                
+                data = data.reverse();
+                data.forEach(element => {
+                    let link_a = document.createElement('a');
+                    link_a.textContent = `Position ${element}`;
+                    position.insertBefore(link_a, position.firstChild);
+                    eventlistenerLinksCourses(document.querySelector('#dropdown-content-position'));
+                })
+
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              });
         };
         links.forEach(link => link.addEventListener('click', updateSiblingText));
     }
@@ -159,6 +192,17 @@ function add_link_dropdown(placeholder, adder) {
     // Handle input submission
     input.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
+            let body = {program: document.querySelector('#dropbtn-program').innerText,
+                        course: e.target.value}
+            const response =  fetch(`/add_course`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body)
+              }).then(response => response.json())
+              .then(data => console.log(data))
+              .catch((error) => console.error('Error:', error));
             const a_new_course = document.createElement('a');
             a_new_course.textContent = e.target.value;
             adder.parentElement.insertBefore(a_new_course, container);
