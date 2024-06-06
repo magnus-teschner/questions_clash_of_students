@@ -361,8 +361,7 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
     method: 'POST',
     body: formData
   })
-  .then(response => response.json())
-  .then(data => res.send(data))
+  .then(response => res.send(response))
   .catch(error => {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
