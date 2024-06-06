@@ -70,9 +70,23 @@ passport.use('stud',
                   if (!match) {
                       // passwords do not match!
                       return done(null, false, { message: "Incorrect password" })
-                  } else {            
-                      let user = { firstname: db_first, lastname: db_last, email: db_email };
+                  } else {
+                    let query_score = "SELECT score FROM scores WHERE account_id =?";
+                    const id_account = [result[0].id];
+
+                    con.query(query_score, id_account, (err, accountScore) => {
+                      if (err) {
+                        return done(err);
+                      }
+                      const db_score = accountScore[0].score;
+                      let user = {
+                        firstname: db_first,
+                        lastname: db_last,
+                        email: db_email,
+                        score: db_score,
+                      };
                       return done(null, user);
+                    });
                   }
               } catch (bcryptError) {
                   return done(bcryptError);
@@ -135,14 +149,20 @@ try {
   const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
   const values = [email];
   con.query(query_retrieve, values, (err, result) => {
+      const db_id = result[0].id;
       const db_first = result[0].firstname;
       const db_last = result[0].lastname;
       const db_email = result[0].email;
-
+  
+  const query_score = "SELECT score FROM scores WHERE account_id =?";
+  const account_id = [result[0].id]; 
+  con.query(query_score, account_id, (err, accountScore) => {
+      const db_score = accountScore[0].score;
       
-      let user = { firstname: db_first, lastname: db_last, email: db_email }
+      let user = {id: db_id, firstname: db_first, lastname: db_last, email: db_email, score: db_score}
       return done(null, user);
   });
+});
 } catch(err) {
   done(err);
 };
@@ -185,6 +205,47 @@ app.get('/manage-questions', (req, res) => {
 
 app.get('/courses', (req, res) => {
   res.render("courses", { user: req.user});
+});
+
+app.get('/ranking', (req, res) => {
+  const rankingQuery = `
+    SELECT a.id, a.firstname, a.lastname, s.score
+    FROM accounts a
+    JOIN scores s ON a.id = s.account_id
+  `;
+
+  con.query(rankingQuery, [], (err, rows) => {
+    if (err) {
+      return next(err);
+    }
+
+    const sortedData = rows.sort((a, b) => {
+      if (b.score === a.score) {
+        return a.firstname.localeCompare(b.firstname); 
+      }
+      return b.score - a.score;
+    });
+
+    let currentRank = 1;
+    let currentScore = sortedData[0].score;
+    sortedData.forEach((user, index) => {
+      if (user.score < currentScore) {
+        currentRank = index + 1;
+        currentScore = user.score;
+      }
+      user.rank = currentRank;
+    });
+
+    const rankingList = sortedData.map(user => ({
+      rank: user.rank,
+      id: user.id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      score: user.score
+    }));
+
+    res.render('ranking', { user: req.user, rankingList: rankingList });
+  });
 });
 
 
@@ -280,10 +341,27 @@ app.post("/sign-up-student", (req, res, next) => {
               con.query(query_insert, values_insert, (err) => {
                   if (err) {
                       return next(err);
+                }
+
+                con.query("SELECT LAST_INSERT_ID() as id", (err, idResult) => {
+                  if (err) {
+                    return next(err);
                   }
-                  res.redirect("/");
-              });
-            });   
+                  // Get the ID of the newly inserted account
+                  const accountId = idResult[0].id;
+
+                  let query_insert_score = "INSERT INTO scores (account_id, score) VALUES (?,?)";
+                  const values_insert_score = [accountId, 0];
+
+                  con.query(query_insert_score, values_insert_score, (err) => {
+                    if (err) {
+                      return next(err);
+                    }
+                    res.redirect("/");
+                  });
+                });   
+              }); 
+            }); 
       });
   } catch (error) {
       next(error);
