@@ -208,20 +208,36 @@ app.get('/courses', (req, res) => {
 });
 
 app.get('/ranking', (req, res) => {
-  const ranking = `
-  SELECT a.id, a.firstname, a.lastname, s.score
-  FROM accounts a
-  JOIN scores s ON a.id = s.account_id
-`;
+  const rankingQuery = `
+    SELECT a.id, a.firstname, a.lastname, s.score
+    FROM accounts a
+    JOIN scores s ON a.id = s.account_id
+  `;
 
-  con.query(ranking, [], (err, rows) => {
+  con.query(rankingQuery, [], (err, rows) => {
     if (err) {
       return next(err);
     }
-    const sortedData = rows.sort((a, b) => b.score - a.score);
 
-    const rankingList = sortedData.map((user, index) => ({
-      rank: index + 1,
+    const sortedData = rows.sort((a, b) => {
+      if (b.score === a.score) {
+        return a.firstname.localeCompare(b.firstname); 
+      }
+      return b.score - a.score;
+    });
+
+    let currentRank = 1;
+    let currentScore = sortedData[0].score;
+    sortedData.forEach((user, index) => {
+      if (user.score < currentScore) {
+        currentRank = index + 1;
+        currentScore = user.score;
+      }
+      user.rank = currentRank;
+    });
+
+    const rankingList = sortedData.map(user => ({
+      rank: user.rank,
       id: user.id,
       firstname: user.firstname,
       lastname: user.lastname,

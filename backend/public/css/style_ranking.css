@@ -44,25 +44,57 @@
   li {
     background: rgba(255, 255, 255);
     margin-bottom: 10px;
-    padding: 15px;
+    padding-left: 15px;
+    padding-right: 30px;
+    padding-bottom: 5px;
+    padding-top: 5px;
     border-radius: 5px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: #333;
+    min-height: 50px;
   }
-    
+  
+  .icon {
+    width: 40px;
+    height: 40px;
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-size: contain;
+    vertical-align: middle;
+  }
+  
+  .gold-medal path {
+    stroke: gold;
+  }
+  
+  .silver-medal path {
+    stroke: silver;
+  }
+  
+  .bronze-medal path {
+    stroke: #cd7f32;
+  }
+  
   .rank {
     font-weight: bold;
     margin-right: 10px;
+    display: flex;
+    align-items: center;
   }
-  
+
+  .ranks {
+    margin-left: 25px;
+    margin-right: 10px;
+  }
+
   .name-score {
     display: flex;
     justify-content: space-between;
     width: 100%;
   }
-
+  
   .highlight {
-    background-color: #ffeda5;
+    box-shadow: inset 0 0 0 4px #69d7ff;
   }
