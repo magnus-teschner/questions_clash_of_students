@@ -187,8 +187,8 @@ async function sendVerificationEmail(firstname, lastname, email, token){
           Messages: [
               {
                   From: {
-                      Email: "magnus.2002.mt@gmail.com",
-                      Name: "Clash of Students Email Verification"
+                      Email: "clashofstudentes@gmail.com",
+                      Name: "Clash of Students"
                   },
                   To: [
                       {
