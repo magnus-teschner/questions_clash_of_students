@@ -129,7 +129,7 @@ app.post('/change-img', upload.single('image'), (req, res) => {
         return res.status(500).send('Database error');
       }
       
-      res.status(200).send("Row updated");
+      return res.status(200).send("Row updated");
     });
   });
 });
@@ -162,9 +162,9 @@ app.post('/change', (req, res) => {
   con.query(query, values, (err, result) => {
   if (err) {
     console.log(err);
-    res.status(500).send('SERVER_ERROR');
+    return res.status(500).send('SERVER_ERROR');
   }
-  res.status(200).send('Row updated');
+  return res.status(200).send('Row updated');
   
   });
   
@@ -193,9 +193,9 @@ app.post('/send', (req, res) => {
   con.query(query, values, (err, result) => {
   if (err) {
     console.log(err);
-    res.status(500).send({ msg:'SERVER_ERROR' });
+    return res.status(500).send({ msg:'SERVER_ERROR' });
   }
-  res.status(200).send({ id:result.insertId });
+  return res.status(200).send({ id:result.insertId });
   
   });
   
@@ -213,9 +213,9 @@ app.post('/add_course', (req, res) => {
   con.query(query, values, (err, result) => {
   if (err) {
     console.log(err);
-    res.status(500).send({ msg:'SERVER_ERROR' });
+    return res.status(500).send({ msg:'SERVER_ERROR' });
   }
-  res.status(200).send({ id:result.insertId });
+  return res.status(200).send({ id:result.insertId });
   
   });
   
@@ -231,9 +231,9 @@ app.get("/all_entrys", async (req, res) => {
   con.query(query_retrieve, values, (err, result) => {
     if (err) {
       console.log(err);
-      res.status(500).send({ msg:'SERVER_ERROR' });
+      return res.status(500).send({ msg:'SERVER_ERROR' });
     }
-    res.status(200).send(result);
+    return res.status(200).send(result);
     });
 
 })
@@ -243,9 +243,9 @@ app.get("/programs", async (req, res) => {
   con.query(query_retrieve, (err, result) => {
     if (err) {
       console.log(err);
-      res.status(500).send({ msg:'SERVER_ERROR' });
+      return res.status(500).send({ msg:'SERVER_ERROR' });
     }
-    res.status(200).send(result);
+    return res.status(200).send(result);
     });
 })
 
@@ -260,9 +260,9 @@ app.get('/get_question', (req, res) => {
   con.query(query_retrieve, values, (err, result) => {
     if (err) {
       console.log(err);
-      res.status(500).send({ msg:'SERVER_ERROR' });
+      return res.status(500).send({ msg:'SERVER_ERROR' });
     }
-    res.status(200).json(result);
+    return res.status(200).json(result);
     });
 });
 
@@ -276,9 +276,9 @@ app.get('/get_courses', (req, res) => {
   con.query(query_retrieve, values, (err, result) => {
     if (err) {
       console.log(err);
-      res.status(500).send({ msg:'SERVER_ERROR' });
+      return res.status(500).send({ msg:'SERVER_ERROR' });
     }
-    res.status(200).json(result);
+    return res.status(200).json(result);
     });
 });
 
@@ -294,12 +294,12 @@ app.get('/get_positions', (req, res) => {
   con.query(query_retrieve, values, (err, result) => {
     if (err) {
       console.log(err);
-      res.status(500).send({ msg:'SERVER_ERROR' });
+      return res.status(500).send({ msg:'SERVER_ERROR' });
     }
     const existingValues = result.map(row => row.position);
     const allValues = Array.from({ length: 10 }, (_, i) => i + 1);
     const missingValues = allValues.filter(value => !existingValues.includes(value));
-    res.status(200).send(missingValues);
+    return res.status(200).send(missingValues);
     });
 });
 

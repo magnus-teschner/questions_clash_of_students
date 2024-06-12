@@ -6,6 +6,9 @@ const port = 80;
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const mysql = require('mysql2');
+require('dotenv').config();
+const Mailjet = require('node-mailjet');
+const { v4: uuidv4 } = require('uuid');
 
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
@@ -25,6 +28,16 @@ app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
 question_creator_service = process.env.QUESTIONCREATOR;
+mailjet_public_key = process.env.PUBLICMAIL;
+mailjet_private_key = process.env.PRIVATEMAIL;
+backend = "localhost"
+
+
+
+const mailjet = Mailjet.apiConnect(
+    mailjet_public_key,
+    mailjet_private_key
+);
 
 
 const config_mysql = {
@@ -44,11 +57,16 @@ app.use((req, res, next) => {
 
 const con = mysql.createConnection(config_mysql);
 
+
+
+
+
+
 passport.use('stud',
   new LocalStrategy({usernameField: 'email', passwordField: 'password'}, async (email, password, done) => {
       try {
           const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
-          const values = [email];
+          const values = [email, 1];
           
           
           con.query(query_retrieve, values, async (err, result) => {
@@ -58,6 +76,11 @@ passport.use('stud',
   
               if (!result || result.length === 0) {
                   return done(null, false, { message: "Email not found" });
+              }
+
+              else if (result[0].isVerified == 0) {
+                return done(null, false, { message: "Email not verified" });
+
               }
   
               const db_first = result[0].firstname;
@@ -100,11 +123,17 @@ passport.use('prof',
               if (!result || result.length === 0) {
                   return done(null, false, { message: "Email not found" });
               }
+
+              else if (result[0].isVerified == 0) {
+                return done(null, false, { message: "Email not verified" });
+
+              }
   
               const db_first = result[0].firstname;
               const db_last = result[0].lastname;
               const db_email = result[0].email;
               const db_password = result[0].password;
+
   
               try {
                   const match = await bcrypt.compare(password, db_password);
@@ -149,6 +178,80 @@ try {
 });
 
 
+async function sendVerificationEmail(firstname, lastname, email, token){
+  const verificationLink = `http://${backend}/verify-email?token=${token}`;
+
+  const request = mailjet
+      .post('send', { version: 'v3.1' })
+      .request({
+          Messages: [
+              {
+                  From: {
+                      Email: "magnus.2002.mt@gmail.com",
+                      Name: "Clash of Students Email Verification"
+                  },
+                  To: [
+                      {
+                          Email: email,
+                          Name: `${firstname} ${lastname}`
+                      }
+                  ],
+                  Subject: "Please verify your email address",
+                  TextPart: `Hello ${firstname}, please verify your email by clicking the following link: ${verificationLink}`,
+                  HTMLPart: `<p>Hello, please verify your email by clicking the following link:</p><a href="${verificationLink}">Verify Email</a>`
+              }
+          ]
+      });
+
+  try {
+      const result = await request;
+  } catch (err) {
+      console.log(err.statusCode);
+  }
+};
+
+
+app.get('/verify-email', async (req, res) => {
+  const { token } = req.query;
+  
+  try {
+    let query = "SELECT * FROM accounts WHERE verificationToken = ?";
+    const values = [token];
+
+    con.query(query, values, async (err, result) => {
+        if (err) {
+            return res.status(500).send('Error querying the database.');
+        }
+
+        let user = result[0];
+        if (!user) {
+          return res.status(400).send('Invalid token.');
+        }
+
+        let updateQuery = "UPDATE accounts SET isVerified = 1 WHERE id = ?";
+        const updateValues = [user.id];
+
+        con.query(updateQuery, updateValues, (updateErr, updateResult) => {
+            if (updateErr) {
+                return res.status(500).send('Error updating the user.');
+            }
+
+            if (user.role == "professor") {
+              return res.render("login", { user: req.user, error: undefined, target: "student", verification: undefined });
+
+            } else if (user.role == "student") {
+
+            }
+            return res.render("login", { user: req.user, error: undefined, target: "professor", verification: undefined });
+        });
+    });
+  } catch (error) {
+      console.log(error);
+      return res.status(500).send('Error verifying email.');
+  }
+});
+
+
 app.get("/log-out", (req, res, next) => {
   req.logout((err) => {
     if (err) {
@@ -167,15 +270,14 @@ app.get('/questions', (req, res) => {
   .then(data => res.render("questions", { user: req.user, programs:data}))
   .catch(error => {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    return res.status(500).send('Internal Server Error');
   });
 });
 
 
 app.get('/manage-questions', (req, res) => {
   if (!req.user){
-    res.render("show-manage-questions", { user: req.user, data: undefined});
-    return;
+    return res.render("show-manage-questions", { user: req.user, data: undefined});
   }
   let user = req.user;
   fetch(`http://${question_creator_service}:80/all_entrys/`, {
@@ -188,33 +290,37 @@ app.get('/manage-questions', (req, res) => {
   .then(data => res.render("show-manage-questions", { user: req.user, data: data}))
   .catch(error => {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    return res.status(500).send('Internal Server Error');
   });
 });
 
 app.get('/courses', (req, res) => {
-  res.render("courses", { user: req.user});
+  return res.render("courses", { user: req.user});
 });
 
 
 app.get("/log-in-prof", (req, res) => {
   if (req.session.messages){
     const error = req.session.messages.length > 0 ? req.session.messages[req.session.messages.length - 1] : undefined;
-    res.render("login", { user: req.user, error: error, target: "professor" });
+    return res.render("login", { user: req.user, error: error, target: "professor", verification: undefined });
   } else {
-    res.render("login", { user: req.user, error: undefined, target: "professor" });
+    return res.render("login", { user: req.user, error: undefined, target: "professor", verification: undefined });
   }
   
 });
 
 app.get("/log-in-student", (req, res) => {
-  const error = req.session.messages.length > 0 ? req.session.messages[req.session.messages.length - 1] : undefined;
-  res.render("login", { user: req.user, error: error, target: "student" });
+  if (req.session.messages){
+    const error = req.session.messages.length > 0 ? req.session.messages[req.session.messages.length - 1] : undefined;
+    return res.render("login", { user: req.user, error: error, target: "student", verification: undefined });
+  } else {
+    return res.render("login", { user: req.user, error: undefined, target: "student", verification: undefined });
+  }
 });
 
 
 app.get('/', (req, res) => {
-  res.render("login", { user: req.user, error: undefined, target: undefined });
+  return res.render("login", { user: req.user, error: undefined, target: undefined, verification: undefined });
 });
 
 app.post(
@@ -235,30 +341,9 @@ app.post(
   })
 );
 
-/*
-app.post('/log-in-prof', (req, res, next) => {
-  let returnTo = req.session.returnTo
-  passport.authenticate('prof', (err, user, info) => {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      return res.redirect('/log-in-prof');
-    }
-    req.logIn(user, (err) => {
-      if (err) {
-        return next(err);
-      }
-      const redirectUrl = returnTo || '/questions';
-      delete req.session.returnTo;
-      return res.redirect(redirectUrl);
-    });
-  })(req, res, next);
-});
-*/
 
 app.get('/sign-up-student', (req, res) => {
-  res.render("sign-up-student", {error: undefined});
+  return res.render("sign-up-student", {error: undefined});
 });
 
 app.post("/sign-up-student", (req, res, next) => {
@@ -281,16 +366,19 @@ app.post("/sign-up-student", (req, res, next) => {
               return res.render("sign-up-student", { error: "Email already in use."} )
           }
 
+          const verificationToken = uuidv4();
+
           bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
               // If the email is not in use, proceed with the insertion
-              let query_insert = "INSERT INTO accounts (firstname, lastname, email, password, role) VALUES (?,?,?,?,?)";
-              const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword, "student"];
+              let query_insert = "INSERT INTO accounts (firstname, lastname, email, password, role, verificationToken) VALUES (?,?,?,?,?, ?)";
+              const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword, "student", verificationToken];
 
-              con.query(query_insert, values_insert, (err) => {
+              con.query(query_insert, values_insert, async (err) => {
                   if (err) {
                       return next(err);
                   }
-                  res.redirect("/");
+                  await sendVerificationEmail(req.body.fname, req.body.lname, req.body.email, verificationToken);
+                  return res.render("login", { user: req.user, error: undefined, target: "student", verification: 1 });
               });
             });   
       });
@@ -300,16 +388,19 @@ app.post("/sign-up-student", (req, res, next) => {
 });
 
 app.get('/sign-up-prof', (req, res) => {
-  res.render("sign-up-prof", {error: undefined});
+  return res.render("sign-up-prof", {error: undefined});
 });
 
 app.post("/sign-up-prof", (req, res, next) => {
   try {
+    
       const emailPattern = /^[a-zA-Z0-9._%+-]+@reutlingen-university\.de$/;
       if (emailPattern.test(req.body.email) === false){
         return res.render("sign-up-student", { error: "Not a reutlingen university professor email."} )
 
+    
       }
+      
       let query_check = "SELECT * FROM accounts WHERE email = ?";
       const values_check = [req.body.email];
 
@@ -322,16 +413,19 @@ app.post("/sign-up-prof", (req, res, next) => {
               return res.render("sign-up-prof", { error: "Email already in use."} )
           }
 
+          const verificationToken = uuidv4();
+
           bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
               // If the email is not in use, proceed with the insertion
-              let query_insert = "INSERT INTO accounts (firstname, lastname, email, password, role) VALUES (?,?,?,?,?)";
-              const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword, "professor"];
+              let query_insert = "INSERT INTO accounts (firstname, lastname, email, password, role, verificationToken) VALUES (?,?,?,?,?,?)";
+              const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword, "professor", verificationToken];
 
-              con.query(query_insert, values_insert, (err) => {
+              con.query(query_insert, values_insert, async (err) => {
                   if (err) {
                       return next(err);
                   }
-                  res.redirect("/");
+                  await sendVerificationEmail(req.body.fname, req.body.lname, req.body.email, verificationToken);
+                  return res.render("login", { user: req.user, error: undefined, target: "professor", verification: 1 });
               });
             });   
       });
@@ -364,7 +458,7 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
   .then(response => res.send(response))
   .catch(error => {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    return res.status(500).send('Internal Server Error');
   });
 });
 
@@ -388,7 +482,7 @@ app.post('/send', (req, res) => {
   .then(data => res.send(data))
   .catch(error => {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    return res.status(500).send('Internal Server Error');
   });
 });
 
@@ -411,7 +505,7 @@ app.post('/add_course', (req, res) => {
   .then(data => res.send(data))
   .catch(error => {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    return res.status(500).send('Internal Server Error');
   });
 });
 
@@ -436,7 +530,7 @@ app.post('/update', (req, res) => {
   .then(response => res.redirect('/manage-questions'))
   .catch(error => {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    return res.status(500).send('Internal Server Error');
   });
 });
 
@@ -465,7 +559,7 @@ app.post('/update_img', upload.single('image'), (req, res) => {
   .then(response => res.redirect('/manage-questions'))
   .catch(error => {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    return res.status(500).send('Internal Server Error');
   });
 });
 
@@ -489,7 +583,7 @@ app.get('/get_question', (req, res) => {
   .then(data => res.send(data))
   .catch(error => {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    return res.status(500).send('Internal Server Error');
   });
 });
 
@@ -511,7 +605,26 @@ app.get('/get_courses', (req, res) => {
   .then(data => res.send(data))
   .catch(error => {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    return res.status(500).send('Internal Server Error');
+  });
+});
+
+
+
+app.get('/programs', (req, res) => {
+
+  // Construct the URL with parameters
+  let url = `http://${question_creator_service}:80/programs`;
+
+  // Make the GET request
+  fetch(url, {
+    method: 'GET',
+  })
+  .then(response => response.json())
+  .then(data => res.send(data))
+  .catch(error => {
+    console.error('Error:', error);
+    return res.status(500).send('Internal Server Error');
   });
 });
 
@@ -536,7 +649,7 @@ app.get('/get_positions', (req, res) => {
   .then(data => res.send(data))
   .catch(error => {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    return res.status(500).send('Internal Server Error');
   });
 });
 

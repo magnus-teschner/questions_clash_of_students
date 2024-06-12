@@ -10,6 +10,12 @@
   <section class="wrapper">
     <div class="form students">
       <header>Clash of Students</header>
+      <% if (target === "student" && verification) {%>
+        <div id = "error-container">
+          <img id = "red-dot" src="../images/red_dot.png" alt="a red dot">
+          Please verify your email</div>
+        <%}%>
+      
       <% if (target === "student" && error) {%>
         <div id = "error-container">
           <img id = "red-dot" src="../images/red_dot.png" alt="a red dot">
@@ -26,6 +32,11 @@
 
     <div class="form profs">
       <header>Professors Hub</header>
+      <% if (target === "professor" && verification) {%>
+        <div id = "error-container">
+          <img id = "red-dot" src="../images/red_dot.png" alt="a red dot">
+          Please verify your email</div>
+        <%}%>
       <% if ((target === "professor" && error)) {%>
         <div id = "error-container">
           <img id = "red-dot" src="../images/red_dot.png" alt="a red dot">
