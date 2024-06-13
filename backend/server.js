@@ -30,7 +30,7 @@ app.use(express.urlencoded({ extended: false }));
 question_creator_service = process.env.QUESTIONCREATOR;
 mailjet_public_key = process.env.PUBLICMAIL;
 mailjet_private_key = process.env.PRIVATEMAIL;
-backend = "localhost"
+backend = "192.168.188.169"
 
 
 
@@ -237,12 +237,11 @@ app.get('/verify-email', async (req, res) => {
             }
 
             if (user.role == "professor") {
-              return res.render("login", { user: req.user, error: undefined, target: "student", verification: undefined });
-
+              return res.render("login", { user: req.user, error: undefined, target: "professor", verification: undefined });
             } else if (user.role == "student") {
-
+              return res.render("login", { user: req.user, error: undefined, target: "student", verification: undefined });
             }
-            return res.render("login", { user: req.user, error: undefined, target: "professor", verification: undefined });
+            
         });
     });
   } catch (error) {
