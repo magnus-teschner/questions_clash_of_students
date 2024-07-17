@@ -39,27 +39,7 @@ services:
 
 
 
-  questionmicroservice:
-    build: ./question_creator_microservice
-    ports:
-      - "81:80"
-    restart: always
-    environment:
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: admin
-      BLOB: minio1
-      DB: mysqldb
 
-  backend:
-    build: ./backend
-    ports:
-      - "80:80"
-    restart: always
-    environment:
-      QUESTIONCREATOR: questionmicroservice
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: admin
-      DB: mysqldb
 
 volumes:
   dbdata:

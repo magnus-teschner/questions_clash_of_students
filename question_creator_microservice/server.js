@@ -3,7 +3,7 @@ const multer = require("multer");
 const { v4: uuidv4 } = require('uuid');
 const mysql = require('mysql2');
 const app = express();
-const port = 80;
+const port = 2000;
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const Minio = require('minio');
@@ -11,6 +11,8 @@ app.use(express.json());
 
 mysqlHost = process.env.DB;
 minHost = process.env.BLOB;
+mysqlHost = "127.0.0.1";
+minHost = "127.0.0.1";
 
 const config_mysql = {
   user: "admin",
@@ -271,7 +273,7 @@ app.get('/get_courses', (req, res) => {
   let user = req.query.user
   let program = req.query.program
 
-  let query_retrieve = `select course_name from course where user = ? and program_name = ?;`
+  let query_retrieve = `select id, course_name from course where user = ? and program_name = ?;`
   const values = [user, program]
   con.query(query_retrieve, values, (err, result) => {
     if (err) {

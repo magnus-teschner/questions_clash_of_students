@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Questions</title>
+    <link rel="stylesheet" href="css/manage-courses.css">
+</head>
+<body>
+    <% if (user) { %>
+        <div id="main-container">
+            <div id="top-menu">
+                <div id="profile-logout">
+                    <button id="profile-btn">Profile</button>
+                    <a id="logout-a" href="/log-out">Logout</a>
+                </div>
+
+                <div id="profile-options" class="hidden">
+                    <a href="#">Manage account</a>
+                    <a href="/questions">Enter questions</a>
+                </div>
+            </div>
+            <div id="content-container">
+                <% programsWithCourses.forEach(program => { %>
+                    <div class="program-item">
+                        <h1><%= program.program_name %></h1>
+                        <% program.courses.forEach(course => { %>
+                            <div class="course-item">
+                                <div class="course-name"><%= course.course_name %></div>
+                                <div class="course-actions">
+                                    <button class="edit-btn" onclick="editCourse('<%= course.id %>')">Edit</button>
+                                    <button class="delete-btn" onclick="deleteCourse('<%= course.id %>')">Delete</button>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    <% } else { %>
+        <div id="login-hint">
+            Please <a href="/log-in-prof">log in</a> to view this page!
+        </div>
+    <% } %>
+    <script src="../js/manage-courses.js"></script>
+</body>
+</html>

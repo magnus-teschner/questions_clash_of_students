@@ -40,5 +40,11 @@ CREATE TABLE IF NOT EXISTS course (
     FOREIGN KEY (program_name) REFERENCES programs(program_name)
 );
 
+CREATE TABLE IF NOT EXISTS course_members (
+    user_email VARCHAR(255),
+    course_id INT,
+    FOREIGN KEY (course_id) REFERENCES course(id)
+);
+
 INSERT INTO `programs`(`program_name`) VALUES ('Digital Business');
 INSERT INTO `programs`(`program_name`) VALUES ('Digital Business Engineering');

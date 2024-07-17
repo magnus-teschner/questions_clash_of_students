@@ -36,7 +36,9 @@ lastname.addEventListener('keyup', (e) => {
 });
 
 email.addEventListener('keyup', (e) => {
+    
     let message = errorDisplayers[2];
+    /*
     let email_str = email.value;
     email_str = email_str.toLowerCase();
 
@@ -45,6 +47,9 @@ email.addEventListener('keyup', (e) => {
     emailPattern.test(email_str) ? 
         onValidation(message, '', true, 'email') : 
         onValidation(message, '*Please provide a valid HHZ Professor Email', false, 'email');
+    */
+   console.log(validationFlags)
+    onValidation(message, '', true, 'email')
 });
 
 

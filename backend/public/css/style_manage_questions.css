@@ -34,7 +34,7 @@ body.modal-open {
 }
 
 #top-menu {
-    height: 95px;
+    min-height: 95px;
     background-color: #333;
     width: 100vw;
     max-width: 100%;

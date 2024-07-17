@@ -2,7 +2,8 @@ const express = require('express');
 const path = require('path');
 const multer = require("multer");
 const app = express();
-const port = 80;
+const port = 1999;
+const port_question_service = 2000;
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const mysql = require('mysql2');
@@ -28,9 +29,12 @@ app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
 question_creator_service = process.env.QUESTIONCREATOR;
+question_creator_service = "127.0.0.1";
 mailjet_public_key = process.env.PUBLICMAIL;
 mailjet_private_key = process.env.PRIVATEMAIL;
-backend = "192.168.188.169"
+mailjet_public_key = "6a2924e64b4c454bbcdf6580e44e9ca2";
+mailjet_private_key ="9b2b92a8e47833cfaeb1488d47dc1790";
+backend = "127.0.0.1"
 
 
 
@@ -43,13 +47,12 @@ const mailjet = Mailjet.apiConnect(
 const config_mysql = {
   user: "admin",
   password: "admin",
-  host: process.env.DB,
+  host: "127.0.0.1",
   database: "clashOfStudents"
 };
 
-// Middleware to store the original URL
 app.use((req, res, next) => {
-  if (!req.isAuthenticated() && req.method === 'GET' && req.path !== '/log-in-prof') {
+  if (!req.isAuthenticated() && req.method === 'GET' && req.path !== '/log-in-prof' && req.path !== '/log-in-student') {
     req.session.returnTo = req.originalUrl;
   }
   next();
@@ -262,7 +265,7 @@ app.get("/log-out", (req, res, next) => {
 
 app.get('/questions', (req, res) => {
   
-  fetch(`http://${question_creator_service}:80/programs/`, {
+  fetch(`http://${question_creator_service}:${port_question_service}/programs/`, {
     method: 'GET',
   })
   .then(response => response.json())
@@ -279,7 +282,7 @@ app.get('/manage-questions', (req, res) => {
     return res.render("show-manage-questions", { user: req.user, data: undefined});
   }
   let user = req.user;
-  fetch(`http://${question_creator_service}:80/all_entrys/`, {
+  fetch(`http://${question_creator_service}:${port_question_service}/all_entrys/`, {
     method: 'GET',
     headers: {
       'user': user.email
@@ -296,6 +299,67 @@ app.get('/manage-questions', (req, res) => {
 app.get('/courses', (req, res) => {
   return res.render("courses", { user: req.user});
 });
+
+
+app.get('/manage-courses', async (req, res) => {
+  try {
+    const programsUrl = `http://${question_creator_service}:${port_question_service}/programs`;
+
+    const programsResponse = await fetch(programsUrl, { method: 'GET' });
+    const programs = await programsResponse.json();
+    console.log(programs);
+
+    const coursesPromises = programs.map(program => {
+      const queryParams = new URLSearchParams({
+        user: req.user.email,
+        program: program.program_name
+      });
+      const coursesUrl = `http://${question_creator_service}:${port_question_service}/get_courses/?${queryParams}`;
+      return fetch(coursesUrl, { method: 'GET' }).then(response => response.json());
+    });
+
+    const allCourses = await Promise.all(coursesPromises);
+
+    const programsWithCourses = programs.map((program, index) => ({
+      program_name: program.program_name,
+      courses: allCourses[index]
+    }));
+
+    console.log(programsWithCourses[0].courses);
+
+    res.render("manage-courses", { user: req.user, programsWithCourses });
+  } catch (error) {
+    console.error('Error:', error);
+    res.render("manage-courses", { user: req.user, programsWithCourses: [] });
+  }
+});
+
+app.delete('/delete-course', (req, res) => {
+  if (!req.session.passport.user) {
+    return res.status(401).send('No User signed in!');
+  }
+
+  const userId = req.user.email;
+  const courseId = req.query.id;
+
+  const query_delete = 'DELETE FROM course WHERE id = ? AND user = ?';
+  const values = [courseId, userId];
+  console.log(values);
+
+  con.query(query_delete, values, (err, result) => {
+    if (err) {
+      console.error('Error deleting course:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Course not found or not authorized to delete this course');
+    }
+
+    return res.status(200).send('Course deleted successfully');
+  });
+});
+
 
 
 app.get("/log-in-prof", (req, res) => {
@@ -322,6 +386,8 @@ app.get('/', (req, res) => {
   return res.render("login", { user: req.user, error: undefined, target: undefined, verification: undefined });
 });
 
+
+/*
 app.post(
   "/log-in-student",
   passport.authenticate("stud", {
@@ -339,6 +405,48 @@ app.post(
     failureMessage: true
   })
 );
+
+*/
+app.post("/log-in-student", (req, res, next) => {
+  const return_to_req = req.session.returnTo;
+  passport.authenticate("stud", (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.redirect("/log-in-student");
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      const redirectTo = return_to_req || '/courses';
+      delete req.session.returnTo;
+      return res.redirect(redirectTo);
+    });
+  })(req, res, next);
+});
+
+app.post("/log-in-prof", (req, res, next) => {
+  const return_to_req = req.session.returnTo;
+  passport.authenticate("prof", (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.redirect("/log-in-prof");
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      const redirectTo = return_to_req || '/questions';
+      delete req.session.returnTo;
+      return res.redirect(redirectTo);
+    });
+  })(req, res, next); 
+});
+
 
 
 app.get('/sign-up-student', (req, res) => {
@@ -393,12 +501,14 @@ app.get('/sign-up-prof', (req, res) => {
 app.post("/sign-up-prof", (req, res, next) => {
   try {
     
+    /*
       const emailPattern = /^[a-zA-Z0-9._%+-]+@reutlingen-university\.de$/;
       if (emailPattern.test(req.body.email) === false){
         return res.render("sign-up-student", { error: "Not a reutlingen university professor email."} )
 
     
       }
+        */
       
       let query_check = "SELECT * FROM accounts WHERE email = ?";
       const values_check = [req.body.email];
@@ -450,7 +560,7 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
   formData.append('json', userData)
   formData.append('mimetype', req.file.mimetype)
 
-  fetch(`http://${question_creator_service}:80/upload_min/`, {
+  fetch(`http://${question_creator_service}:${port_question_service}/upload_min/`, {
     method: 'POST',
     body: formData
   })
@@ -470,7 +580,7 @@ app.post('/send', (req, res) => {
     user: req.session.passport.user,
     ...req.body
   };
-  fetch(`http://${question_creator_service}:80/send/`, {
+  fetch(`http://${question_creator_service}:${port_question_service}/send/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -493,7 +603,7 @@ app.post('/add_course', (req, res) => {
     user: req.session.passport.user,
     ...req.body
   };
-  fetch(`http://${question_creator_service}:80/add_course/`, {
+  fetch(`http://${question_creator_service}:${port_question_service}/add_course/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -519,7 +629,7 @@ app.post('/update', (req, res) => {
     user: req.session.passport.user,
     ...req.body
   };
-  fetch(`http://${question_creator_service}:80/change/`, {
+  fetch(`http://${question_creator_service}:${port_question_service}/change/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -551,7 +661,7 @@ app.post('/update_img', upload.single('image'), (req, res) => {
   formData.append('json', userData)
   formData.append('mimetype', req.file.mimetype)
 
-  fetch(`http://${question_creator_service}:80/change-img/`, {
+  fetch(`http://${question_creator_service}:${port_question_service}/change-img/`, {
     method: 'POST',
     body: formData
   })
@@ -572,7 +682,7 @@ app.get('/get_question', (req, res) => {
     position: req.query.position
   });
   // Construct the URL with parameters
-  let url = `http://${question_creator_service}:80/get_question/?${queryParams}`;
+  let url = `http://${question_creator_service}:${port_question_service}/get_question/?${queryParams}`;
 
   // Make the GET request
   fetch(url, {
@@ -594,7 +704,7 @@ app.get('/get_courses', (req, res) => {
   });
 
   // Construct the URL with parameters
-  let url = `http://${question_creator_service}:80/get_courses/?${queryParams}`;
+  let url = `http://${question_creator_service}:${port_question_service}/get_courses/?${queryParams}`;
 
   // Make the GET request
   fetch(url, {
@@ -613,7 +723,7 @@ app.get('/get_courses', (req, res) => {
 app.get('/programs', (req, res) => {
 
   // Construct the URL with parameters
-  let url = `http://${question_creator_service}:80/programs`;
+  let url = `http://${question_creator_service}:${port_question_service}/programs`;
 
   // Make the GET request
   fetch(url, {
@@ -638,7 +748,7 @@ app.get('/get_positions', (req, res) => {
   });
 
   // Construct the URL with parameters
-  let url = `http://${question_creator_service}:80/get_positions/?${queryParams}`;
+  let url = `http://${question_creator_service}:${port_question_service}/get_positions/?${queryParams}`;
 
   // Make the GET request
   fetch(url, {
