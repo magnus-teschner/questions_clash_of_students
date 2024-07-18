@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/style_course.css">
+  <link rel="stylesheet" href="css/enter_course.css">
   <title>Courses</title>
 </head>
 <body>
@@ -46,14 +46,28 @@
       </div>
 
       <div id="content-container">
-        <% courses.forEach(course => { %>
-          <div class="course-item">
-            <p><strong>Course Name:</strong> <%= course.course_name %></p>
-            <p><strong>Program:</strong> <%= course.program_name %></p>
-            <p><strong>Instructor:</strong> <%= course.user %></p>
-            <button class="enroll-btn" onclick="enrollCourse('<%= course.id %>')">Enroll</button>
-          </div>
-        <% }) %>
+        <h2>Enrolled Courses</h2>
+        <div class="course-list">
+          <% enrolledCourses.forEach(course => { %>
+            <div class="course-item">
+              <p><strong>Program:</strong> <%= course.program_name %></p>
+              <p><strong>Course Name:</strong> <%= course.course_name %></p>
+              <p><strong>Instructor:</strong> <%= course.user %></p>
+            </div>
+          <% }) %>
+        </div>
+
+        <h2>Available Courses</h2>
+        <div class="course-list">
+          <% nonEnrolledCourses.forEach(course => { %>
+            <div class="course-item">
+              <p><strong>Course Name:</strong> <%= course.course_name %></p>
+              <p><strong>Program:</strong> <%= course.program_name %></p>
+              <p><strong>Instructor:</strong> <%= course.user %></p>
+              <button class="enroll-btn" onclick="enrollCourse('<%= course.id %>')">Enroll</button>
+            </div>
+          <% }) %>
+        </div>
       </div>
     </div>
   <% } else { %>

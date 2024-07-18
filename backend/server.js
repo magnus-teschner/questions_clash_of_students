@@ -52,7 +52,7 @@ const config_mysql = {
 };
 
 app.use((req, res, next) => {
-  if (!req.isAuthenticated() && req.method === 'GET' && req.path !== '/log-in-prof' && req.path !== '/log-in-student') {
+  if (!req.isAuthenticated() && req.method === 'GET' && req.path !== '/log-in-prof' && req.path !== '/log-in-student' && req.path !== '/') {
     req.session.returnTo = req.originalUrl;
   }
   next();
@@ -411,18 +411,43 @@ app.get('/courses', (req, res) => {
 
 
 app.get('/enter-courses', (req, res) => {
-  const query_courses = 'SELECT * FROM course';
-
-    con.query(query_courses, (err, courses) => {
-        if (err) {
-            console.error('Error fetching courses:', err);
-            return res.status(500).send('Internal Server Error');
-        }
-
-        return res.render("enter-courses", { user: req.user, courses: courses});
+  if (!req.user) {
+    return res.render("enter-courses", { 
+      user: req.user, 
+      nonEnrolledCourses: [], 
+      enrolledCourses: [] 
     });
+  }
 
+  const query_courses = 'SELECT * FROM course';
+  const query_enrolled_courses = 'SELECT c.* FROM course c JOIN course_members cm ON c.id = cm.course_id WHERE cm.user_email = ?';
+
+  con.query(query_courses, (err, courses) => {
+    if (err) {
+      console.error('Error fetching courses:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    con.query(query_enrolled_courses, [req.user.email], (err, enrolledCourses) => {
+      if (err) {
+        console.error('Error fetching enrolled courses:', err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      // Filter courses to get the non-enrolled courses
+      const nonEnrolledCourses = courses.filter(course => 
+        !enrolledCourses.some(enrolled => enrolled.id === course.id)
+      );
+
+      return res.render("enter-courses", { 
+        user: req.user, 
+        nonEnrolledCourses: nonEnrolledCourses, 
+        enrolledCourses: enrolledCourses 
+      });
+    });
+  });
 });
+
 
 // Endpoint to handle course enrollment
 app.post('/enroll-course', (req, res) => {
@@ -555,6 +580,7 @@ app.post(
 */
 app.post("/log-in-student", (req, res, next) => {
   let return_to_req = req.session.returnTo;
+  console.log(return_to_req);
   passport.authenticate("stud", (err, user, info) => {
     if (err) {
       return next(err);
@@ -568,10 +594,8 @@ app.post("/log-in-student", (req, res, next) => {
       if (err) {
         return next(err);
       }
-      return_to_req === "/" ? return_to_req = "/courses" : null
       const redirectTo = return_to_req || '/courses';
       delete req.session.returnTo;
-      console.log(redirectTo);
       return res.redirect(redirectTo);
     });
   })(req, res, next);
@@ -579,6 +603,7 @@ app.post("/log-in-student", (req, res, next) => {
 
 app.post("/log-in-prof", (req, res, next) => {
   const return_to_req = req.session.returnTo;
+  console.log(return_to_req);
   passport.authenticate("prof", (err, user, info) => {
     if (err) {
       return next(err);

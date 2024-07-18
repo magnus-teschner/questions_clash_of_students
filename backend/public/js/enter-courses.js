@@ -59,3 +59,4 @@ document.addEventListener("DOMContentLoaded", function() {
     // Attach the enrollCourse function to the global scope to be accessible from the HTML
     window.enrollCourse = enrollCourse;
 });
+
