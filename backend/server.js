@@ -254,6 +254,34 @@ app.get('/verify-email', async (req, res) => {
 });
 
 
+
+app.delete('/delete-member', (req, res) => {
+  const { course_id, user_email } = req.body;
+  const query = `DELETE FROM course_members WHERE course_id = ? AND user_email = ?`;
+
+  con.query(query, [course_id, user_email], (error, results) => {
+      if (error) {
+          return res.status(500).json({ error: 'Database query error' });
+      }
+      res.status(200).json({ message: 'Member deleted successfully' });
+  });
+});
+
+app.get('/course-members', (req, res) => {
+  const courseId = req.query.id;
+  const email = req.user.email;
+  const query = `SELECT * FROM course_members WHERE course_id = ?`;
+
+  con.query(query, [courseId, email], (error, results) => {
+      if (error) {
+          return res.status(500).json({ error: 'Database query error' });
+      }
+      res.json(results);
+  });
+});
+
+
+
 app.get("/log-out", (req, res, next) => {
   req.logout((err) => {
     if (err) {
