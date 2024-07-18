@@ -109,7 +109,8 @@ function editCourseName(courseId) {
     const editCourseNameInput = document.getElementById(`edit-course-name-${courseId}`);
     const saveBtn = document.getElementById(`save-btn-${courseId}`);
     const cancelBtn = document.getElementById(`cancel-btn-${courseId}`);
-    const editBtn = document.querySelector(`#course-item-${courseId} .edit-btn`);
+    const editBtn = document.querySelector(`#course-${courseId} .edit-btn`);
+    console.log(`#course-${courseId} .edit-btn`);
 
     courseNameSpan.classList.add('hidden');
     editCourseNameInput.classList.remove('hidden');
@@ -146,7 +147,7 @@ function cancelEdit(courseId) {
     const editCourseNameInput = document.getElementById(`edit-course-name-${courseId}`);
     const saveBtn = document.getElementById(`save-btn-${courseId}`);
     const cancelBtn = document.getElementById(`cancel-btn-${courseId}`);
-    const editBtn = document.querySelector(`#course-item-${courseId} .edit-btn`);
+    const editBtn = document.querySelector(`#course-${courseId} .edit-btn`);
 
     courseNameSpan.classList.remove('hidden');
     editCourseNameInput.classList.add('hidden');
@@ -154,3 +155,40 @@ function cancelEdit(courseId) {
     cancelBtn.classList.add('hidden');
     editBtn.classList.remove('hidden');
 }
+
+// Drag and Drop Functions
+function allowDrop(event) {
+    event.preventDefault();
+}
+
+function drag(event) {
+    event.dataTransfer.setData("text", event.target.id);
+}
+
+function drop(event, programName) {
+    event.preventDefault();
+    var data = event.dataTransfer.getData("text");
+    var courseElement = document.getElementById(data);
+    var courseId = courseElement.getAttribute('data-course-id');
+
+    fetch(`/move-course`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ course_id: courseId, new_program: programName })
+    })
+    .then(response => {
+        if (response.ok) {
+            // Refresh the page after successful move
+            window.location.reload();
+        } else {
+            response.text().then(text => alert('Failed to move course: ' + text));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to move course');
+    });
+}
+

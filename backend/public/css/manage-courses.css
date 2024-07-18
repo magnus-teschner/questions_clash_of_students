@@ -60,7 +60,6 @@ body {
     font-family: "Poppins", sans-serif;
     color: white;
     text-decoration: none;
-
 }
 
 #profile-options a:hover {
@@ -69,19 +68,19 @@ body {
 
 #profile-btn,
 #logout-a {
-  font-family: "Poppins", sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-  background-color: transparent;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  text-decoration: none;
+    font-family: "Poppins", sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
 }
 
 #profile-btn:hover,
 #logout-a:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 #login-hint {
@@ -118,88 +117,13 @@ h1 {
     width: 80%;
     align-self: center;
     margin-top: 50px;
-} 
-
-/* Additional Styles for Edit and Delete Buttons */
-.course-item {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    border-bottom: 1px solid #ddd;
+    flex-direction: column;
 }
 
-.course-name {
-    font-size: 1.2em;
-    font-weight: bold;
-}
-
-.course-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.edit-btn, .delete-btn {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.3s ease;
-}
-
-.edit-btn {
-    background-color: #28a745;
-}
-
-.delete-btn {
-    background-color: #dc3545;
-}
-
-.edit-btn:hover {
-    background-color: #218838;
-}
-
-.delete-btn:hover {
-    background-color: #c82333;
-}
-
-/* Styles for Save and Cancel Buttons */
-.save-btn, .cancel-btn {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.3s ease;
-    margin-left: 10px;
-}
-
-.save-btn {
-    background-color: #28a745;
-}
-
-.cancel-btn {
-    background-color: #dc3545;
-}
-
-.save-btn:hover {
-    background-color: #218838;
-}
-
-.cancel-btn:hover {
-    background-color: #c82333;
-}
-
-.program-item {
-    margin-bottom: 40px;
-}
-
-h1 {
+.drag-and-drop-info {
     text-align: center;
-    color: black;
+    font-size: 1.1em;
     margin-bottom: 20px;
 }
 
@@ -209,45 +133,115 @@ h1 {
     align-items: center;
     padding: 15px;
     border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    flex-wrap: wrap;
+}
+
+.draggable {
+    cursor: grab;
+}
+
+.course-item:active {
+    cursor: grabbing;
 }
 
 .course-name {
     font-size: 1.2em;
     font-weight: bold;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .course-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
 }
 
-.edit-btn, .delete-btn {
-    padding: 10px 15px;
+input[type="text"] {
+    font-family: "Poppins", sans-serif;
+    font-size: 0.9em;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    margin-left: 10px;
+}
+
+input[type="text"]:focus {
+    border-color: #007bff;
+}
+
+button {
+    font-family: "Poppins", sans-serif;
+    font-size: 0.9em;
+    font-weight: 500;
+    padding: 8px 12px;
     border: none;
     border-radius: 5px;
-    color: white;
     cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .edit-btn {
-    background-color: #28a745;
+    background-color: #007bff;
+    color: white;
+    padding: 6px 10px;
+    margin-left: 10px;
 }
 
 .delete-btn {
     background-color: #dc3545;
+    color: white;
+}
+
+.save-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.cancel-btn {
+    background-color: #ffc107;
+    color: black;
 }
 
 .edit-btn:hover {
-    background-color: #218838;
+    background-color: #0056b3;
 }
 
 .delete-btn:hover {
     background-color: #c82333;
 }
 
-/* Add this to your CSS file (e.g., manage-courses.css) */
+.save-btn:hover {
+    background-color: #218838;
+}
+
+.cancel-btn:hover {
+    background-color: #e0a800;
+}
+
+.program-item {
+    margin-bottom: 40px;
+}
+
+.program-dropzone {
+    padding: 20px;
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    min-height: 100px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: black;
+    margin-bottom: 20px;
+}
 
 .modal {
     display: none;

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Questions</title>
+    <title>Manage Courses</title>
     <link rel="stylesheet" href="css/manage-courses.css">
 </head>
 <body>
@@ -21,11 +21,12 @@
                 </div>
             </div>
             <div id="content-container">
+                <p class="drag-and-drop-info">Drag and drop courses to change program</p>
                 <% programsWithCourses.forEach(program => { %>
-                    <div class="program-item">
+                    <div id="<%= program.program_name.replace(/\s+/g, '-').toLowerCase() %>" class="program-dropzone" ondrop="drop(event, '<%= program.program_name %>')" ondragover="allowDrop(event)">
                         <h1><%= program.program_name %></h1>
                         <% program.courses.forEach(course => { %>
-                            <div class="course-item" id="course-item-<%= course.id %>">
+                            <div class="course-item draggable" id="course-<%= course.id %>" draggable="true" ondragstart="drag(event)" data-course-id="<%= course.id %>">
                                 <div class="course-name">
                                     <span id="course-name-<%= course.id %>"><%= course.course_name %></span>
                                     <input type="text" id="edit-course-name-<%= course.id %>" class="hidden" value="<%= course.course_name %>">

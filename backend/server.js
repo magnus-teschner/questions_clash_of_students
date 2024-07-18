@@ -305,6 +305,32 @@ app.put('/rename-course', (req, res) => {
   });
 });
 
+app.put('/move-course', (req, res) => {
+  const { course_id, new_program } = req.body;
+
+  if (!req.session.passport.user) {
+      return res.status(401).send('No User signed in!');
+  }
+
+  const userId = req.user.email;
+  const query_update = 'UPDATE course SET program_name = ? WHERE id = ? AND user = ?';
+  const values = [new_program, course_id, userId];
+
+  con.query(query_update, values, (err, result) => {
+      if (err) {
+          console.error('Error moving course:', err);
+          return res.status(500).send('Internal Server Error');
+      }
+
+      if (result.affectedRows === 0) {
+          return res.status(404).send('Course not found or not authorized to move this course');
+      }
+
+      return res.status(200).send('Course moved successfully');
+  });
+});
+
+
 
 
 app.get("/log-out", (req, res, next) => {
