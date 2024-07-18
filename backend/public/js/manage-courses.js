@@ -32,14 +32,6 @@ document.addEventListener("DOMContentLoaded", function() {
             modal.style.display = "none";
         }
     });
-
-    const renameCourseForm = document.getElementById("rename-course-form");
-    renameCourseForm.addEventListener("submit", function(event) {
-        event.preventDefault();
-        const newCourseName = document.getElementById("new-course-name").value;
-        const courseId = document.getElementById("course-id").value;
-        renameCourse(courseId, newCourseName);
-    });
 });
 
 function deleteCourse(courseId) {
@@ -61,14 +53,12 @@ function deleteCourse(courseId) {
     }
 }
 
-function editCourse(courseId, courseName) {
+function editCourse(courseId) {
     fetch(`/course-members?id=${courseId}`)
     .then(response => response.json())
     .then(data => {
         const modal = document.getElementById('members-modal');
         const membersList = document.getElementById('members-list');
-        const courseIdInput = document.getElementById("course-id");
-        const newCourseNameInput = document.getElementById("new-course-name");
 
         membersList.innerHTML = '';
         data.forEach(member => {
@@ -82,10 +72,6 @@ function editCourse(courseId, courseName) {
             listItem.appendChild(deleteButton);
             membersList.appendChild(listItem);
         });
-
-        // Set the hidden input value to the course ID
-        courseIdInput.value = courseId;
-        newCourseNameInput.value = courseName;
 
         modal.style.display = 'block';
     })
@@ -118,7 +104,23 @@ function deleteMember(courseId, userEmail) {
     }
 }
 
-function renameCourse(courseId, newCourseName) {
+function editCourseName(courseId) {
+    const courseNameSpan = document.getElementById(`course-name-${courseId}`);
+    const editCourseNameInput = document.getElementById(`edit-course-name-${courseId}`);
+    const saveBtn = document.getElementById(`save-btn-${courseId}`);
+    const cancelBtn = document.getElementById(`cancel-btn-${courseId}`);
+    const editBtn = document.querySelector(`#course-item-${courseId} .edit-btn`);
+
+    courseNameSpan.classList.add('hidden');
+    editCourseNameInput.classList.remove('hidden');
+    saveBtn.classList.remove('hidden');
+    cancelBtn.classList.remove('hidden');
+    editBtn.classList.add('hidden');
+}
+
+function saveCourseName(courseId) {
+    const newCourseName = document.getElementById(`edit-course-name-${courseId}`).value;
+    
     fetch(`/rename-course`, {
         method: 'PUT',
         headers: {
@@ -137,4 +139,18 @@ function renameCourse(courseId, newCourseName) {
         console.error('Error:', error);
         alert('Failed to rename course');
     });
+}
+
+function cancelEdit(courseId) {
+    const courseNameSpan = document.getElementById(`course-name-${courseId}`);
+    const editCourseNameInput = document.getElementById(`edit-course-name-${courseId}`);
+    const saveBtn = document.getElementById(`save-btn-${courseId}`);
+    const cancelBtn = document.getElementById(`cancel-btn-${courseId}`);
+    const editBtn = document.querySelector(`#course-item-${courseId} .edit-btn`);
+
+    courseNameSpan.classList.remove('hidden');
+    editCourseNameInput.classList.add('hidden');
+    saveBtn.classList.add('hidden');
+    cancelBtn.classList.add('hidden');
+    editBtn.classList.remove('hidden');
 }

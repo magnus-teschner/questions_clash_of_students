@@ -16,7 +16,6 @@ body {
     flex-direction: column;
 }
 
-
 #main-container {
     display: flex;
     flex-direction: column;
@@ -166,6 +165,33 @@ h1 {
     background-color: #c82333;
 }
 
+/* Styles for Save and Cancel Buttons */
+.save-btn, .cancel-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+    margin-left: 10px;
+}
+
+.save-btn {
+    background-color: #28a745;
+}
+
+.cancel-btn {
+    background-color: #dc3545;
+}
+
+.save-btn:hover {
+    background-color: #218838;
+}
+
+.cancel-btn:hover {
+    background-color: #c82333;
+}
 
 .program-item {
     margin-bottom: 40px;
