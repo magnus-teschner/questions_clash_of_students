@@ -28,7 +28,7 @@
                             <div class="course-item">
                                 <div class="course-name"><%= course.course_name %></div>
                                 <div class="course-actions">
-                                    <button class="edit-btn" onclick="editCourse('<%= course.id %>')">Edit</button>
+                                    <button class="edit-btn" onclick="editCourse('<%= course.id %>', '<%= course.course_name %>')">Edit</button>
                                     <button class="delete-btn" onclick="deleteCourse('<%= course.id %>')">Delete</button>
                                 </div>
                             </div>
@@ -43,12 +43,18 @@
         </div>
     <% } %>
 
-    <!-- Modal for displaying course members -->
+    <!-- Modal for displaying course members and renaming the course -->
     <div id="members-modal" class="modal">
         <div class="modal-content">
             <span id="modal-close-btn" class="close">&times;</span>
             <h2>Course Members</h2>
             <ul id="members-list"></ul>
+            <form id="rename-course-form">
+                <input type="hidden" id="course-id" name="course-id">
+                <label for="new-course-name">Rename Course:</label>
+                <input type="text" id="new-course-name" name="new-course-name">
+                <button type="submit">Rename</button>
+            </form>
         </div>
     </div>
 

@@ -2,10 +2,8 @@ document.addEventListener("DOMContentLoaded", function() {
     const profileBtn = document.getElementById("profile-btn");
     const profileOptions = document.getElementById("profile-options");
     profileOptions.classList.add("hidden");
-  
+
     profileBtn.addEventListener("click", function() {
-        
-        console.log(profileOptions.classList.contains("hidden"))
         if (profileOptions.classList.contains("hidden")) {
             profileOptions.classList.remove("hidden");
             profileOptions.style.display = "flex";
@@ -14,60 +12,64 @@ document.addEventListener("DOMContentLoaded", function() {
             profileOptions.style.display = "none";
         }
     });
-  
-    // Hide the profile options when clicking outside
+
     document.addEventListener("click", function(event) {
         if (!profileBtn.contains(event.target) && !profileOptions.contains(event.target)) {
             profileOptions.classList.add("hidden");
             profileOptions.style.display = "none";
         }
     });
-  });
 
-  // Add event listener for the close button of the modal
-  const modalCloseBtn = document.getElementById("modal-close-btn");
-  const modal = document.getElementById("members-modal");
-  
-  modalCloseBtn.addEventListener("click", function() {
-      modal.style.display = "none";
-  });
+    const modalCloseBtn = document.getElementById("modal-close-btn");
+    const modal = document.getElementById("members-modal");
 
-  // Close modal when clicking outside of the modal content
-  window.addEventListener("click", function(event) {
-      if (event.target == modal) {
-          modal.style.display = "none";
-      }
-  });
+    modalCloseBtn.addEventListener("click", function() {
+        modal.style.display = "none";
+    });
 
-
-
-  function deleteCourse(courseId) {
-    if (confirm('Are you sure you want to delete this course?')) {
-        console.log(courseId);
-      fetch(`/delete-course?id=${courseId}`, {
-        method: 'DELETE'
-      })
-      .then(response => {
-        if (response.ok) {
-          window.location.reload();
-        } else {
-          response.text().then(text => alert('Failed to delete course: ' + text));
+    window.addEventListener("click", function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
         }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to delete course');
-      });
+    });
+
+    const renameCourseForm = document.getElementById("rename-course-form");
+    renameCourseForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        const newCourseName = document.getElementById("new-course-name").value;
+        const courseId = document.getElementById("course-id").value;
+        renameCourse(courseId, newCourseName);
+    });
+});
+
+function deleteCourse(courseId) {
+    if (confirm('Are you sure you want to delete this course?')) {
+        fetch(`/delete-course?id=${courseId}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                response.text().then(text => alert('Failed to delete course: ' + text));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to delete course');
+        });
     }
-  }
+}
 
-
-  function editCourse(courseId) {
+function editCourse(courseId, courseName) {
     fetch(`/course-members?id=${courseId}`)
     .then(response => response.json())
     .then(data => {
         const modal = document.getElementById('members-modal');
         const membersList = document.getElementById('members-list');
+        const courseIdInput = document.getElementById("course-id");
+        const newCourseNameInput = document.getElementById("new-course-name");
+
         membersList.innerHTML = '';
         data.forEach(member => {
             const listItem = document.createElement('li');
@@ -80,6 +82,11 @@ document.addEventListener("DOMContentLoaded", function() {
             listItem.appendChild(deleteButton);
             membersList.appendChild(listItem);
         });
+
+        // Set the hidden input value to the course ID
+        courseIdInput.value = courseId;
+        newCourseNameInput.value = courseName;
+
         modal.style.display = 'block';
     })
     .catch(error => {
@@ -99,7 +106,6 @@ function deleteMember(courseId, userEmail) {
         })
         .then(response => {
             if (response.ok) {
-                // Refresh the members list after deletion
                 editCourse(courseId);
             } else {
                 response.text().then(text => alert('Failed to delete member: ' + text));
@@ -112,8 +118,23 @@ function deleteMember(courseId, userEmail) {
     }
 }
 
-
-
-
-
-  
+function renameCourse(courseId, newCourseName) {
+    fetch(`/rename-course`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ course_id: courseId, new_course_name: newCourseName })
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            response.text().then(text => alert('Failed to rename course: ' + text));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to rename course');
+    });
+}
