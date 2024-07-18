@@ -110,7 +110,6 @@ function editCourseName(courseId) {
     const saveBtn = document.getElementById(`save-btn-${courseId}`);
     const cancelBtn = document.getElementById(`cancel-btn-${courseId}`);
     const editBtn = document.querySelector(`#course-${courseId} .edit-btn`);
-    console.log(`#course-${courseId} .edit-btn`);
 
     courseNameSpan.classList.add('hidden');
     editCourseNameInput.classList.remove('hidden');
@@ -121,7 +120,7 @@ function editCourseName(courseId) {
 
 function saveCourseName(courseId) {
     const newCourseName = document.getElementById(`edit-course-name-${courseId}`).value;
-    
+
     fetch(`/rename-course`, {
         method: 'PUT',
         headers: {
@@ -180,7 +179,6 @@ function drop(event, programName) {
     })
     .then(response => {
         if (response.ok) {
-            // Refresh the page after successful move
             window.location.reload();
         } else {
             response.text().then(text => alert('Failed to move course: ' + text));
@@ -191,4 +189,3 @@ function drop(event, programName) {
         alert('Failed to move course');
     });
 }
-

@@ -183,3 +183,11 @@ body, html {
   display: flex;
   flex-direction: column;
 }
+
+
+.course-item {
+  background-color: white;
+  color: black;
+  border-radius: 10px;
+  padding: 10px
+}
