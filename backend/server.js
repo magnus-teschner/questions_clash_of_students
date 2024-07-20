@@ -937,6 +937,31 @@ app.get('/get_positions', (req, res) => {
   });
 });
 
+app.get('/api/questions/:user/:program/:course/:lection/:position', (req, res) => {
+  const { user, program, course, lection, position } = req.params;
+
+  const query = `
+    SELECT * FROM questions
+    WHERE user = ? AND program = ? AND course = ? AND lection = ? AND position = ?
+  `;
+
+  console.log(user, program, course, lection, position);
+
+  con.query(query, [user, program, course, lection, position], (err, result) => {
+    if (err) {
+      console.error('Error fetching question:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'Question not found' });
+    }
+
+    res.json(result[0]);
+  });
+});
+
+
 app.listen(port, () => {
   console.log(`Server running at port ${port}`);
 });
