@@ -33,14 +33,14 @@ question_creator_service = "127.0.0.1";
 mailjet_public_key = process.env.PUBLICMAIL;
 mailjet_private_key = process.env.PRIVATEMAIL;
 mailjet_public_key = "6a2924e64b4c454bbcdf6580e44e9ca2";
-mailjet_private_key ="9b2b92a8e47833cfaeb1488d47dc1790";
+mailjet_private_key = "9b2b92a8e47833cfaeb1488d47dc1790";
 backend = "127.0.0.1"
 
 
 
 const mailjet = Mailjet.apiConnect(
-    mailjet_public_key,
-    mailjet_private_key
+  mailjet_public_key,
+  mailjet_private_key
 );
 
 
@@ -66,95 +66,109 @@ const con = mysql.createConnection(config_mysql);
 
 
 passport.use('stud',
-  new LocalStrategy({usernameField: 'email', passwordField: 'password'}, async (email, password, done) => {
-      try {
-          const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
-          const values = [email, 1];
-          
-          
-          con.query(query_retrieve, values, async (err, result) => {
-              if (err) {
-                  return done(err);
-              }
-  
-              if (!result || result.length === 0) {
-                  return done(null, false, { message: "Email not found" });
-              }
+  new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, async (email, password, done) => {
+    try {
+      const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
+      const values = [email, 1];
 
-              else if (result[0].isVerified == 0) {
-                return done(null, false, { message: "Email not verified" });
 
-              }
-  
-              const db_first = result[0].firstname;
-              const db_last = result[0].lastname;
-              const db_email = result[0].email;
-              const db_password = result[0].password;
-  
-              try {
-                  const match = await bcrypt.compare(password, db_password);
-                  if (!match) {
-                      // passwords do not match!
-                      return done(null, false, { message: "Incorrect password" })
-                  } else {            
-                      let user = { firstname: db_first, lastname: db_last, email: db_email };
-                      return done(null, user);
-                  }
-              } catch (bcryptError) {
-                  return done(bcryptError);
-              }
-          });
-          
-      } catch(err) {
+      con.query(query_retrieve, values, async (err, result) => {
+        if (err) {
           return done(err);
-      }
+        }
+
+        if (!result || result.length === 0) {
+          return done(null, false, { message: "Email not found" });
+        }
+
+        else if (result[0].isVerified == 0) {
+          return done(null, false, { message: "Email not verified" });
+
+        }
+
+        const db_first = result[0].firstname;
+        const db_last = result[0].lastname;
+        const db_email = result[0].email;
+        const db_password = result[0].password;
+
+        try {
+          const match = await bcrypt.compare(password, db_password);
+          if (!match) {
+            // passwords do not match!
+            return done(null, false, { message: "Incorrect password" })
+          } else {
+            let query_score = "SELECT score FROM scores WHERE account_id =?";
+            const id_account = [result[0].id];
+
+            con.query(query_score, id_account, (err, accountScore) => {
+              if (err) {
+                return done(err);
+              }
+              const db_score = accountScore[0].score;
+              let user = {
+                firstname: db_first,
+                lastname: db_last,
+                email: db_email,
+                score: db_score,
+              };
+              return done(null, user);
+            });
+          }
+        } catch (bcryptError) {
+          return done(bcryptError);
+        }
+      });
+
+    } catch (err) {
+      return done(err);
+    }
   })
 );
 
 passport.use('prof',
-  new LocalStrategy({usernameField: 'email', passwordField: 'password'}, async (email, password, done) => {
-      try {
-          const query_retrieve = 'SELECT * FROM accounts WHERE email = ? AND role = ?';
-          const values = [email, "professor"];
-          
-          
-          con.query(query_retrieve, values, async (err, result) => {
-              if (err) {
-                  return done(err);
-              }
-  
-              if (!result || result.length === 0) {
-                  return done(null, false, { message: "Email not found" });
-              }
+  new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, async (email, password, done) => {
+    try {
+      const query_retrieve = 'SELECT * FROM accounts WHERE email = ? AND role = ?';
+      const values = [email, "professor"];
 
-              else if (result[0].isVerified == 0) {
-                return done(null, false, { message: "Email not verified" });
 
-              }
-  
-              const db_first = result[0].firstname;
-              const db_last = result[0].lastname;
-              const db_email = result[0].email;
-              const db_password = result[0].password;
-
-  
-              try {
-                  const match = await bcrypt.compare(password, db_password);
-                  if (!match) {
-                      // passwords do not match!
-                      return done(null, false, { message: "Incorrect password" })
-                  } else {            
-                      let user = { firstname: db_first, lastname: db_last, email: db_email };
-                      return done(null, user);
-                  }
-              } catch (bcryptError) {
-                  return done(bcryptError);
-              }
-          });
-          
-      } catch(err) {
+      con.query(query_retrieve, values, async (err, result) => {
+        if (err) {
           return done(err);
-      }
+        }
+
+        if (!result || result.length === 0) {
+          return done(null, false, { message: "Email not found" });
+        }
+
+        else if (result[0].isVerified == 0) {
+          return done(null, false, { message: "Email not verified" });
+
+        }
+
+        const db_first = result[0].firstname;
+        const db_last = result[0].lastname;
+        const db_email = result[0].email;
+        const db_password = result[0].password;
+
+
+        try {
+          const match = await bcrypt.compare(password, db_password);
+          if (!match) {
+            // passwords do not match!
+            return done(null, false, { message: "Incorrect password" })
+          } else {
+            let user = { firstname: db_first, lastname: db_last, email: db_email };
+            return done(null, user);
+          }
+        } catch (bcryptError) {
+          return done(bcryptError);
+        }
+      });
+
+    } catch (err) {
+      return done(err);
+    }
   })
 );
 
@@ -163,93 +177,107 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (email, done) => {
-try {
-  const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
-  const values = [email];
-  con.query(query_retrieve, values, (err, result) => {
+  try {
+    const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
+    const values = [email];
+    con.query(query_retrieve, values, (err, result) => {
+      const db_id = result[0].id;
       const db_first = result[0].firstname;
       const db_last = result[0].lastname;
       const db_email = result[0].email;
+      const db_role = result[0].role;
 
-      
-      let user = { firstname: db_first, lastname: db_last, email: db_email }
-      return done(null, user);
-  });
-} catch(err) {
-  done(err);
-};
+      if (db_role === 'student') {
+        const query_score = "SELECT score FROM scores WHERE account_id = ?";
+        const account_id = [db_id];
+        con.query(query_score, account_id, (err, accountScore) => {
+          if (err) {
+            return done(err);
+          }
+
+          const db_score = accountScore.length > 0 ? accountScore[0].score : 0;
+          let user = { id: db_id, firstname: db_first, lastname: db_last, email: db_email, score: db_score };
+          return done(null, user);
+        });
+      } else {
+        let user = { id: db_id, firstname: db_first, lastname: db_last, email: db_email, score: null };
+        return done(null, user);
+      }
+    });
+  } catch (err) {
+    done(err);
+  }
 });
 
-
-async function sendVerificationEmail(firstname, lastname, email, token){
+async function sendVerificationEmail(firstname, lastname, email, token) {
   const verificationLink = `http://${backend}/verify-email?token=${token}`;
 
   const request = mailjet
-      .post('send', { version: 'v3.1' })
-      .request({
-          Messages: [
-              {
-                  From: {
-                      Email: "clashofstudentes@gmail.com",
-                      Name: "Clash of Students"
-                  },
-                  To: [
-                      {
-                          Email: email,
-                          Name: `${firstname} ${lastname}`
-                      }
-                  ],
-                  Subject: "Please verify your email address",
-                  TextPart: `Hello ${firstname}, please verify your email by clicking the following link: ${verificationLink}`,
-                  HTMLPart: `<p>Hello, please verify your email by clicking the following link:</p><a href="${verificationLink}">Verify Email</a>`
-              }
-          ]
-      });
+    .post('send', { version: 'v3.1' })
+    .request({
+      Messages: [
+        {
+          From: {
+            Email: "clashofstudentes@gmail.com",
+            Name: "Clash of Students"
+          },
+          To: [
+            {
+              Email: email,
+              Name: `${firstname} ${lastname}`
+            }
+          ],
+          Subject: "Please verify your email address",
+          TextPart: `Hello ${firstname}, please verify your email by clicking the following link: ${verificationLink}`,
+          HTMLPart: `<p>Hello, please verify your email by clicking the following link:</p><a href="${verificationLink}">Verify Email</a>`
+        }
+      ]
+    });
 
   try {
-      const result = await request;
+    const result = await request;
   } catch (err) {
-      console.log(err.statusCode);
+    console.log(err.statusCode);
   }
 };
 
 
 app.get('/verify-email', async (req, res) => {
   const { token } = req.query;
-  
+
   try {
     let query = "SELECT * FROM accounts WHERE verificationToken = ?";
     const values = [token];
 
     con.query(query, values, async (err, result) => {
-        if (err) {
-            return res.status(500).send('Error querying the database.');
+      if (err) {
+        return res.status(500).send('Error querying the database.');
+      }
+
+      let user = result[0];
+      if (!user) {
+        return res.status(400).send('Invalid token.');
+      }
+
+      let updateQuery = "UPDATE accounts SET isVerified = 1 WHERE id = ?";
+      const updateValues = [user.id];
+
+      con.query(updateQuery, updateValues, (updateErr, updateResult) => {
+        if (updateErr) {
+          return res.status(500).send('Error updating the user.');
         }
 
-        let user = result[0];
-        if (!user) {
-          return res.status(400).send('Invalid token.');
+        if (user.role == "professor") {
+          return res.render("login", { user: req.user, error: undefined, target: "professor", verification: undefined });
+        } else if (user.role == "student") {
+          return res.render("login", { user: req.user, error: undefined, target: "student", verification: undefined });
         }
 
-        let updateQuery = "UPDATE accounts SET isVerified = 1 WHERE id = ?";
-        const updateValues = [user.id];
-
-        con.query(updateQuery, updateValues, (updateErr, updateResult) => {
-            if (updateErr) {
-                return res.status(500).send('Error updating the user.');
-            }
-
-            if (user.role == "professor") {
-              return res.render("login", { user: req.user, error: undefined, target: "professor", verification: undefined });
-            } else if (user.role == "student") {
-              return res.render("login", { user: req.user, error: undefined, target: "student", verification: undefined });
-            }
-            
-        });
+      });
     });
   } catch (error) {
-      console.log(error);
-      return res.status(500).send('Error verifying email.');
+    console.log(error);
+    return res.status(500).send('Error verifying email.');
   }
 });
 
@@ -260,10 +288,10 @@ app.delete('/delete-member', (req, res) => {
   const query = `DELETE FROM course_members WHERE course_id = ? AND user_email = ?`;
 
   con.query(query, [course_id, user_email], (error, results) => {
-      if (error) {
-          return res.status(500).json({ error: 'Database query error' });
-      }
-      res.status(200).json({ message: 'Member deleted successfully' });
+    if (error) {
+      return res.status(500).json({ error: 'Database query error' });
+    }
+    res.status(200).json({ message: 'Member deleted successfully' });
   });
 });
 
@@ -273,10 +301,10 @@ app.get('/course-members', (req, res) => {
   const query = `SELECT * FROM course_members WHERE course_id = ?`;
 
   con.query(query, [courseId, email], (error, results) => {
-      if (error) {
-          return res.status(500).json({ error: 'Database query error' });
-      }
-      res.json(results);
+    if (error) {
+      return res.status(500).json({ error: 'Database query error' });
+    }
+    res.json(results);
   });
 });
 
@@ -286,7 +314,7 @@ app.put('/rename-course', (req, res) => {
   //console.log(course_id, new_course_name);
 
   if (!req.session.passport.user) {
-      return res.status(401).send('No User signed in!');
+    return res.status(401).send('No User signed in!');
   }
 
   const userId = req.user.email;
@@ -296,27 +324,27 @@ app.put('/rename-course', (req, res) => {
   const values_course = [new_course_name, course_id, userId];
 
   con.query(query_update_course, values_course, (err, result) => {
+    if (err) {
+      console.error('Error renaming course:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Course not found or not authorized to rename this course');
+    }
+
+    // Update the course name in the questions table
+    const query_update_questions = 'UPDATE questions SET course = ? WHERE course = (SELECT course_name FROM course WHERE id = ?) and program = (Select program_name from course where id = ?)';
+    const values_questions = [new_course_name, course_id, course_id];
+
+    con.query(query_update_questions, values_questions, (err, result) => {
       if (err) {
-          console.error('Error renaming course:', err);
-          return res.status(500).send('Internal Server Error');
+        console.error('Error updating course name in questions:', err);
+        return res.status(500).send('Internal Server Error');
       }
 
-      if (result.affectedRows === 0) {
-          return res.status(404).send('Course not found or not authorized to rename this course');
-      }
-
-      // Update the course name in the questions table
-      const query_update_questions = 'UPDATE questions SET course = ? WHERE course = (SELECT course_name FROM course WHERE id = ?) and program = (Select program_name from course where id = ?)';
-      const values_questions = [new_course_name, course_id, course_id];
-
-      con.query(query_update_questions, values_questions, (err, result) => {
-          if (err) {
-              console.error('Error updating course name in questions:', err);
-              return res.status(500).send('Internal Server Error');
-          }
-
-          return res.status(200).send('Course renamed and questions updated successfully');
-      });
+      return res.status(200).send('Course renamed and questions updated successfully');
+    });
   });
 });
 
@@ -325,7 +353,7 @@ app.put('/move-course', (req, res) => {
   const { course_id, new_program } = req.body;
 
   if (!req.session.passport.user) {
-      return res.status(401).send('No User signed in!');
+    return res.status(401).send('No User signed in!');
   }
 
   const userId = req.user.email;
@@ -335,28 +363,28 @@ app.put('/move-course', (req, res) => {
   const values_course = [new_program, course_id, userId];
 
   con.query(query_update_course, values_course, (err, result) => {
+    if (err) {
+      console.error('Error moving course:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Course not found or not authorized to move this course');
+    }
+
+    // Update the program in the questions table
+    const query_update_questions = 'UPDATE questions SET program = ? WHERE course = (SELECT course_name FROM course WHERE id = ?)';
+    const values_questions = [new_program, course_id];
+    console.log(values_questions);
+
+    con.query(query_update_questions, values_questions, (err, result) => {
       if (err) {
-          console.error('Error moving course:', err);
-          return res.status(500).send('Internal Server Error');
+        console.error('Error updating program in questions:', err);
+        return res.status(500).send('Internal Server Error');
       }
 
-      if (result.affectedRows === 0) {
-          return res.status(404).send('Course not found or not authorized to move this course');
-      }
-
-      // Update the program in the questions table
-      const query_update_questions = 'UPDATE questions SET program = ? WHERE course = (SELECT course_name FROM course WHERE id = ?)';
-      const values_questions = [new_program, course_id];
-      console.log(values_questions);
-
-      con.query(query_update_questions, values_questions, (err, result) => {
-          if (err) {
-              console.error('Error updating program in questions:', err);
-              return res.status(500).send('Internal Server Error');
-          }
-
-          return res.status(200).send('Course moved and questions updated successfully');
-      });
+      return res.status(200).send('Course moved and questions updated successfully');
+    });
   });
 });
 
@@ -373,22 +401,22 @@ app.get("/log-out", (req, res, next) => {
 });
 
 app.get('/questions', (req, res) => {
-  
+
   fetch(`http://${question_creator_service}:${port_question_service}/programs/`, {
     method: 'GET',
   })
-  .then(response => response.json())
-  .then(data => res.render("questions", { user: req.user, programs:data}))
-  .catch(error => {
-    console.error('Error:', error);
-    return res.status(500).send('Internal Server Error');
-  });
+    .then(response => response.json())
+    .then(data => res.render("questions", { user: req.user, programs: data }))
+    .catch(error => {
+      console.error('Error:', error);
+      return res.status(500).send('Internal Server Error');
+    });
 });
 
 
 app.get('/manage-questions', (req, res) => {
-  if (!req.user){
-    return res.render("show-manage-questions", { user: req.user, data: undefined});
+  if (!req.user) {
+    return res.render("show-manage-questions", { user: req.user, data: undefined });
   }
   let user = req.user;
   fetch(`http://${question_creator_service}:${port_question_service}/all_entrys/`, {
@@ -397,25 +425,66 @@ app.get('/manage-questions', (req, res) => {
       'user': user.email
     }
   })
-  .then(response => response.json())
-  .then(data => res.render("show-manage-questions", { user: req.user, data: data}))
-  .catch(error => {
-    console.error('Error:', error);
-    return res.status(500).send('Internal Server Error');
-  });
+    .then(response => response.json())
+    .then(data => res.render("show-manage-questions", { user: req.user, data: data }))
+    .catch(error => {
+      console.error('Error:', error);
+      return res.status(500).send('Internal Server Error');
+    });
 });
 
 app.get('/courses', (req, res) => {
-  return res.render("courses", { user: req.user});
+  return res.render("courses", { user: req.user });
+});
+
+app.get('/ranking', (req, res) => {
+  const rankingQuery = `
+    SELECT a.id, a.firstname, a.lastname, s.score
+    FROM accounts a
+    JOIN scores s ON a.id = s.account_id
+  `;
+
+  con.query(rankingQuery, [], (err, rows) => {
+    if (err) {
+      return next(err);
+    }
+
+    const sortedData = rows.sort((a, b) => {
+      if (b.score === a.score) {
+        return a.firstname.localeCompare(b.firstname);
+      }
+      return b.score - a.score;
+    });
+
+    let currentRank = 1;
+    let currentScore = sortedData[0].score;
+    sortedData.forEach((user, index) => {
+      if (user.score < currentScore) {
+        currentRank = index + 1;
+        currentScore = user.score;
+      }
+      user.rank = currentRank;
+    });
+
+    const rankingList = sortedData.map(user => ({
+      rank: user.rank,
+      id: user.id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      score: user.score
+    }));
+
+    res.render('ranking', { user: req.user, rankingList: rankingList });
+  });
 });
 
 
 app.get('/enter-courses', (req, res) => {
   if (!req.user) {
-    return res.render("enter-courses", { 
-      user: req.user, 
-      nonEnrolledCourses: [], 
-      enrolledCourses: [] 
+    return res.render("enter-courses", {
+      user: req.user,
+      nonEnrolledCourses: [],
+      enrolledCourses: []
     });
   }
 
@@ -435,14 +504,14 @@ app.get('/enter-courses', (req, res) => {
       }
 
       // Filter courses to get the non-enrolled courses
-      const nonEnrolledCourses = courses.filter(course => 
+      const nonEnrolledCourses = courses.filter(course =>
         !enrolledCourses.some(enrolled => enrolled.id === course.id)
       );
 
-      return res.render("enter-courses", { 
-        user: req.user, 
-        nonEnrolledCourses: nonEnrolledCourses, 
-        enrolledCourses: enrolledCourses 
+      return res.render("enter-courses", {
+        user: req.user,
+        nonEnrolledCourses: nonEnrolledCourses,
+        enrolledCourses: enrolledCourses
       });
     });
   });
@@ -452,7 +521,7 @@ app.get('/enter-courses', (req, res) => {
 // Endpoint to handle course enrollment
 app.post('/enroll-course', (req, res) => {
   if (!req.user) {
-      return res.status(401).send('No User signed in!');
+    return res.status(401).send('No User signed in!');
   }
 
   const courseId = req.body.course_id;
@@ -461,12 +530,12 @@ app.post('/enroll-course', (req, res) => {
   const query_enroll = 'INSERT INTO course_members (user_email, course_id) VALUES (?, ?)';
 
   con.query(query_enroll, [userEmail, courseId], (err, result) => {
-      if (err) {
-          console.error('Error enrolling in course:', err);
-          return res.status(500).send('Internal Server Error');
-      }
+    if (err) {
+      console.error('Error enrolling in course:', err);
+      return res.status(500).send('Internal Server Error');
+    }
 
-      res.status(200).send('Enrolled successfully');
+    res.status(200).send('Enrolled successfully');
   });
 });
 
@@ -534,17 +603,17 @@ app.delete('/delete-course', (req, res) => {
 
 
 app.get("/log-in-prof", (req, res) => {
-  if (req.session.messages){
+  if (req.session.messages) {
     const error = req.session.messages.length > 0 ? req.session.messages[req.session.messages.length - 1] : undefined;
     return res.render("login", { user: req.user, error: error, target: "professor", verification: undefined });
   } else {
     return res.render("login", { user: req.user, error: undefined, target: "professor", verification: undefined });
   }
-  
+
 });
 
 app.get("/log-in-student", (req, res) => {
-  if (req.session.messages){
+  if (req.session.messages) {
     const error = req.session.messages.length > 0 ? req.session.messages[req.session.messages.length - 1] : undefined;
     return res.render("login", { user: req.user, error: error, target: "student", verification: undefined });
   } else {
@@ -619,63 +688,84 @@ app.post("/log-in-prof", (req, res, next) => {
       delete req.session.returnTo;
       return res.redirect(redirectTo);
     });
-  })(req, res, next); 
+  })(req, res, next);
 });
 
 
 
 app.get('/sign-up-student', (req, res) => {
-  return res.render("sign-up-student", {error: undefined});
+  return res.render("sign-up-student", { error: undefined });
 });
 
-app.post("/sign-up-student", (req, res, next) => {
+app.post("/sign-up-student", async (req, res, next) => {
   try {
-      const emailPattern = /^[a-zA-Z0-9._%+-]+@student.reutlingen-university\.de$/;
-      if (emailPattern.test(req.body.email) === false){
-        return res.render("sign-up-student", { error: "Not a reutlingen university student email."} )
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@student.reutlingen-university\.de$/;
+    if (emailPattern.test(req.body.email) === false) {
+      return res.render("sign-up-student", { error: "Not a reutlingen university student email." })
 
+    }
+
+    let query_check = "SELECT * FROM accounts WHERE email = ?";
+    const values_check = [req.body.email];
+
+    con.query(query_check, values_check, (err, result) => {
+      if (err) {
+        return next(err);
       }
 
-      let query_check = "SELECT * FROM accounts WHERE email = ?";
-      const values_check = [req.body.email];
+      if (result.length > 0) {
+        return res.render("sign-up-student", { error: "Email already in use." })
+      }
 
-      con.query(query_check, values_check, (err, result) => {
+      const verificationToken = uuidv4();
+
+      bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
+        // If the email is not in use, proceed with the insertion
+        let query_insert = "INSERT INTO accounts (firstname, lastname, email, password, role, verificationToken) VALUES (?,?,?,?,?, ?)";
+        const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword, "student", verificationToken];
+
+        con.query(query_insert, values_insert, async (err) => {
           if (err) {
+            return next(err);
+          }
+
+          con.query("SELECT LAST_INSERT_ID() as id", (err, idResult) => {
+            if (err) {
               return next(err);
-          }
+            }
+            // Get the ID of the newly inserted account
+            const accountId = idResult[0].id;
 
-          if (result.length > 0) {
-              return res.render("sign-up-student", { error: "Email already in use."} )
-          }
+            let query_insert_score = "INSERT INTO scores (account_id, score) VALUES (?,?)";
+            const values_insert_score = [accountId, 0];
 
-          const verificationToken = uuidv4();
-
-          bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
-              // If the email is not in use, proceed with the insertion
-              let query_insert = "INSERT INTO accounts (firstname, lastname, email, password, role, verificationToken) VALUES (?,?,?,?,?, ?)";
-              const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword, "student", verificationToken];
-
-              con.query(query_insert, values_insert, async (err) => {
-                  if (err) {
-                      return next(err);
-                  }
-                  await sendVerificationEmail(req.body.fname, req.body.lname, req.body.email, verificationToken);
-                  return res.render("login", { user: req.user, error: undefined, target: "student", verification: 1 });
-              });
-            });   
+            con.query(query_insert_score, values_insert_score, async (err) => {
+              if (err) {
+                return next(err);
+              }
+              try {
+                await sendVerificationEmail(req.body.fname, req.body.lname, req.body.email, verificationToken);
+                return res.render("login", { user: req.user, error: undefined, target: "student", verification: 1 });
+              } catch (emailError) {
+                return next(emailError);
+              }
+            });
+          });
+        });
       });
+    });
   } catch (error) {
-      next(error);
+    next(error);
   }
 });
 
 app.get('/sign-up-prof', (req, res) => {
-  return res.render("sign-up-prof", {error: undefined});
+  return res.render("sign-up-prof", { error: undefined });
 });
 
 app.post("/sign-up-prof", (req, res, next) => {
   try {
-    
+
     /*
       const emailPattern = /^[a-zA-Z0-9._%+-]+@reutlingen-university\.de$/;
       if (emailPattern.test(req.body.email) === false){
@@ -684,43 +774,43 @@ app.post("/sign-up-prof", (req, res, next) => {
     
       }
         */
-      
-      let query_check = "SELECT * FROM accounts WHERE email = ?";
-      const values_check = [req.body.email];
 
-      con.query(query_check, values_check, (err, result) => {
+    let query_check = "SELECT * FROM accounts WHERE email = ?";
+    const values_check = [req.body.email];
+
+    con.query(query_check, values_check, (err, result) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (result.length > 0) {
+        return res.render("sign-up-prof", { error: "Email already in use." })
+      }
+
+      const verificationToken = uuidv4();
+
+      bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+        // If the email is not in use, proceed with the insertion
+        let query_insert = "INSERT INTO accounts (firstname, lastname, email, password, role, verificationToken) VALUES (?,?,?,?,?,?)";
+        const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword, "professor", verificationToken];
+
+        con.query(query_insert, values_insert, async (err) => {
           if (err) {
-              return next(err);
+            return next(err);
           }
-
-          if (result.length > 0) {
-              return res.render("sign-up-prof", { error: "Email already in use."} )
-          }
-
-          const verificationToken = uuidv4();
-
-          bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
-              // If the email is not in use, proceed with the insertion
-              let query_insert = "INSERT INTO accounts (firstname, lastname, email, password, role, verificationToken) VALUES (?,?,?,?,?,?)";
-              const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword, "professor", verificationToken];
-
-              con.query(query_insert, values_insert, async (err) => {
-                  if (err) {
-                      return next(err);
-                  }
-                  await sendVerificationEmail(req.body.fname, req.body.lname, req.body.email, verificationToken);
-                  return res.render("login", { user: req.user, error: undefined, target: "professor", verification: 1 });
-              });
-            });   
+          await sendVerificationEmail(req.body.fname, req.body.lname, req.body.email, verificationToken);
+          return res.render("login", { user: req.user, error: undefined, target: "professor", verification: 1 });
+        });
       });
+    });
   } catch (error) {
-      next(error);
+    next(error);
   }
 });
 
 
 app.post('/upload_min', upload.single('image'), (req, res) => {
-  if (!req.session.passport.user){
+  if (!req.session.passport.user) {
     return res.status(500).send('No User signed in!')
   }
 
@@ -739,16 +829,16 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
     method: 'POST',
     body: formData
   })
-  .then(response => res.send(response))
-  .catch(error => {
-    console.error('Error:', error);
-    return res.status(500).send('Internal Server Error');
-  });
+    .then(response => res.send(response))
+    .catch(error => {
+      console.error('Error:', error);
+      return res.status(500).send('Internal Server Error');
+    });
 });
 
 
 app.post('/send', (req, res) => {
-  if (!req.session.passport.user){
+  if (!req.session.passport.user) {
     return res.status(500).send('No User signed in!')
   }
   const userData = {
@@ -762,16 +852,16 @@ app.post('/send', (req, res) => {
     },
     body: JSON.stringify(userData)
   })
-  .then(response => response.json())
-  .then(data => res.send(data))
-  .catch(error => {
-    console.error('Error:', error);
-    return res.status(500).send('Internal Server Error');
-  });
+    .then(response => response.json())
+    .then(data => res.send(data))
+    .catch(error => {
+      console.error('Error:', error);
+      return res.status(500).send('Internal Server Error');
+    });
 });
 
 app.post('/add_course', (req, res) => {
-  if (!req.session.passport.user){
+  if (!req.session.passport.user) {
     return res.status(500).send('No User signed in!')
   }
   const userData = {
@@ -785,18 +875,18 @@ app.post('/add_course', (req, res) => {
     },
     body: JSON.stringify(userData)
   })
-  .then(response => response.json())
-  .then(data => res.send(data))
-  .catch(error => {
-    console.error('Error:', error);
-    return res.status(500).send('Internal Server Error');
-  });
+    .then(response => response.json())
+    .then(data => res.send(data))
+    .catch(error => {
+      console.error('Error:', error);
+      return res.status(500).send('Internal Server Error');
+    });
 });
 
 
 
 app.post('/update', (req, res) => {
-  if (!req.session.passport.user){
+  if (!req.session.passport.user) {
     return res.status(500).send('No User signed in!')
   }
 
@@ -811,17 +901,17 @@ app.post('/update', (req, res) => {
     },
     body: JSON.stringify(userData)
   })
-  .then(response => res.redirect('/manage-questions'))
-  .catch(error => {
-    console.error('Error:', error);
-    return res.status(500).send('Internal Server Error');
-  });
+    .then(response => res.redirect('/manage-questions'))
+    .catch(error => {
+      console.error('Error:', error);
+      return res.status(500).send('Internal Server Error');
+    });
 });
 
 
 
 app.post('/update_img', upload.single('image'), (req, res) => {
-  if (!req.session.passport.user){
+  if (!req.session.passport.user) {
     return res.status(500).send('No User signed in!')
   }
 
@@ -840,11 +930,11 @@ app.post('/update_img', upload.single('image'), (req, res) => {
     method: 'POST',
     body: formData
   })
-  .then(response => res.redirect('/manage-questions'))
-  .catch(error => {
-    console.error('Error:', error);
-    return res.status(500).send('Internal Server Error');
-  });
+    .then(response => res.redirect('/manage-questions'))
+    .catch(error => {
+      console.error('Error:', error);
+      return res.status(500).send('Internal Server Error');
+    });
 });
 
 
@@ -863,12 +953,12 @@ app.get('/get_question', (req, res) => {
   fetch(url, {
     method: 'GET',
   })
-  .then(response => response.json())
-  .then(data => res.send(data))
-  .catch(error => {
-    console.error('Error:', error);
-    return res.status(500).send('Internal Server Error');
-  });
+    .then(response => response.json())
+    .then(data => res.send(data))
+    .catch(error => {
+      console.error('Error:', error);
+      return res.status(500).send('Internal Server Error');
+    });
 });
 
 
@@ -885,12 +975,12 @@ app.get('/get_courses', (req, res) => {
   fetch(url, {
     method: 'GET',
   })
-  .then(response => response.json())
-  .then(data => res.send(data))
-  .catch(error => {
-    console.error('Error:', error);
-    return res.status(500).send('Internal Server Error');
-  });
+    .then(response => response.json())
+    .then(data => res.send(data))
+    .catch(error => {
+      console.error('Error:', error);
+      return res.status(500).send('Internal Server Error');
+    });
 });
 
 
@@ -904,12 +994,12 @@ app.get('/programs', (req, res) => {
   fetch(url, {
     method: 'GET',
   })
-  .then(response => response.json())
-  .then(data => res.send(data))
-  .catch(error => {
-    console.error('Error:', error);
-    return res.status(500).send('Internal Server Error');
-  });
+    .then(response => response.json())
+    .then(data => res.send(data))
+    .catch(error => {
+      console.error('Error:', error);
+      return res.status(500).send('Internal Server Error');
+    });
 });
 
 
@@ -929,12 +1019,12 @@ app.get('/get_positions', (req, res) => {
   fetch(url, {
     method: 'GET',
   })
-  .then(response => response.json())
-  .then(data => res.send(data))
-  .catch(error => {
-    console.error('Error:', error);
-    return res.status(500).send('Internal Server Error');
-  });
+    .then(response => response.json())
+    .then(data => res.send(data))
+    .catch(error => {
+      console.error('Error:', error);
+      return res.status(500).send('Internal Server Error');
+    });
 });
 
 app.get('/api/questions/:user/:program/:course/:lection/:position', (req, res) => {

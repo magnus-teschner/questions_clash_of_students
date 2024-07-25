@@ -28,22 +28,30 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   PRIMARY KEY (`id`)
 );
 
-CREATE TABLE IF NOT EXISTS programs (
-    program_name VARCHAR(255) NOT NULL PRIMARY KEY
+CREATE TABLE IF NOT EXISTS `scores` (
+  `account_id` int(11) NOT NULL,
+  `score` int(11),
+  PRIMARY KEY (`account_id`),
+  FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS course (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    course_name VARCHAR(255) NOT NULL,
-	program_name VARCHAR(255),
-    user VARCHAR(255),
-    FOREIGN KEY (program_name) REFERENCES programs(program_name)
+
+CREATE TABLE IF NOT EXISTS `programs` (
+    `program_name` VARCHAR(255) NOT NULL PRIMARY KEY
 );
 
-CREATE TABLE IF NOT EXISTS course_members (
-    user_email VARCHAR(255),
-    course_id INT,
-    FOREIGN KEY (course_id) REFERENCES course(id)
+CREATE TABLE IF NOT EXISTS `course` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `course_name` VARCHAR(255) NOT NULL,
+    `program_name` VARCHAR(255),
+    `user` VARCHAR(255),
+    FOREIGN KEY (`program_name`) REFERENCES `programs`(`program_name`)
+);
+
+CREATE TABLE IF NOT EXISTS `course_members` (
+    `user_email` VARCHAR(255),
+    `course_id` INT,
+    FOREIGN KEY (`course_id`) REFERENCES `course`(`id`)
 );
 
 INSERT INTO `programs`(`program_name`) VALUES ('Digital Business');
