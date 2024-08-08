@@ -52,7 +52,7 @@ const config_mysql = {
 };
 
 app.use((req, res, next) => {
-  if (!req.isAuthenticated() && req.method === 'GET' && req.path !== '/log-in-prof' && req.path !== '/log-in-student' && req.path !== '/') {
+  if (!req.isAuthenticated() && req.method === 'GET' && req.path !== '/log-in-prof' && req.path !=='/sign-up-prof' && req.path !=='/sign-up-student' && req.path !== '/log-in-student' && req.path !== '/') {
     req.session.returnTo = req.originalUrl;
   }
   next();
