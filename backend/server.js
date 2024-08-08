@@ -52,7 +52,7 @@ const config_mysql = {
 };
 
 app.use((req, res, next) => {
-  if (!req.isAuthenticated() && req.method === 'GET' && req.path !== '/log-in-prof' && req.path !=='/sign-up-prof' && req.path !=='/sign-up-student' && req.path !== '/log-in-student' && req.path !== '/') {
+  if (!req.isAuthenticated() && req.method === 'GET' && !req.path.includes('reset-password') && req.path !== '/log-in-prof' && req.path !=='/sign-up-prof' && req.path !=='/sign-up-student' && req.path !== '/log-in-student' && req.path !== '/') {
     req.session.returnTo = req.originalUrl;
   }
   next();
@@ -1102,7 +1102,6 @@ async function sendResetPasswordEmail(email, token) {
 
 
 app.get('/reset-password-request', (req, res) => {
-  if (!req.user) return res.redirect('/');
   res.render('request-reset', { user: req.user });
 });
 
