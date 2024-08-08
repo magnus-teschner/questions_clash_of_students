@@ -86,6 +86,12 @@ passport.use('stud',
 
         }
 
+        else if (result[0].role == 'professor') {
+          return done(null, false, { message: "No access for professors" });
+
+        }
+
+
         const db_first = result[0].firstname;
         const db_last = result[0].lastname;
         const db_email = result[0].email;
@@ -656,6 +662,7 @@ app.post("/log-in-student", (req, res, next) => {
     }
     console.log(user);
     if (!user) {
+      req.session.messages = [info ? info.message : 'Invalid credentials'];
       console.log("redirect")
       return res.redirect("/log-in-student");
     }
@@ -678,6 +685,7 @@ app.post("/log-in-prof", (req, res, next) => {
       return next(err);
     }
     if (!user) {
+      req.session.messages = [info ? info.message : 'Invalid credentials'];
       return res.redirect("/log-in-prof");
     }
     req.logIn(user, (err) => {
