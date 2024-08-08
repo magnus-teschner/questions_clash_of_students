@@ -216,7 +216,7 @@ passport.deserializeUser(async (email, done) => {
 });
 
 async function sendVerificationEmail(firstname, lastname, email, token) {
-  const verificationLink = `http://${backend}/verify-email?token=${token}`;
+  const verificationLink = `http://${backend}:${port}/verify-email?token=${token}`;
 
   const request = mailjet
     .post('send', { version: 'v3.1' })
@@ -1058,6 +1058,106 @@ app.get('/api/questions/:user/:program/:course/:lection/:position', (req, res) =
     res.json(result[0]);
   });
 });
+
+
+//
+async function sendResetPasswordEmail(email, token) {
+  const resetLink = `http://${backend}:${port}/reset-password/${token}`;
+
+  const request = mailjet
+    .post('send', { version: 'v3.1' })
+    .request({
+      Messages: [
+        {
+          From: {
+            Email: "your_email@gmail.com",
+            Name: "Your App Name"
+          },
+          To: [
+            {
+              Email: email,
+              Name: "User"
+            }
+          ],
+          Subject: "Password Reset",
+          TextPart: `You are receiving this because you (or someone else) have requested to reset the password for your account.
+          Please click on the following link, or paste it into your browser to complete the process:
+          ${resetLink}`,
+          HTMLPart: `<p>You are receiving this because you (or someone else) have requested to reset the password for your account.</p>
+          <p>Please click on the following link, or paste it into your browser to complete the process:</p>
+          <a href="${resetLink}">Reset Password</a>`
+        }
+      ]
+    });
+
+  try {
+    await request;
+  } catch (err) {
+    console.log(err.statusCode);
+    throw err;
+  }
+}
+
+
+
+
+app.get('/reset-password-request', (req, res) => {
+  if (!req.user) return res.redirect('/');
+  res.render('request-reset', { user: req.user });
+});
+
+app.post('/send-reset-email', (req, res, next) => {
+  const email = req.body.email;
+  const token = uuidv4();
+  console.log(token);
+
+  const query_update = 'UPDATE accounts SET verificationToken = ? WHERE email = ?';
+  const values_update = [token, email];
+
+  con.query(query_update, values_update, async (err) => {
+    if (err) {
+      console.error('Error updating database:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    try {
+      await sendResetPasswordEmail(email, token);
+      res.render('success');
+    } catch (emailError) {
+      return next(emailError);
+    }
+  });
+});
+
+app.get('/reset-password/:token', (req, res) => {
+  con.query('SELECT * FROM accounts WHERE verificationToken = ?', 
+    [req.params.token], (err, user) => {
+    if (err || !user.length) return res.status(400).send('Password reset token is invalid or has expired.');
+    res.render('reset-password', { token: req.params.token });
+  });
+});
+
+app.post('/reset-password', (req, res) => {
+  const { token, password, 'confirm-password': confirmPassword } = req.body;
+
+  if (password !== confirmPassword) return res.status(400).send('Passwords do not match.');
+
+  con.query('SELECT * FROM accounts WHERE verificationToken = ?', 
+    [token], (err, user) => {
+    if (err || !user.length) return res.status(400).send('Password reset token is invalid or has expired.');
+
+    bcrypt.hash(password, 10, (err, hashedPassword) => {
+      if (err) return res.status(500).send('Error hashing password.');
+
+      con.query('UPDATE accounts SET password = ?, verificationToken = NULL WHERE email = ?', 
+        [hashedPassword, user[0].email], (err) => {
+        if (err) return res.status(500).send('Error updating password.');
+        res.render('success_change');
+      });
+    });
+  });
+});
+
 
 
 app.listen(port, () => {
