@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password</title>
+    <link rel="stylesheet" href="../css/password.css">
+</head>
+<body>
+    <div id="main-container">
+        <h1 id="password-header">Reset Password</h1>
+        <% if (user) { %>
+            <form action="/send-reset-email" method="POST">
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" value="<%= user.email %>" readonly>
+                <button type="submit">Send Reset Email</button>
+            </form>
+          <% } else { %>
+            <form action="/send-reset-email" method="POST">
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email">
+                <button type="submit">Send Reset Email</button>
+            </form>
+          <% } %>
+    </div>
+</body>
+</html>
