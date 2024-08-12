@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,186 +9,176 @@
 	<link rel="stylesheet" href="css/style_file_upload.css">
 	<link rel="stylesheet" href="css/style_dropdown.css">
 </head>
+
 <body>
 	<% if (user) {%>
+		<%- include('navbar-prof') %>
+			<div id="main-container">
+				<div id="side-menu">
+					<div id="mode-container">
+						<button id="multiple-choice" class="mode-button selected-mode">
+							<div class="link">
+								<img class="select-icon" src="../images/auswahl.png" alt="auswahl icon">
+								Multiple Choice
+							</div>
+						</button>
 
-		<div id="main-container">
-			<div id="side-menu">
-				<div id="logo-container">
-					<div id = "profile-logout">
-						<button id="profile-btn">Profil</button>
-						<a id="logout-a" href="/log-out">Log out</a>
+						<button id="multiple-choice-image" class="mode-button">
+							<div class="link">
+								<img class="select-icon" src="../images/bild_auswahl.png" alt="bild auswahl icon">
+								Multiple Choice Image
+							</div>
+						</button>
+
+						<button id="image-description" class="mode-button">
+							<div class="link">
+								<img class="select-icon" src="../images/bild.png" alt="bild icon">
+								Image Description
+							</div>
+						</button>
+
+						<button id="text-description" class="mode-button">
+							<div class="link">
+								<img class="select-icon" src="../images/text.png" alt="text icon">
+								Text Description
+							</div>
+						</button>
 					</div>
 				</div>
+				<div id="content">
 
-				<div id="profile-options" class="hidden">
-					<a href="">Manage account</a>
-					<a href="/manage-questions">Manage questions</a>
-					<a href="/manage-courses">Manage courses</a>
-
-				</div>
-				
-				<div id="mode-container">
-					<button id="multiple-choice" class="mode-button selected-mode">
-						<div class="link">
-							<img class="select-icon" src="../images/auswahl.png" alt="auswahl icon">
-							Multiple Choice
-						</div>
-					</button>
-
-					<button id="multiple-choice-image" class="mode-button">
-						<div class="link">
-							<img class="select-icon" src="../images/bild_auswahl.png" alt="bild auswahl icon">
-							Multiple Choice Image
-						</div>
-					</button>
-
-					<button id="image-description" class="mode-button">
-						<div class="link">
-							<img class="select-icon" src="../images/bild.png" alt="bild icon">
-							Image Description
-						</div>
-					</button>
-
-					<button id="text-description" class="mode-button">
-						<div class="link">
-							<img class="select-icon" src="../images/text.png" alt="text icon">
-							Text Description
-						</div>
-					</button>
-				</div>
-			</div>
-			<div id="content">
-				
-				<div id="all-dropdowns">
-					<div id="dropdown-program" class="dropdown">
-						<button id="dropbtn-program" class="button-dropdown">Program</button>
-						<div id="dropdown-content-program" class="content-dropdown">
-							<% programs.forEach(function(program_json) { %>
-								<a href="#"><%= program_json.program_name %></a>
-							  <% }) %>
-						</div>
-					</div>
-
-					<div id="dropdown-course" class="dropdown">
-						<button id="dropbtn-course" class="button-dropdown">Course</button>
-						<div id="dropdown-content-course" class="content-dropdown">
-							<a href="#" class="add-button" id = "add-course">Add course</a>
-						</div>
-					</div>
-					
-					
-					<div id="dropdown-lection" class="dropdown">
-						<button id="dropbtn-lection" class="button-dropdown">Lection</button>
-						<div id="dropdown-content-lection" class="content-dropdown">
-							<a href="#">Lection 1</a>
-							<a href="#">Lection 2</a>
-							<a href="#">Lection 3</a>
-							<a href="#">Lection 4</a>
-							<a href="#">Lection 5</a>
-							<a href="#">Lection 6</a>
-							<a href="#">Lection 7</a>
-							<a href="#">Lection 8</a>
-						</div>
-					</div>
-				
-					<div id="dropdown-position" class="dropdown">
-						<button id="dropbtn-position" class="button-dropdown">Position</button>
-						<div id="dropdown-content-position" class="content-dropdown">
-						</div>
-					</div>
-				</div>
-				
-				
-				<div id="question-container">
-					<div id="question-input">
-						<p id = "question-p" class="in-box-p">Question</p>
-						<input id="frage" type="text">
-					</div>
-					<div id="file-upload">
-						<label id = "upload-command" for="upload-image">Upload your file: </label>
-						<input type="file" id="upload-image" accept="image/*">
-						<div id="before-upload">
-							<div>
-								<img id="image-icon" src="../images/bild.png" alt="image icon">
-								<h4>Drag & Drop image file or Browse</h4>
-								<p>	Supports: JPEG, PNG, GIF, TIFF</p>
+					<div id="all-dropdowns">
+						<div id="dropdown-program" class="dropdown">
+							<button id="dropbtn-program" class="button-dropdown">Program</button>
+							<div id="dropdown-content-program" class="content-dropdown">
+								<% programs.forEach(function(program_json) { %>
+									<a href="#">
+										<%= program_json.program_name %>
+									</a>
+									<% }) %>
 							</div>
 						</div>
-						<div id="after-upload">
-							<div id="clear-btn">Remove</div>
-							<img id = "image-drop" src="" alt="">
+
+						<div id="dropdown-course" class="dropdown">
+							<button id="dropbtn-course" class="button-dropdown">Course</button>
+							<div id="dropdown-content-course" class="content-dropdown">
+								<a href="#" class="add-button" id="add-course">Add course</a>
+							</div>
+						</div>
+
+
+						<div id="dropdown-lection" class="dropdown">
+							<button id="dropbtn-lection" class="button-dropdown">Lection</button>
+							<div id="dropdown-content-lection" class="content-dropdown">
+								<a href="#">Lection 1</a>
+								<a href="#">Lection 2</a>
+								<a href="#">Lection 3</a>
+								<a href="#">Lection 4</a>
+								<a href="#">Lection 5</a>
+								<a href="#">Lection 6</a>
+								<a href="#">Lection 7</a>
+								<a href="#">Lection 8</a>
+							</div>
+						</div>
+
+						<div id="dropdown-position" class="dropdown">
+							<button id="dropbtn-position" class="button-dropdown">Position</button>
+							<div id="dropdown-content-position" class="content-dropdown">
+							</div>
 						</div>
 					</div>
-				</div>
-				
 
-				<div id="answers">
-					<div class="row-answers">
-						<div class="answer" id="answer1">
-							<p class="in-box-p">Answer A</p>
-							<input id="inputA" class="answer-entry" type="text">
+
+					<div id="question-container">
+						<div id="question-input">
+							<p id="question-p" class="in-box-p">Question</p>
+							<input id="frage" type="text">
 						</div>
-						<div class="answer" id="answer2">
-							<p class="in-box-p">Answer B</p>
-							<input id="inputB" class="answer-entry" type="text">
+						<div id="file-upload">
+							<label id="upload-command" for="upload-image">Upload your file: </label>
+							<input type="file" id="upload-image" accept="image/*">
+							<div id="before-upload">
+								<div>
+									<img id="image-icon" src="../images/bild.png" alt="image icon">
+									<h4>Drag & Drop image file or Browse</h4>
+									<p> Supports: JPEG, PNG, GIF, TIFF</p>
+								</div>
+							</div>
+							<div id="after-upload">
+								<div id="clear-btn">Remove</div>
+								<img id="image-drop" src="" alt="">
+							</div>
 						</div>
 					</div>
-					
-					<div class="row-answers">
-						<div class="answer" id="answer3">
-							<p class="in-box-p">Answer C</p>
-							<input id="inputC" class="answer-entry" type="text">
+
+
+					<div id="answers">
+						<div class="row-answers">
+							<div class="answer" id="answer1">
+								<p class="in-box-p">Answer A</p>
+								<input id="inputA" class="answer-entry" type="text">
+							</div>
+							<div class="answer" id="answer2">
+								<p class="in-box-p">Answer B</p>
+								<input id="inputB" class="answer-entry" type="text">
+							</div>
 						</div>
-						<div class="answer" id="answer4">
-							<p class="in-box-p">Answer D</p>
-							<input id="inputD" class="answer-entry" type="text">
+
+						<div class="row-answers">
+							<div class="answer" id="answer3">
+								<p class="in-box-p">Answer C</p>
+								<input id="inputC" class="answer-entry" type="text">
+							</div>
+							<div class="answer" id="answer4">
+								<p class="in-box-p">Answer D</p>
+								<input id="inputD" class="answer-entry" type="text">
+							</div>
 						</div>
 					</div>
-				</div>
 
-				<div id="correct_answer_selector">
-					<p id="prompt-select-correct-answer">Select correct answer</p>
+					<div id="correct_answer_selector">
+						<p id="prompt-select-correct-answer">Select correct answer</p>
 
-					<div id="checkboxes">
-						<div class="checkbox-group">
-							<label for="optionA">A</label>
-							<input type="checkbox" id="optionA" class="correct-checkbox-class" name="optionA">
+						<div id="checkboxes">
+							<div class="checkbox-group">
+								<label for="optionA">A</label>
+								<input type="checkbox" id="optionA" class="correct-checkbox-class" name="optionA">
+							</div>
+
+							<div class="checkbox-group">
+								<label for="optionB">B</label>
+								<input type="checkbox" id="optionB" class="correct-checkbox-class" name="optionB">
+							</div>
+
+							<div class="checkbox-group">
+								<label for="optionC">C</label>
+								<input type="checkbox" id="optionC" class="correct-checkbox-class" name="optionC">
+							</div>
+
+							<div class="checkbox-group">
+								<label for="optionD">D</label>
+								<input type="checkbox" id="optionD" class="correct-checkbox-class" name="optionD">
+							</div>
 						</div>
-						
-						<div class="checkbox-group">
-							<label for="optionB">B</label>
-							<input type="checkbox" id="optionB" class="correct-checkbox-class" name="optionB">
-						</div>
-						
-						<div class="checkbox-group">
-							<label for="optionC">C</label>
-							<input type="checkbox" id="optionC" class="correct-checkbox-class" name="optionC">
-						</div>
-						
-						<div class="checkbox-group">
-							<label for="optionD">D</label>
-							<input type="checkbox" id="optionD" class="correct-checkbox-class" name="optionD">
-						</div>
+
 					</div>
-					
-				</div>
 
-				<div id="button-container">
-					<button id="confirm-button">Submit</button>
+					<div id="button-container">
+						<button id="confirm-button">Submit</button>
+					</div>
+
 				</div>
-				
 			</div>
-		</div>
-	<% } else { %>
-		<div id="login-hint">
-			Please <a href="/log-in-prof"> log in</a> to view this page!
-		</div>
-		
-	<% } %>
-	<script src="../js/question.js"></script>
-	<script src="../js/image-upload.js"></script>
-	<script src="../js/dropdown.js"></script>
-	<script src="../js/send.js"></script>
+			<% } else { %>
+				<div id="login-hint">
+					Please <a href="/log-in-prof"> log in</a> to view this page!
+				</div>
+
+				<% } %>
+					<script src="../js/question.js"></script>
+					<script src="../js/image-upload.js"></script>
+					<script src="../js/dropdown.js"></script>
+					<script src="../js/send.js"></script>
 </body>
+
 </html>
