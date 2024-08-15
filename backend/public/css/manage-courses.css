@@ -23,66 +23,6 @@ body {
     max-height: 100%;
 }
 
-#top-menu {
-    min-height: 95px;
-    background-color: #333;
-    width: 100vw;
-    max-width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: end;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-}
-
-.hidden {
-    display: none;
-}
-
-#profile-logout {
-    margin-right: 40px;
-}
-
-#profile-options {
-    position: absolute;
-    background-color: #333;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    right: 9px; /* Adjust according to the height of your profile button */
-    top: 60px; /* Adjust according to your layout */
-    flex-direction: column;
-    z-index: 1000;
-}
-
-#profile-options a {
-    font-family: "Poppins", sans-serif;
-    color: white;
-    text-decoration: none;
-}
-
-#profile-options a:hover {
-    text-decoration: underline;
-}
-
-#profile-btn,
-#logout-a {
-    font-family: "Poppins", sans-serif;
-    font-size: 18px;
-    font-weight: 400;
-    background-color: transparent;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-#profile-btn:hover,
-#logout-a:hover {
-    text-decoration: underline;
-}
-
 #login-hint {
     width: 500px;
     height: 200px;
@@ -178,7 +118,7 @@ input[type="text"]:focus {
     border-color: #007bff;
 }
 
-button {
+.edit-btn, .save-btn, .cancel-btn, .delete-btn {
     font-family: "Poppins", sans-serif;
     font-size: 0.9em;
     font-weight: 500;
@@ -246,11 +186,7 @@ button {
     margin-bottom: 20px;
 }
 
-h1 {
-    text-align: center;
-    color: black;
-    margin-bottom: 20px;
-}
+
 
 .modal {
     display: none;
