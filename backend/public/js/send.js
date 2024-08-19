@@ -38,7 +38,6 @@ async function uploadImageQuestion(blob, question) {
   }
 
   async function uploadQuestion(question) {
-    console.log(question);
     const response =  fetch(`/send`, {
       method: 'POST',
       headers: {
@@ -67,12 +66,13 @@ send_button.addEventListener('click', (event) => {
     const optionD = document.querySelector('#optionD');
     const beforeUpload= document.querySelector("#before-upload");
     const afterUpload = document.querySelector("#after-upload");
+    const program = document.querySelector('#dropbtn-program');
     const course = document.querySelector('#dropbtn-course');
     const lection = document.querySelector('#dropbtn-lection');
     const position = document.querySelector('#dropbtn-position');
 
     function checkDropdown(dropdown, message){
-      if (dropdown.textContent === "Course" || dropdown.textContent === "Lection" || dropdown.textContent === "Position") {
+      if (dropdown.textContent === "Program" || dropdown.textContent === "Course" || dropdown.textContent === "Lection" || dropdown.textContent === "Position") {
         alert(message);
         return true;
       }
@@ -106,6 +106,7 @@ send_button.addEventListener('click', (event) => {
         c : inputC.value,
         d : inputD.value,
         correct_answer: correct_answer,
+        program: program.textContent,
         course: course.textContent,
         lection: lection_split[lection_split.length -1],
         position: position_split[position_split.length -1]
@@ -126,6 +127,7 @@ send_button.addEventListener('click', (event) => {
         c : null,
         d : null,
         correct_answer: correct_answer,
+        program: program.textContent,
         course: course.textContent,
         lection: lection_split[lection_split.length -1],
         position: position_split[position_split.length -1]
@@ -151,9 +153,22 @@ send_button.addEventListener('click', (event) => {
       item.disabled = false;
       item.checked = false;
     })
+
+    const pos_value = document.querySelector('#dropbtn-position').innerText;
+    const dropdown = document.querySelector('#dropdown-content-position');
+    const links = dropdown.querySelectorAll('a');
+
+    links.forEach(element => {
+      if (element.innerText == pos_value){
+        element.remove();
+        document.querySelector('#dropbtn-position').innerText = "Position"
+      }
+    })
+
   }
 
-  if (checkDropdown(course, "Please select course!") ||
+  if (checkDropdown(program, "Please select program!") ||
+      checkDropdown(course, "Please select course!") ||
       checkDropdown(lection, "Please select lection!") ||
       checkDropdown(position, "Please select position!")) {
       return;

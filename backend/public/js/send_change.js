@@ -60,6 +60,7 @@ send_button.addEventListener('click', (event) => {
     const answerC = document.querySelector('#edit-answer-c').value;
     const answerD = document.querySelector('#edit-answer-d').value;
     const correct_answer = document.querySelector('#edit-correct-answer').value;
+    const program = document.querySelector('#edit-program').value;
     const course = document.querySelector('#edit-course').value;
     const lection = document.querySelector('#edit-lection').value;
     const position = document.querySelector('#edit-position').value;
@@ -77,6 +78,7 @@ send_button.addEventListener('click', (event) => {
         c : answerC,
         d : answerD,
         correct_answer: correct_answer,
+        program: program,
         course: course,
         lection: lection,
         position: position
@@ -94,6 +96,7 @@ send_button.addEventListener('click', (event) => {
         c : null,
         d : null,
         correct_answer: answerA,
+        program: program,
         course: course,
         lection: lection,
         position: position

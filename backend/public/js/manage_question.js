@@ -1,3 +1,41 @@
+function changeProgram(){
+    const program_selector = document.querySelector('#edit-program');
+    program_selector.addEventListener('change', (event) => {
+        let program = event.target.value;
+
+    })
+}
+
+async function set_program_listener(program, course, position){
+    fetch(`/programs`, {
+        method: 'GET',
+    })
+    .then(response => {
+        const select = document.querySelector('#edit-program');
+        select.innerHTML = '';
+        return response.json()})
+    .then(data => data.forEach(element => {
+        const select = document.querySelector('#edit-program');
+        let newOption = document.createElement('option');
+        newOption.value = element.program_name;
+        newOption.text = element.program_name;
+        select.appendChild(newOption);
+        select.value = program;
+    })).then(() => {
+        set_course(course, position);
+        return
+    }).then(() => {
+
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        return
+
+    });
+
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const editButtons = document.querySelectorAll('.edit-btn');
     const modal = document.getElementById('edit-modal');
@@ -96,7 +134,109 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function openModal(row) {
+    async function set_program(program, course, position){
+        fetch(`/programs`, {
+            method: 'GET',
+        })
+        .then(response => {
+            const select = document.querySelector('#edit-program');
+            select.innerHTML = '';
+            return response.json()})
+        .then(data => data.forEach(element => {
+            const select = document.querySelector('#edit-program');
+            let newOption = document.createElement('option');
+            newOption.value = element.program_name;
+            newOption.text = element.program_name;
+            select.appendChild(newOption);
+            select.value = program;
+        })).then(() => {
+            set_course(course, position);
+            return
+        }).then(() => {
+
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            return
+
+        });
+
+    }
+
+    function set_course(course_value, position){
+        console.log(document.querySelector('#edit-program').value);
+        const queryParams = new URLSearchParams({
+            program: document.querySelector('#edit-program').value,
+          });
+        
+          // Construct the URL with parameters
+          let url = `/get_courses/?${queryParams}`;
+          fetch(url, {
+            method: 'GET',
+          })
+          .then(response => {
+            console.log(response)
+            const course = document.querySelector('#edit-course');
+            course.innerHTML = '';
+            return response.json()})
+          .then(data => data.forEach(element => {
+            console.log(element);
+            const course = document.querySelector('#edit-course');
+            let newOption = document.createElement('option');
+            newOption.value = element.course_name;
+            newOption.text = element.course_name;
+            course.appendChild(newOption);
+            document.getElementById('edit-course').value = course_value;
+            return
+           })).then(() => {
+            console.log(position);
+            return set_position(position)})
+          .catch(error => {
+            console.error('Error:', error);
+            return
+          });
+    }
+
+    function set_position(position_value){
+        const queryParams = new URLSearchParams({
+            program: document.querySelector('#edit-program').value,
+            course: document.querySelector('#edit-course').value,
+            lection: document.querySelector('#edit-lection').value
+          });
+        
+          // Construct the URL with parameters
+          let url = `/get_positions/?${queryParams}`;
+          fetch(url, {
+            method: 'GET',
+          })
+          .then(response => response.json())
+          .then(data => {
+            const position = document.querySelector('#edit-position');
+            position.innerHTML = '';
+            data.forEach(element => {
+                let newOption = document.createElement('option');
+                newOption.value = element;
+                newOption.text = `Position ${element}`;
+                position.appendChild(newOption);
+                
+
+            })
+            let newOption = document.createElement('option');
+            newOption.value = position_value;
+            newOption.text = `Position ${position_value}`;
+            position.appendChild(newOption);
+            position.value = position_value.toString();
+            
+
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+
+
+    }
+
+    async function openModal(row) {
         const id = row.cells[0].innerText;
         const questionType = row.cells[1].innerText;
         const question = row.cells[2].innerText;
@@ -105,12 +245,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const answerC = row.cells[5].innerText;
         const answerD = row.cells[6].innerText;
         const correctAnswer = row.cells[7].innerText;
-        const course = row.cells[8].innerText;
-        const lection = row.cells[9].innerText;
-        const position = row.cells[10].innerText;
-        const image_url = row.cells[11].querySelector('.store-url').innerText;
+        const program = row.cells[8].innerText;
+        const course = row.cells[9].innerText;
+        const lection = row.cells[10].innerText;
+        const position = row.cells[11].innerText;
+        const image_url = row.cells[12].querySelector('.store-url').innerText;
         const image = document.querySelector('#img-modal');
 
+        await set_program(program, course, position);
+        
         document.getElementById('edit-question-type').value = questionType;
         document.getElementById('edit-question').value = question;
         document.getElementById('edit-answer-a').value = answerA;
@@ -118,7 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-answer-c').value = answerC;
         document.getElementById('edit-answer-d').value = answerD;
         document.getElementById('edit-correct-answer').value = correctAnswer;
-        document.getElementById('edit-course').value = course;
+        
+        
         document.getElementById('edit-lection').value = lection;
         document.getElementById('edit-position').value = position;
         document.getElementById('id-container').innerText = id;
@@ -129,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
             image.src = `http://localhost:9000/images-questions-bucket/${image_url}`;
             
         } else {
-            image.src = 'none';
+            image.src = '';
         };
 
         modal.classList.remove('hidden');
@@ -152,20 +296,21 @@ document.addEventListener('DOMContentLoaded', () => {
         row.cells[5].innerText = document.getElementById('edit-answer-c').value;
         row.cells[6].innerText = document.getElementById('edit-answer-d').value;
         row.cells[7].innerText = document.getElementById('edit-correct-answer').value;
-        row.cells[8].innerText = document.getElementById('edit-course').value;
-        row.cells[9].innerText = document.getElementById('edit-lection').value;
-        row.cells[10].innerText = document.getElementById('edit-position').value;
+        row.cells[8].innerText = document.getElementById('edit-program').value;
+        row.cells[9].innerText = document.getElementById('edit-course').value;
+        row.cells[10].innerText = document.getElementById('edit-lection').value;
+        row.cells[11].innerText = document.getElementById('edit-position').value;
 
         let type_selector_value = document.getElementById('edit-question-type').value
         if (type_selector_value === 'multiple-choice' || type_selector_value === 'text-description'){
-            row.cells[11].querySelector('.store-url').innerText = '';
-            row.cells[11].querySelector('.row-image').src = '';
-            row.cells[11].querySelector('.row-image').classList.add('hidden');
+            row.cells[12].querySelector('.store-url').innerText = '';
+            row.cells[12].querySelector('.row-image').src = '';
+            row.cells[12].querySelector('.row-image').classList.add('hidden');
 
         } else {
-            row.cells[11].querySelector('.store-url').innerText = document.querySelector('#img-modal').src;
-            row.cells[11].querySelector('.row-image').src = document.querySelector('#img-modal').src;
-            row.cells[11].querySelector('.row-image').classList.remove('hidden');
+            row.cells[12].querySelector('.store-url').innerText = document.querySelector('#img-modal').src;
+            row.cells[12].querySelector('.row-image').src = document.querySelector('#img-modal').src;
+            row.cells[12].querySelector('.row-image').classList.remove('hidden');
 
         }
     }
@@ -204,4 +349,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
   });
+
+
+
   

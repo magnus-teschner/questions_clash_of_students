@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Courses</title>
+    <link rel="stylesheet" href="css/manage-courses.css">
+</head>
+
+<body>
+    <% if (user) { %>
+        <%- include('navbar-prof') %>
+            <div id="content-container">
+                <p class="drag-and-drop-info">Drag and drop courses to change program</p>
+                <% programsWithCourses.forEach(program=> { %>
+                    <div id="<%= program.program_name.replace(/\s+/g, '-').toLowerCase() %>" class="program-dropzone"
+                        ondrop="drop(event, '<%= program.program_name %>')" ondragover="allowDrop(event)">
+                        <h1>
+                            <%= program.program_name %>
+                        </h1>
+                        <% program.courses.forEach(course=> { %>
+                            <div class="course-item draggable" id="course-<%= course.id %>" draggable="true"
+                                ondragstart="drag(event)" data-course-id="<%= course.id %>">
+                                <div class="course-name">
+                                    <span id="course-name-<%= course.id %>">
+                                        <%= course.course_name %>
+                                    </span>
+                                    <input type="text" id="edit-course-name-<%= course.id %>" class="hidden"
+                                        value="<%= course.course_name %>">
+                                    <button class="edit-btn" onclick="editCourseName('<%= course.id %>')">Edit</button>
+                                    <button class="save-btn hidden" id="save-btn-<%= course.id %>"
+                                        onclick="saveCourseName('<%= course.id %>')">Save</button>
+                                    <button class="cancel-btn hidden" id="cancel-btn-<%= course.id %>"
+                                        onclick="cancelEdit('<%= course.id %>')">Cancel</button>
+                                </div>
+                                <div class="course-actions">
+                                    <button class="edit-btn" onclick="editCourse('<%= course.id %>')">Members</button>
+                                    <button class="delete-btn"
+                                        onclick="deleteCourse('<%= course.id %>')">Delete</button>
+                                </div>
+                            </div>
+                            <% }) %>
+                    </div>
+                    <% }) %>
+            </div>
+            </div>
+            <% } else { %>
+                <div id="login-hint">
+                    Please <a href="/log-in-prof">log in</a> to view this page!
+                </div>
+                <% } %>
+
+                    <!-- Modal for displaying course members -->
+                    <div id="members-modal" class="modal">
+                        <div class="modal-content">
+                            <span id="modal-close-btn" class="close">&times;</span>
+                            <h2>Course Members</h2>
+                            <ul id="members-list"></ul>
+                        </div>
+                    </div>
+
+                    <script src="../js/manage-courses.js"></script>
+</body>
+
+</html>

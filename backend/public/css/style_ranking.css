@@ -1,0 +1,100 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+  }
+  
+  body {
+    background-image: url('../images/game.png');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+  }
+  
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .ranking-header {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 12px;
+    background: #69d7ff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+    
+  /* Ranking Liste */
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+  }
+  
+  li {
+    background: rgba(255, 255, 255);
+    margin-bottom: 10px;
+    padding-left: 15px;
+    padding-right: 30px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #333;
+    min-height: 50px;
+  }
+  
+  .medal-icon {
+    width: 40px;
+    height: 40px;
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-size: contain;
+    vertical-align: middle;
+  }
+  
+  .gold-medal path {
+    stroke: gold;
+  }
+  
+  .silver-medal path {
+    stroke: silver;
+  }
+  
+  .bronze-medal path {
+    stroke: #cd7f32;
+  }
+  
+  .rank {
+    font-weight: bold;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+  }
+
+  .ranks {
+    margin-left: 25px;
+    margin-right: 10px;
+  }
+
+  .name-score {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .highlight {
+    box-shadow: inset 0 0 0 4px #69d7ff;
+  }

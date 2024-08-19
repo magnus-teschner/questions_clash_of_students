@@ -3,7 +3,7 @@ const multer = require("multer");
 const { v4: uuidv4 } = require('uuid');
 const mysql = require('mysql2');
 const app = express();
-const port = 80;
+const port = 2000;
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const Minio = require('minio');
@@ -11,6 +11,8 @@ app.use(express.json());
 
 mysqlHost = process.env.DB;
 minHost = process.env.BLOB;
+mysqlHost = "127.0.0.1";
+minHost = "127.0.0.1";
 
 const config_mysql = {
   user: "admin",
@@ -54,10 +56,8 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
       console.error('Error uploading file:', err);
       return res.status(500).send('Error uploading file');
     }
-
-    console.log(`http://${minHost}:9000/${bucket}/${filename}`);
     let json_object = JSON.parse(req.body.json);
-    let query = "INSERT INTO questions (user, frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image_url) VALUES (?,?,?, ?,?,?,?,?,?,?,?,?)";
+    let query = "INSERT INTO questions (user, frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, program, course, lection, position, image_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
     const values = [
       json_object.user,
       json_object.question.frage,
@@ -67,6 +67,7 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
       json_object.question.c,
       json_object.question.d,
       json_object.question.correct_answer,
+      json_object.question.program,
       json_object.question.course,
       json_object.question.lection,
       json_object.question.position,
@@ -79,7 +80,7 @@ app.post('/upload_min', upload.single('image'), (req, res) => {
         return res.status(500).send('Database error');
       }
       
-      res.status(200).send({ id: file_url });
+      res.status(200).send("Image and question stored");
     });
   });
 });
@@ -105,7 +106,7 @@ app.post('/change-img', upload.single('image'), (req, res) => {
     console.log(`http://${minHost}:9000/${bucket}/${filename}`);
     let json_object = JSON.parse(req.body.json);
     
-    let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ? AND user = ?;"
+    let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, program = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ? AND user = ?;"
   const values = [
     
     json_object.question.frage,
@@ -114,7 +115,8 @@ app.post('/change-img', upload.single('image'), (req, res) => {
     json_object.question.b, 
     json_object.question.c, 
     json_object.question.d, 
-    json_object.question.correct_answer, 
+    json_object.question.correct_answer,
+    json_object.question.program, 
     json_object.question.course, 
     json_object.question.lection, 
     json_object.question.position, 
@@ -129,7 +131,7 @@ app.post('/change-img', upload.single('image'), (req, res) => {
         return res.status(500).send('Database error');
       }
       
-      res.status(200).send("Row updated");
+      return res.status(200).send("Row updated");
     });
   });
 });
@@ -140,7 +142,7 @@ app.post('/change-img', upload.single('image'), (req, res) => {
 app.post('/change', (req, res) => {
   let json_object = req.body;
   
-  let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ? AND user = ?;"
+  let query = "UPDATE questions SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, program = ?, course = ?, lection = ?, position = ?, image_url = ? WHERE id = ? AND user = ?;"
   const values = [
     json_object.question.frage,
     json_object.question.type,
@@ -148,7 +150,8 @@ app.post('/change', (req, res) => {
     json_object.question.b, 
     json_object.question.c, 
     json_object.question.d, 
-    json_object.question.correct_answer, 
+    json_object.question.correct_answer,
+    json_object.question.program, 
     json_object.question.course, 
     json_object.question.lection, 
     json_object.question.position, 
@@ -161,10 +164,9 @@ app.post('/change', (req, res) => {
   con.query(query, values, (err, result) => {
   if (err) {
     console.log(err);
-    res.status(500).send('SERVER_ERROR');
+    return res.status(500).send('SERVER_ERROR');
   }
-  console.log("successfull")
-  res.status(200).send('Row updated');
+  return res.status(200).send('Row updated');
   
   });
   
@@ -174,7 +176,7 @@ app.post('/change', (req, res) => {
 app.post('/send', (req, res) => {
   let json_object = req.body;
   
-  let query = "INSERT INTO questions (user, frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, course, lection, position, image_url) VALUES (?, ?,?, ?,?,?,?,?,?,?,?,?)";
+  let query = "INSERT INTO questions (user, frage, question_type, answer_a, answer_b, answer_c, answer_d, correct_answer, program, course, lection, position, image_url) VALUES (?, ?,?, ?,?,?,?,?,?,?,?,?,?)";
   const values = [
     json_object.user,
     json_object.question.frage,
@@ -183,7 +185,8 @@ app.post('/send', (req, res) => {
     json_object.question.b, 
     json_object.question.c, 
     json_object.question.d, 
-    json_object.question.correct_answer, 
+    json_object.question.correct_answer,
+    json_object.question.program, 
     json_object.question.course, 
     json_object.question.lection, 
     json_object.question.position, 
@@ -192,9 +195,29 @@ app.post('/send', (req, res) => {
   con.query(query, values, (err, result) => {
   if (err) {
     console.log(err);
-    res.status(500).send({ msg:'SERVER_ERROR' });
+    return res.status(500).send({ msg:'SERVER_ERROR' });
   }
-  res.status(200).send({ id:result.insertId });
+  return res.status(200).send({ id:result.insertId });
+  
+  });
+  
+});
+
+app.post('/add_course', (req, res) => {
+  let json_object = req.body;
+  
+  let query = "INSERT INTO course (course_name, program_name, user) VALUES (?,?,?)";
+  const values = [
+    json_object.course,
+    json_object.program,
+    json_object.user
+  ];
+  con.query(query, values, (err, result) => {
+  if (err) {
+    console.log(err);
+    return res.status(500).send({ msg:'SERVER_ERROR' });
+  }
+  return res.status(200).send({ id:result.insertId });
   
   });
   
@@ -210,11 +233,22 @@ app.get("/all_entrys", async (req, res) => {
   con.query(query_retrieve, values, (err, result) => {
     if (err) {
       console.log(err);
-      res.status(500).send({ msg:'SERVER_ERROR' });
+      return res.status(500).send({ msg:'SERVER_ERROR' });
     }
-    res.status(200).send(result);
+    return res.status(200).send(result);
     });
 
+})
+
+app.get("/programs", async (req, res) => {
+  let query_retrieve = "select * from programs;"
+  con.query(query_retrieve, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send({ msg:'SERVER_ERROR' });
+    }
+    return res.status(200).send(result);
+    });
 })
 
 
@@ -228,9 +262,46 @@ app.get('/get_question', (req, res) => {
   con.query(query_retrieve, values, (err, result) => {
     if (err) {
       console.log(err);
-      res.status(500).send({ msg:'SERVER_ERROR' });
+      return res.status(500).send({ msg:'SERVER_ERROR' });
     }
-    res.status(200).json(result);
+    return res.status(200).json(result);
+    });
+});
+
+
+app.get('/get_courses', (req, res) => {
+  let user = req.query.user
+  let program = req.query.program
+
+  let query_retrieve = `select id, course_name from course where user = ? and program_name = ?;`
+  const values = [user, program]
+  con.query(query_retrieve, values, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send({ msg:'SERVER_ERROR' });
+    }
+    return res.status(200).json(result);
+    });
+});
+
+ 
+app.get('/get_positions', (req, res) => {
+  let user = req.query.user;
+  let program = req.query.program
+  let course = req.query.course
+  let lection = req.query.lection
+
+  let query_retrieve = `select position from questions where program = ? AND course = ? AND lection = ? AND USER = ?;`
+  const values = [program, course, lection, user];
+  con.query(query_retrieve, values, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send({ msg:'SERVER_ERROR' });
+    }
+    const existingValues = result.map(row => row.position);
+    const allValues = Array.from({ length: 10 }, (_, i) => i + 1);
+    const missingValues = allValues.filter(value => !existingValues.includes(value));
+    return res.status(200).send(missingValues);
     });
 });
 
