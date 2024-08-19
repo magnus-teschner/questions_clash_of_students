@@ -16,6 +16,8 @@ body {
   background-image: url('../images/game.png');
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat; /* Do not repeat the image */
+  background-attachment: fixed; /* This is the key property */
 }
 
 body,
