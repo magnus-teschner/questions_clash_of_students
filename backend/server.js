@@ -1,4 +1,5 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const path = require('path');
 const multer = require("multer");
 const app = express();
@@ -1203,7 +1204,32 @@ app.post('/reset-password', (req, res) => {
     });
 });
 
+// JWT secret key
+const secretKey = 'yourSecretKey';
 
+// Endpoint to generate a JWT token
+app.post('/jwt', (req, res) => {
+  const { program, course } = req.body;
+
+  if (!req.user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  // Construct the JWT payload
+  const payload = {
+    email: req.user.email,
+    firstname: req.user.firstname,
+    lastname: req.user.lastname,
+    program: program,
+    course: course,
+  };
+
+  // Generate the token
+  const token = jwt.sign(payload, secretKey, { expiresIn: '24h' });
+
+  // Send the token back as the response
+  res.json({ result: token });
+});
 
 app.listen(port, () => {
   console.log(`Server running at port ${port}`);

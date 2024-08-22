@@ -115,7 +115,7 @@ document.querySelectorAll('.play-btn').forEach(btn => {
       const result = encodeURIComponent(data.result); // Adjust 'result' as per your data structure
 
       // Append the result as a URL parameter
-      const newUrl = `${url}?result=${result}`;
+      const newUrl = `${url}?token=${result}`;
 
       // Navigate to the new URL
       window.location.href = newUrl;
