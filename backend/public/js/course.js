@@ -88,10 +88,41 @@ document.querySelectorAll('.toggle-btn').forEach(button => {
   });
 });
 
-// Play Button Lessons
 document.querySelectorAll('.play-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    var url = 'https://kocbetue.itch.io/clash-of-students';
-    window.location.href = url;
-  })
+    // Define the base URL
+    var url = 'http://localhost:8080';
+    const selectedProgram = btn.closest('.course-item').querySelector('.info-content span').innerText; // Adjust selector if necessary
+    const selectedCourse = btn.closest('.course-item').querySelector('.course-title').innerText; // Adjust selector if necessary
+
+    // Define the data to send in the POST request
+    const postData = {
+      program: selectedProgram,
+      course: selectedCourse,
+    };
+
+    // Make the POST fetch request
+    fetch('/jwt', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(postData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Assuming 'data' is the result you want to append as a URL parameter
+      const result = encodeURIComponent(data.result); // Adjust 'result' as per your data structure
+
+      // Append the result as a URL parameter
+      const newUrl = `${url}?result=${result}`;
+
+      // Navigate to the new URL
+      window.location.href = newUrl;
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    });
+  });
 });
+
