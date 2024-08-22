@@ -52,9 +52,7 @@
 							<button id="dropbtn-program" class="button-dropdown">Program</button>
 							<div id="dropdown-content-program" class="content-dropdown">
 								<% programs.forEach(function(program_json) { %>
-									<a href="#">
-										<%= program_json.program_name %>
-									</a>
+									<a href="#"><%= program_json.program_name %></a>
 									<% }) %>
 							</div>
 						</div>

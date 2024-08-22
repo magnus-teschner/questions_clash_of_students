@@ -8,73 +8,188 @@
   font-family: "Poppins", sans-serif;
 }
 
+html {
+  overflow-y: scroll;
+}
+
 body {
   background-image: url('../images/game.png');
   background-size: cover;
   background-position: center;
-  color: #fff;
+  background-repeat: no-repeat; /* Do not repeat the image */
+  background-attachment: fixed; /* This is the key property */
 }
 
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
   height: 100%;
 }
 
-#password-link {
-  display: inline-block;
-  color: #333;
-  text-decoration: none;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-#setting-svg {
-  margin-right: 5px;
-}
-
-#password-link:hover {
-  text-decoration: underline;
-}
-
-/* Inhalt */
-
-.content-container {
+/* Tab Container */
+.tab-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  margin-top: 40px; 
-}
-
-
-.course {
-  width: 60%;
+  margin-top: 20px;
   margin-bottom: 20px;
-  border-radius: 12px;
-  background: rgba(51, 51, 51, 0.9);
 }
 
-.course-header {
+.tab-link {
+  width: 200px;
+  padding: 10px 20px;
+  margin: 0 5px;
+  background-color: #ffffff;
+  color: #000000;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 2px solid white;
+  cursor: pointer;
+}
+
+.tab-link:hover {
+  background-color: #E6EEF4;
+}
+
+.tab-link.active {
+  background-color: #69d7ff;
+}
+
+/* Content */
+
+.tab-content {
   padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  width: 60%;
+  display: none;
+  margin: 0 auto;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+h2 {
+  color: #000000;
+  margin-bottom: 10px;
+}
+
+.course-item {
   border-radius: 12px;
-  background: #69d7ff;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.header-container {
+  padding: 15px;
+  background-color: #E6EEF4;
+}
+
+.title-container {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+}
+
+.all-courses {
+  justify-content: space-between;
+}
+
+.course-title {
+  font-size: 24px;
+  color: #000000;
+  text-align: left;
+}
+
+.exit-icon {
+  background-color: transparent;
+  border: none;
+  margin-left: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.info-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.info-details {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  margin-right: 20px;
+  min-width: 200px;
+}
+
+.info-deco {
+  width: 4px;
+  height: 40px;
+  background-color: #69d7ff;
+  margin-right: 8px;
+  border-radius: 4px 0 0 4px;
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: black;
+}
+
+.info-content span {
+  color: #000000;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.toggle-btn {
+  background-color: transparent;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.toggle-icon.rotate {
+  transform: rotate(180deg);
+  transition: transform 0.3s;
+}
+
+.toggle-icon {
+  transition: transform 0.3s;
+}
+
+.course-item.active .lessons {
+  display: block;
+}
+
+.course-item.active .toggle-icon {
+  transform: rotate(180deg);
 }
 
 .lessons {
   display: none;
-  padding: 10px;
+  background-color: #ffffff4f;
+  color: #000000;
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 15px;
 }
 
 .lesson {
   display: flex;
+  margin-bottom: 10px;
   align-items: center;
-  padding: 5px 0;
-  margin-top: 10px;
-  color: white;
+}
+
+.lesson:last-child {
+  margin-bottom: 0;
 }
 
 .play-btn {
@@ -89,12 +204,23 @@ body, html {
   cursor: pointer;
 }
 
-.toggle-btn {
-  background-color: transparent;
+.enroll-btn {
+  background-color: #ffffff;
+  color: black;
+  padding: 10px 10px;
   border: none;
-  color: white;
-  font-size: 16px;
+  border-radius: 5px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 120px;
+  justify-content: center;
+}
+
+.enroll-btn.enrolled {
+  background-color: #a4ecb4;
+  cursor: default;
 }
 
 #login-hint {
@@ -121,12 +247,4 @@ body, html {
 #container {
   display: flex;
   flex-direction: column;
-}
-
-
-.course-item {
-  background-color: white;
-  color: black;
-  border-radius: 10px;
-  padding: 10px
 }

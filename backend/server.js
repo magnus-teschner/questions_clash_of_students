@@ -1,4 +1,5 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const path = require('path');
 const multer = require("multer");
 const app = express();
@@ -52,7 +53,7 @@ const config_mysql = {
 };
 
 app.use((req, res, next) => {
-  if (!req.isAuthenticated() && req.method === 'GET' && !req.path.includes('reset-password') && req.path !== '/log-in-prof' && req.path !=='/sign-up-prof' && req.path !=='/sign-up-student' && req.path !== '/log-in-student' && req.path !== '/') {
+  if (!req.isAuthenticated() && req.method === 'GET' && !req.path.includes('reset-password') && req.path !== '/log-in-prof' && req.path !== '/sign-up-prof' && req.path !== '/sign-up-student' && req.path !== '/log-in-student' && req.path !== '/') {
     req.session.returnTo = req.originalUrl;
   }
   next();
@@ -440,7 +441,116 @@ app.get('/manage-questions', (req, res) => {
 });
 
 app.get('/courses', (req, res) => {
-  return res.render("courses", { user: req.user });
+  if (!req.user) {
+    return res.render("courses", {
+      user: req.user,
+      nonEnrolledCourses: [],
+      enrolledCourses: []
+    });
+  }
+
+  const query_courses = 'SELECT * FROM course';
+  const query_enrolled_courses = `SELECT c.* FROM course c JOIN course_members cm ON c.id = cm.course_id WHERE cm.user_email = ?`;
+
+  con.query(query_courses, (err, courses) => {
+    if (err) {
+      console.error('Error fetching courses:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    const promises_unenroll = courses.map(course => {
+      if (course.user) {
+        const emailParts = course.user.split('@')[0].split('.');
+        course.lastname = emailParts.length > 1 ? emailParts[emailParts.length - 1] : '';
+        course.lastname = course.lastname.charAt(0).toUpperCase() + course.lastname.slice(1);
+      }
+    });
+
+    con.query(query_enrolled_courses, [req.user.email], (err, enrolledCourses) => {
+      if (err) {
+        console.error('Error fetching enrolled courses:', err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      const getLectionsForCourse = (program, course) => {
+        return new Promise((resolve, reject) => {
+          const query = `SELECT DISTINCT lection FROM questions WHERE program = ? AND course = ?`
+
+          con.query(query, [program, course], (err, results) => {
+            if (err) {
+              return reject(err);
+            }
+            resolve(results.map(r => r.lection));
+          });
+        });
+      };
+
+      const promises_enroll = enrolledCourses.map(course => {
+        if (course.user) {
+          const emailParts = course.user.split('@')[0].split('.');
+          course.lastname = emailParts.length > 1 ? emailParts[emailParts.length - 1] : '';
+          course.lastname = course.lastname.charAt(0).toUpperCase() + course.lastname.slice(1);
+        }
+
+        return getLectionsForCourse(course.program_name, course.course_name).then(lections => {
+          course.lections = lections;
+        });
+      });
+
+      Promise.all(promises_enroll, promises_unenroll).then(() => {
+        return res.render("courses", {
+          user: req.user,
+          nonEnrolledCourses: courses,
+          enrolledCourses: enrolledCourses
+        });
+      }).catch(err => {
+        console.error('Error fetching lections:', err);
+        return res.status(500).send('Internal Server Error');
+      });
+    });
+  });
+});
+
+// Endpoint to handle course enrollment
+app.post('/enroll-course', (req, res) => {
+  if (!req.user) {
+    return res.status(401).send('No User signed in!');
+  }
+
+  const courseId = req.body.course_id;
+  const userEmail = req.user.email;
+
+  const query_enroll = 'INSERT INTO course_members (user_email, course_id) VALUES (?, ?)';
+
+  con.query(query_enroll, [userEmail, courseId], (err, result) => {
+    if (err) {
+      console.error('Error enrolling in course:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    res.status(200).send('Enrolled successfully');
+  });
+});
+
+// Endpoint to handle course unenrollment
+app.post('/unenroll-course', (req, res) => {
+  if (!req.user) {
+    return res.status(401).send('No User signed in!');
+  }
+
+  const courseId = req.body.course_id;
+  const userEmail = req.user.email;
+
+  const query_unenroll = 'DELETE FROM course_members WHERE user_email = ? AND course_id = ?';
+
+  con.query(query_unenroll, [userEmail, courseId], (err, result) => {
+    if (err) {
+      console.error('Error unenrolling from course:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    res.status(200).send('Unenrolled successfully');
+  });
 });
 
 app.get('/ranking', (req, res) => {
@@ -483,69 +593,6 @@ app.get('/ranking', (req, res) => {
     res.render('ranking', { user: req.user, rankingList: rankingList });
   });
 });
-
-
-app.get('/enter-courses', (req, res) => {
-  if (!req.user) {
-    return res.render("enter-courses", {
-      user: req.user,
-      nonEnrolledCourses: [],
-      enrolledCourses: []
-    });
-  }
-
-  const query_courses = 'SELECT * FROM course';
-  const query_enrolled_courses = 'SELECT c.* FROM course c JOIN course_members cm ON c.id = cm.course_id WHERE cm.user_email = ?';
-
-  con.query(query_courses, (err, courses) => {
-    if (err) {
-      console.error('Error fetching courses:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    con.query(query_enrolled_courses, [req.user.email], (err, enrolledCourses) => {
-      if (err) {
-        console.error('Error fetching enrolled courses:', err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-      // Filter courses to get the non-enrolled courses
-      const nonEnrolledCourses = courses.filter(course =>
-        !enrolledCourses.some(enrolled => enrolled.id === course.id)
-      );
-
-      return res.render("enter-courses", {
-        user: req.user,
-        nonEnrolledCourses: nonEnrolledCourses,
-        enrolledCourses: enrolledCourses
-      });
-    });
-  });
-});
-
-
-// Endpoint to handle course enrollment
-app.post('/enroll-course', (req, res) => {
-  if (!req.user) {
-    return res.status(401).send('No User signed in!');
-  }
-
-  const courseId = req.body.course_id;
-  const userEmail = req.user.email;
-
-  const query_enroll = 'INSERT INTO course_members (user_email, course_id) VALUES (?, ?)';
-
-  con.query(query_enroll, [userEmail, courseId], (err, result) => {
-    if (err) {
-      console.error('Error enrolling in course:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    res.status(200).send('Enrolled successfully');
-  });
-});
-
-
 
 app.get('/manage-courses', async (req, res) => {
   try {
@@ -1129,11 +1176,11 @@ app.post('/send-reset-email', (req, res, next) => {
 });
 
 app.get('/reset-password/:token', (req, res) => {
-  con.query('SELECT * FROM accounts WHERE verificationToken = ?', 
+  con.query('SELECT * FROM accounts WHERE verificationToken = ?',
     [req.params.token], (err, user) => {
-    if (err || !user.length) return res.status(400).send('Password reset token is invalid or has expired.');
-    res.render('reset-password', { token: req.params.token });
-  });
+      if (err || !user.length) return res.status(400).send('Password reset token is invalid or has expired.');
+      res.render('reset-password', { token: req.params.token });
+    });
 });
 
 app.post('/reset-password', (req, res) => {
@@ -1141,23 +1188,48 @@ app.post('/reset-password', (req, res) => {
 
   if (password !== confirmPassword) return res.status(400).send('Passwords do not match.');
 
-  con.query('SELECT * FROM accounts WHERE verificationToken = ?', 
+  con.query('SELECT * FROM accounts WHERE verificationToken = ?',
     [token], (err, user) => {
-    if (err || !user.length) return res.status(400).send('Password reset token is invalid or has expired.');
+      if (err || !user.length) return res.status(400).send('Password reset token is invalid or has expired.');
 
-    bcrypt.hash(password, 10, (err, hashedPassword) => {
-      if (err) return res.status(500).send('Error hashing password.');
+      bcrypt.hash(password, 10, (err, hashedPassword) => {
+        if (err) return res.status(500).send('Error hashing password.');
 
-      con.query('UPDATE accounts SET password = ?, verificationToken = NULL WHERE email = ?', 
-        [hashedPassword, user[0].email], (err) => {
-        if (err) return res.status(500).send('Error updating password.');
-        res.render('success_change');
+        con.query('UPDATE accounts SET password = ?, verificationToken = NULL WHERE email = ?',
+          [hashedPassword, user[0].email], (err) => {
+            if (err) return res.status(500).send('Error updating password.');
+            res.render('success_change');
+          });
       });
     });
-  });
 });
 
+// JWT secret key
+const secretKey = 'yourSecretKey';
 
+// Endpoint to generate a JWT token
+app.post('/jwt', (req, res) => {
+  const { program, course } = req.body;
+
+  if (!req.user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  // Construct the JWT payload
+  const payload = {
+    email: req.user.email,
+    firstname: req.user.firstname,
+    lastname: req.user.lastname,
+    program: program,
+    course: course,
+  };
+
+  // Generate the token
+  const token = jwt.sign(payload, secretKey, { expiresIn: '24h' });
+
+  // Send the token back as the response
+  res.json({ result: token });
+});
 
 app.listen(port, () => {
   console.log(`Server running at port ${port}`);
