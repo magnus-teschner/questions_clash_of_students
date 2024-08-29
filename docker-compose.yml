@@ -3,6 +3,7 @@ version: '3'
 services:
   mysqldb:
     image: mysql:5.7
+#    platform: linux/x86_64
     environment:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: clashOfStudents
@@ -36,6 +37,13 @@ services:
       MINIO_ACCESS_KEY: IQ8WmkoR6EoyZtWIH4Pc
       MINIO_SECRET_KEY: c7SiP3sIexrTxQH8yTak5zSxBYdIpLTCuxA1qsSk
     command: server /data --console-address ":9001"
+
+  webgl:
+    container_name: unity-webgl-demo
+    image: unity-webgl-demo
+    build: ./webgl
+    ports:
+      - "8080:80"
 
 
 
