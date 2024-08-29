@@ -38,6 +38,10 @@
                       </svg>
                     </button>
                   </div>
+                  <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar">
+                    </div>
+                  </div>
                   <div class="info-container">
                     <div class="info-details">
                       <div class="info-deco"></div>
@@ -57,24 +61,18 @@
                         </span>
                       </div>
                     </div>
-                    <button class="toggle-btn">
-                      <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="35"
-                        height="35">
-                        <path fill='black' d='m5.84 9.59l5.66 5.66l5.66-5.66l-.71-.7l-4.95 4.95l-4.95-4.95z' />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <!-- Lessons Container -->
-                <div class="lessons">
-                  <% course.lections.forEach(lection=> { %>
-                    <div class="lesson">
-                      <button class="play-btn">▶</button>
-                      <span>
-                        <%= lection %>
-                      </span>
+                    <div class="info-details">
+                      <div class="info-deco"></div>
+                      <span class="icon-score"></span>
+                      <div class="info-content">
+                        <div>Score</div>
+                        <span>
+                          <%= course.course_score %>
+                        </span>
+                      </div>
                     </div>
-                    <% }) %>
+                    <button class="play-btn">▶</button>
+                  </div>
                 </div>
               </div>
               <% }) %>

@@ -449,7 +449,12 @@ app.get('/courses', (req, res) => {
   }
 
   const query_courses = 'SELECT * FROM course';
-  const query_enrolled_courses = `SELECT c.* FROM course c JOIN course_members cm ON c.id = cm.course_id WHERE cm.user_email = ?`;
+  const query_enrolled_courses = `
+    SELECT c.*, cm.progress, cm.course_score 
+    FROM course c 
+    JOIN course_members cm 
+    ON c.id = cm.course_id 
+    WHERE cm.user_email = ?`;
 
   con.query(query_courses, (err, courses) => {
     if (err) {
@@ -497,10 +502,10 @@ app.get('/courses', (req, res) => {
       });
 
       Promise.all(promises_enroll, promises_unenroll).then(() => {
-        return res.render("courses", {
-          user: req.user,
-          nonEnrolledCourses: courses,
-          enrolledCourses: enrolledCourses
+      return res.render("courses", {
+        user: req.user,
+        nonEnrolledCourses: courses,
+        enrolledCourses: enrolledCourses
         });
       }).catch(err => {
         console.error('Error fetching lections:', err);
@@ -519,7 +524,7 @@ app.post('/enroll-course', (req, res) => {
   const courseId = req.body.course_id;
   const userEmail = req.user.email;
 
-  const query_enroll = 'INSERT INTO course_members (user_email, course_id) VALUES (?, ?)';
+  const query_enroll = 'INSERT INTO course_members (user_email, course_id, progress, course_score) VALUES (?, ?, 0, 0)';
 
   con.query(query_enroll, [userEmail, courseId], (err, result) => {
     if (err) {
@@ -528,6 +533,25 @@ app.post('/enroll-course', (req, res) => {
     }
 
     res.status(200).send('Enrolled successfully');
+  });
+});
+
+app.get('/course-progress', (req, res) => {
+  if (!req.user) {
+    return res.status(401).send('No User signed in!');
+  }
+
+  const userEmail = req.user.email;
+
+  const query_progress = 'SELECT course_id, progress, course_score FROM course_members WHERE user_email = ?';
+
+  con.query(query_progress, [userEmail], (err, results) => {
+    if (err) {
+      console.error('Error fetching course progress:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    res.status(200).json(results);
   });
 });
 

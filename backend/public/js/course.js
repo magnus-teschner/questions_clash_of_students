@@ -76,16 +76,35 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
+  fetch('/course-progress')
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      const progressBars = document.querySelectorAll('.progress-bar');
+
+      data.forEach((course, index) => {
+        const progress = calculateProgress(course.progress, 100);
+        progressBars[index].style.width = progress.toFixed(0) + '%';
+        progressBars[index].textContent = progress.toFixed(0) + '%';
+
+        if (progress === 0) {
+          progressBars[index].style.width = 0 + '%';
+          progressBars[index].textContent = 0 + '%';
+        }
+      });
+    })
+    .catch(error => {
+      console.error('Error fetching course progress:', error);
+    });
+
+  function calculateProgress(currentPoints, maxPoints) {
+    if (maxPoints === 0) return 0;
+    if (currentPoints === 0) return 0;
+    return (currentPoints / maxPoints) * 100;
+  }
+
   window.enrollCourse = enrollCourse;
   window.unenrollCourse = unenrollCourse;
-});
-
-// Toggle Button Courses
-document.querySelectorAll('.toggle-btn').forEach(button => {
-  button.addEventListener('click', function () {
-    const courseItem = this.closest('.course-item');
-    courseItem.classList.toggle('active');
-  });
 });
 
 // Play Button Lessons
