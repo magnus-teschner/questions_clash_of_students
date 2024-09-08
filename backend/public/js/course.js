@@ -94,11 +94,12 @@ document.querySelectorAll('.play-btn').forEach(btn => {
     var url = 'http://localhost:8080';
     const selectedProgram = btn.closest('.course-item').querySelector('.info-content span').innerText; // Adjust selector if necessary
     const selectedCourse = btn.closest('.course-item').querySelector('.course-title').innerText; // Adjust selector if necessary
-
+    const professorEmail = btn.closest('.course-item').querySelector(`input[type="hidden"]`).value; // Get the hidden email
     // Define the data to send in the POST request
     const postData = {
       program: selectedProgram,
       course: selectedCourse,
+      professorEmail: professorEmail
     };
 
     // Make the POST fetch request
@@ -109,20 +110,20 @@ document.querySelectorAll('.play-btn').forEach(btn => {
       },
       body: JSON.stringify(postData)
     })
-    .then(response => response.json())
-    .then(data => {
-      // Assuming 'data' is the result you want to append as a URL parameter
-      const result = encodeURIComponent(data.result); // Adjust 'result' as per your data structure
+      .then(response => response.json())
+      .then(data => {
+        // Assuming 'data' is the result you want to append as a URL parameter
+        const result = encodeURIComponent(data.result); // Adjust 'result' as per your data structure
 
-      // Append the result as a URL parameter
-      const newUrl = `${url}?token=${result}`;
+        // Append the result as a URL parameter
+        const newUrl = `${url}?token=${result}`;
 
-      // Navigate to the new URL
-      window.location.href = newUrl;
-    })
-    .catch(error => {
-      console.error('Error fetching data:', error);
-    });
+        // Navigate to the new URL
+        window.location.href = newUrl;
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
   });
 });
 
