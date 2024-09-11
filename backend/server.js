@@ -53,7 +53,7 @@ const config_mysql = {
 };
 
 app.use((req, res, next) => {
-  if (!req.isAuthenticated() && req.method === 'GET' && !req.path.includes('reset-password') && req.path !== '/log-in-prof' && req.path !== '/sign-up-prof' && req.path !== '/sign-up-student' && req.path !== '/log-in-student' && req.path !== '/') {
+  if (!req.isAuthenticated() && req.method === 'GET' && !req.path.includes('reset-password') && req.path !== '/favicon.ico' && req.path !== '/log-in-prof' && req.path !== '/sign-up-prof' && req.path !== '/sign-up-student' && req.path !== '/log-in-student' && req.path !== '/') {
     req.session.returnTo = req.originalUrl;
   }
   next();
@@ -1233,7 +1233,7 @@ const secretKey = 'yourSecretKey';
 
 // Endpoint to generate a JWT token
 app.post('/jwt', (req, res) => {
-  const { program, course } = req.body;
+  const { program, course, professorEmail } = req.body;
 
   if (!req.user) {
     return res.status(401).json({ message: 'Unauthorized' });
@@ -1246,6 +1246,7 @@ app.post('/jwt', (req, res) => {
     lastname: req.user.lastname,
     program: program,
     course: course,
+    professor_email: professorEmail
   };
 
   // Generate the token
