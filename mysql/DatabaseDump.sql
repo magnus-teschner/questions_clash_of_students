@@ -51,6 +51,8 @@ CREATE TABLE IF NOT EXISTS `course` (
 CREATE TABLE IF NOT EXISTS `course_members` (
     `user_email` VARCHAR(255),
     `course_id` INT,
+    `progress` INT,
+    `course_score` INT,
     FOREIGN KEY (`course_id`) REFERENCES `course`(`id`)
 );
 
