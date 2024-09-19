@@ -201,6 +201,10 @@ input[type="text"]:focus {
     cursor: pointer;
 }
 
+.hidden {
+    display: none;
+}
+
 /* Media Queries */
 @media (max-width: 768px) {
     #content-container {
