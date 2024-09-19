@@ -577,44 +577,80 @@ app.post('/unenroll-course', (req, res) => {
   });
 });
 
-app.get('/ranking', (req, res) => {
-  const rankingQuery = `
-    SELECT a.id, a.firstname, a.lastname, s.score
-    FROM accounts a
-    JOIN scores s ON a.id = s.account_id
-  `;
+app.get('/ranking', (req, res, next) => {
+  const courseQuery = `SELECT DISTINCT course_name, id FROM course`;
 
-  con.query(rankingQuery, [], (err, rows) => {
+  const selectedCourse = req.query.course || 'all';
+
+  let rankingQuery;
+  let queryParams = [];
+
+  if (selectedCourse === 'all') {
+    // Gesamtranking (alle Kurse)
+    rankingQuery = `
+      SELECT a.id, a.firstname, a.lastname, s.score
+      FROM accounts a
+      JOIN scores s ON a.id = s.account_id
+      ORDER BY s.score DESC
+    `;
+  } else {
+    // Kursbasiertes Ranking
+    rankingQuery = `
+      SELECT a.id, a.firstname, a.lastname, cm.course_score, c.course_name
+      FROM accounts a
+      JOIN course_members cm ON a.id = cm.account_id
+      JOIN course c ON cm.course_id = c.id
+      WHERE c.course_name = ?
+      ORDER BY cm.course_score DESC
+    `;
+    queryParams = [selectedCourse];
+  }
+
+  con.query(courseQuery, [], (err, courses) => {
     if (err) {
       return next(err);
     }
 
-    const sortedData = rows.sort((a, b) => {
-      if (b.score === a.score) {
-        return a.firstname.localeCompare(b.firstname);
+    con.query(rankingQuery, queryParams, (err, rows) => {
+      if (err) {
+        return next(err);
       }
-      return b.score - a.score;
-    });
 
-    let currentRank = 1;
-    let currentScore = sortedData[0].score;
-    sortedData.forEach((user, index) => {
-      if (user.score < currentScore) {
-        currentRank = index + 1;
-        currentScore = user.score;
+      let rankingList;
+      if (selectedCourse === 'all') {
+        // Alle Kurse
+        rankingList = rows.sort((a, b) => b.score - a.score).map((user, index, sortedUsers) => {
+          const rank = index > 0 && sortedUsers[index - 1].score === user.score ? sortedUsers[index - 1].rank : index + 1;
+          return {
+            id: user.id,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            score: user.score,
+            rank: rank
+          };
+        });
+      } else {
+        // Ausgewählter Kurs
+        rankingList = rows.sort((a, b) => b.course_score - a.course_score).map((user, index, sortedUsers) => {
+          const rank = index > 0 && sortedUsers[index - 1].course_score === user.course_score ? sortedUsers[index - 1].rank : index + 1;
+          return {
+            id: user.id,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            course_score: user.course_score, 
+            course_name: user.course_name, 
+            rank: rank
+          };
+        });
       }
-      user.rank = currentRank;
+
+      res.render('ranking', {
+        user: req.user,
+        rankingList: rankingList,
+        courses: courses,
+        selectedCourse: selectedCourse 
+      });
     });
-
-    const rankingList = sortedData.map(user => ({
-      rank: user.rank,
-      id: user.id,
-      firstname: user.firstname,
-      lastname: user.lastname,
-      score: user.score
-    }));
-
-    res.render('ranking', { user: req.user, rankingList: rankingList });
   });
 });
 

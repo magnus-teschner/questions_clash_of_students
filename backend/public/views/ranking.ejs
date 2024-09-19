@@ -10,59 +10,88 @@
 <body>
   <% if (user) { %>
     <%- include('navbar') %>
-    <div class="container">
-      <div class="ranking">
-        <div class="ranking-header">
-          <h2>Ranking Liste</h2>
-        </div>
-        <ul>
-          <% rankingList.forEach(userItem => { %>
-            <% const isCurrentUser = user.id === userItem.id; %>
-            <li class="<%= isCurrentUser ? 'highlight' : '' %>">
-              <span class="rank">
-                <% if (userItem.rank === 1) { %>
-                  <svg class="medal-icon gold-medal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <g fill="none" stroke="#ffd700" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" color="#ffd700">
-                      <path d="M5 15c0-3.866 3.022-7 6.75-7h.5C15.978 8 19 11.134 19 15s-3.022 7-6.75 7h-.5C8.022 22 5 18.866 5 15"/>
-                      <path d="M12.5 18v-5.052c0-.574 0-.862-.23-.933c-.507-.157-1.27.984-1.27.984m1.5 5H11m1.5 0H14M13.56 2L11 7.898M18 2l-2.821 6.5M10.44 2L12 5.594M6 2l2.821 6.5"/>
-                    </g>
-                  </svg>
-                <% } else if (userItem.rank === 2) { %>
-                  <svg class="medal-icon silver-medal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <g fill="none" stroke="#c0c0c0" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" color="#c0c0c0">
-                      <path d="M5 15c0-3.866 3.022-7 6.75-7h.5C15.978 8 19 11.134 19 15s-3.022 7-6.75 7h-.5C8.022 22 5 18.866 5 15"/>
-                      <path d="M10.5 13.118c.08-.785.608-1.118 1.158-1.118h.666c.55 0 1.077.333 1.157 1.118a4 4 0 0 1 0 .764c-.049.478-.627 1.027-.627 1.027L12 15.5s-1.5 1-1.5 2c0 .54.437.5.977.5h2.004m.079-16L11 7.898M18 2l-2.821 6.5M10.44 2L12 5.594M6 2l2.821 6.5"/>
-                    </g>
-                  </svg>
-                <% } else if (userItem.rank === 3) { %>
-                  <svg class="medal-icon bronze-medal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <g fill="none" stroke="#cd7f32" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" color="#cd7f32">
-                      <path d="M5 15c0-3.866 3.022-7 6.75-7h.5C15.978 8 19 11.134 19 15s-3.022 7-6.75 7h-.5C8.022 22 5 18.866 5 15"/>
-                      <path d="M10.5 13.118c.08-.785.607-1.118 1.158-1.118h.666c.55 0 1.077.333 1.157 1.118a4 4 0 0 1 0 .764c-.066.648-.51 1.118-.99 1.118M10.5 16.882c.08.785.607 1.118 1.158 1.118h.666c.55 0 1.077-.333 1.157-1.118a4 4 0 0 0 0-.764c-.066-.648-.51-1.118-.99-1.118m0 0h-.06M13.56 2L11 7.898M18 2l-2.821 6.5M10.44 2L12 5.594M6 2l2.821 6.5"/>
-                    </g>
-                  </svg>
-                <% } else { %>
-                  <div class="ranks">
-                  <%= userItem.rank %>.
+      <div class="container">
+        <div class="ranking">
+          <div class="ranking-header">
+            <h2>Ranking Liste</h2>
+            <form method="GET" action="/ranking">
+              <select id="kurs-filter" name="course" class="ranking-dropdown" onchange="this.form.submit()">
+                <option value="all" <% if (selectedCourse==='all' ) { %>selected<% } %>>Alle Kurse</option>
+                <% courses.forEach(function(course) { %>
+                  <option value="<%= course.course_name %>" <% if (selectedCourse===course.course_name) { %>selected<% }
+                      %>><%= course.course_name %>
+                  </option>
+                  <% }); %>
+              </select>
+            </form>
+          </div>
+          <ul>
+            <% rankingList.forEach(userItem=> { %>
+              <% const isCurrentUser=user.id===userItem.id; %>
+                <li class="<%= isCurrentUser ? 'highlight' : '' %>">
+                  <span class="rank">
+                    <% if (userItem.rank===1) { %>
+                      <svg class="medal-icon gold-medal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <g fill="none" stroke="#ffd700" stroke-linecap="round" stroke-linejoin="round"
+                          stroke-width="1.5" color="#ffd700">
+                          <path
+                            d="M5 15c0-3.866 3.022-7 6.75-7h.5C15.978 8 19 11.134 19 15s-3.022 7-6.75 7h-.5C8.022 22 5 18.866 5 15" />
+                          <path
+                            d="M12.5 18v-5.052c0-.574 0-.862-.23-.933c-.507-.157-1.27.984-1.27.984m1.5 5H11m1.5 0H14M13.56 2L11 7.898M18 2l-2.821 6.5M10.44 2L12 5.594M6 2l2.821 6.5" />
+                        </g>
+                      </svg>
+                      <% } else if (userItem.rank===2) { %>
+                        <svg class="medal-icon silver-medal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                          <g fill="none" stroke="#c0c0c0" stroke-linecap="round" stroke-linejoin="round"
+                            stroke-width="1.5" color="#c0c0c0">
+                            <path
+                              d="M5 15c0-3.866 3.022-7 6.75-7h.5C15.978 8 19 11.134 19 15s-3.022 7-6.75 7h-.5C8.022 22 5 18.866 5 15" />
+                            <path
+                              d="M10.5 13.118c.08-.785.608-1.118 1.158-1.118h.666c.55 0 1.077.333 1.157 1.118a4 4 0 0 1 0 .764c-.049.478-.627 1.027-.627 1.027L12 15.5s-1.5 1-1.5 2c0 .54.437.5.977.5h2.004m.079-16L11 7.898M18 2l-2.821 6.5M10.44 2L12 5.594M6 2l2.821 6.5" />
+                          </g>
+                        </svg>
+                        <% } else if (userItem.rank===3) { %>
+                          <svg class="medal-icon bronze-medal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <g fill="none" stroke="#cd7f32" stroke-linecap="round" stroke-linejoin="round"
+                              stroke-width="1.5" color="#cd7f32">
+                              <path
+                                d="M5 15c0-3.866 3.022-7 6.75-7h.5C15.978 8 19 11.134 19 15s-3.022 7-6.75 7h-.5C8.022 22 5 18.866 5 15" />
+                              <path
+                                d="M10.5 13.118c.08-.785.607-1.118 1.158-1.118h.666c.55 0 1.077.333 1.157 1.118a4 4 0 0 1 0 .764c-.066.648-.51 1.118-.99 1.118M10.5 16.882c.08.785.607 1.118 1.158 1.118h.666c.55 0 1.077-.333 1.157-1.118a4 4 0 0 0 0-.764c-.066-.648-.51-1.118-.99-1.118m0 0h-.06M13.56 2L11 7.898M18 2l-2.821 6.5M10.44 2L12 5.594M6 2l2.821 6.5" />
+                            </g>
+                          </svg>
+                          <% } else { %>
+                            <div class="ranks">
+                              <%= userItem.rank %>.
+                            </div>
+                            <% } %>
+                  </span>
+                  <div class="name-score">
+                    <span>
+                      <%= userItem.firstname %>
+                        <%= userItem.lastname %>
+                    </span>
+                    <span>
+                      <% if (selectedCourse==='all' ) { %>
+                        <%= userItem.score %>
+                          <% } else { %>
+                            <%= userItem.course_score %>
+                              <% } %>
+                    </span>
                   </div>
-                <% } %>
-              </span>
-              <div class="name-score">
-                <span><%= userItem.firstname %> <%= userItem.lastname %></span>
-                <span><%= userItem.score %></span>
-              </div>
-            </li>
-          <% }) %>
-        </ul>
+                </li>
+                <% }) %>
+          </ul>
+        </div>
       </div>
-    </div>
-  <% } else { %>
-    <div id="container">
-      <div id="login-hint">
-        Please <a href="/"> log in</a> to view this page!
-      </div>
-    </div>
-  <% } %>
-  <script src="js/ranking.js"></script>
+      <% } else { %>
+        <div id="container">
+          <div id="login-hint">
+            Please <a href="/">log in</a> to view this page!
+          </div>
+        </div>
+        <% } %>
+          <script src="js/ranking.js"></script>
 </body>
+
 </html>
