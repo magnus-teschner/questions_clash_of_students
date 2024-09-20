@@ -63,5 +63,13 @@ CREATE TABLE IF NOT EXISTS `scores` (
   FOREIGN KEY (`user_id`) REFERENCES `accounts` (`user_id`) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS `lection_scores` (
+  `lection_id` INT,
+  `user_id` INT,
+  'lection_score' INT
+  FOREIGN KEY (`user_id`) REFERENCES `accounts` (`user_id`) ON DELETE CASCADE,
+  FOREIGN KEY (`lection_id`) REFERENCES `lections` (`lection_id`) ON DELETE CASCADE,
+);
+
 INSERT INTO `programs`(`program_name`) VALUES ('Digital Business');
 INSERT INTO `programs`(`program_name`) VALUES ('Digital Business Engineering');

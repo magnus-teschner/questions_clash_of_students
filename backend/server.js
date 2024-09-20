@@ -162,7 +162,6 @@ passport.use('prof',
         try {
           const match = await bcrypt.compare(password, db_password);
           if (!match) {
-            // passwords do not match!
             return done(null, false, { message: "Incorrect password" })
           } else {
             let user = { firstname: db_first, lastname: db_last, email: db_email };
@@ -503,10 +502,10 @@ app.get('/courses', (req, res) => {
       });
 
       Promise.all(promises_enroll, promises_unenroll).then(() => {
-      return res.render("courses", {
-        user: req.user,
-        nonEnrolledCourses: courses,
-        enrolledCourses: enrolledCourses
+        return res.render("courses", {
+          user: req.user,
+          nonEnrolledCourses: courses,
+          enrolledCourses: enrolledCourses
         });
       }).catch(err => {
         console.error('Error fetching lections:', err);
