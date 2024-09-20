@@ -9,7 +9,7 @@ class UserManagementController {
         try {
             const { email } = req.params;
             const userId = await UserManagementService.findIdByEmail(email);
-            if (!userId.length) {
+            if (!userId) {
                 return res.status(404).json({ error: `No user found with email ${email}` });
             }
             res.json(userId);
@@ -19,11 +19,40 @@ class UserManagementController {
         }
     }
 
+    static async checkVerification(req, res) {
+        try {
+            const { user_id } = req.params;
+            const verification_status = await UserManagementService.checkVerification(user_id);
+            if (!verification_status) {
+                return res.status(404).json({ error: `No verification info found for user_id ${user_id}` });
+            }
+            res.json(verification_status);
+        } catch (error) {
+            res.status(500).json({ error: 'An error occurred while retrieving verification status by ID' });
+            console.error(error);
+        }
+    }
+
+
+    static async findAccountByEmail(req, res) {
+        try {
+            const { email } = req.params;
+            const account = await UserManagementService.findAccountByEmail(email);
+            if (!account) {
+                return res.status(404).json({ error: `No account found for email ${email}` });
+            }
+            res.json(account);
+        } catch (error) {
+            res.status(500).json({ error: 'An error occurred while retrieving account by email' });
+            console.error(error);
+        }
+    }
+
     static async findAccountById(req, res) {
         try {
             const { user_id } = req.params;
             const account = await UserManagementService.findAccountById(user_id);
-            if (!account.length) {
+            if (!account) {
                 return res.status(404).json({ error: `No account found for user ID ${user_id}` });
             }
             res.json(account);
@@ -37,7 +66,7 @@ class UserManagementController {
         try {
             const { token } = req.params;
             const account = await UserManagementService.findAccountByToken(token);
-            if (!account.length) {
+            if (!account) {
                 return res.status(404).json({ error: `No account found with token ${token}` });
             }
             res.json(account);
@@ -71,11 +100,11 @@ class UserManagementController {
 
     static async createAccount(req, res) {
         try {
-            const { firstname, lastname, email, password, role, verificationToken } = req.body;
-            if (!firstname || !lastname || !email || !password || !role || !verificationToken) {
+            const { firstname, lastname, email, password, role } = req.body;
+            if (!firstname || !lastname || !email || !password || !role) {
                 return res.status(400).json({ error: 'All fields are required' });
             }
-            await UserManagementService.createAccount(firstname, lastname, email, password, role, verificationToken);
+            await UserManagementService.createAccount(firstname, lastname, email, password, role);
             res.status(201).json({ message: 'Account created successfully' });
         } catch (error) {
             res.status(500).json({ error: 'An error occurred while creating the account' });
@@ -85,7 +114,8 @@ class UserManagementController {
 
     static async updatePassword(req, res) {
         try {
-            const { user_id, newPassword } = req.body;
+            const { user_id } = req.params;
+            const { newPassword } = req.body;
             if (!user_id || !newPassword) {
                 return res.status(400).json({ error: 'User ID and new password are required' });
             }

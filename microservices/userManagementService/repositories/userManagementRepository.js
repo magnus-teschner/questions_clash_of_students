@@ -6,9 +6,19 @@ class UserManagementRepository {
         return this.query(sql, [email]);
     }
 
+    static checkVerification(user_id) {
+        const sql = 'SELECT isVerified FROM accounts WHERE user_id = ?';
+        return this.query(sql, [user_id]);
+    }
+
     static findAccountById(user_id) {
         const sql = 'SELECT * FROM accounts WHERE user_id = ?';
         return this.query(sql, [user_id]);
+    }
+
+    static findAccountByEmail(email) {
+        const sql = 'SELECT * FROM accounts WHERE email = ?';
+        return this.query(sql, [email]);
     }
 
     static findAccountByToken(token) {
@@ -17,23 +27,23 @@ class UserManagementRepository {
     }
 
     static verifyAccount(user_id) {
-        const sql = 'UPDATE accounts SET isVerified = 1 WHERE id = ?';
+        const sql = 'UPDATE accounts SET isVerified = 1 WHERE user_id = ?';
         return this.query(sql, [user_id]);
     }
 
     static resetVerificationToken(user_id) {
-        const sql = 'UPDATE accounts SET verificationToken = NULL WHERE id = ?';
+        const sql = 'UPDATE accounts SET verificationToken = NULL WHERE user_id = ?';
         return this.query(sql, [user_id]);
     }
 
     static createAccount(firstname, lastname, email, hashedPassword, role, verificationToken) {
-        const query_insert = 'INSERT INTO accounts (firstname, lastname, email, password, role, verificationToken) VALUES (?, ?, ?, ?, ?, ?)';
+        const sql = 'INSERT INTO accounts (firstname, lastname, email, password, role, verificationToken) VALUES (?, ?, ?, ?, ?, ?)';
         return this.query(sql, [firstname, lastname, email, hashedPassword, role, verificationToken]);
     }
 
-    static updatePassword(hashedPassword) {
-        const query_insert = 'UPDATE accounts SET password = ? WHERE id = ?';
-        return this.query(sql, [hashedPassword]);
+    static updatePassword(user_id, hashedPassword) {
+        const sql = 'UPDATE accounts SET password = ? WHERE user_id = ?';
+        return this.query(sql, [hashedPassword, user_id]);
     }
 
 
