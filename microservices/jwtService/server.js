@@ -1,29 +1,15 @@
-//jwt generation
-// JWT secret key
-const jwt = require('jsonwebtoken');
-const secretKey = 'yourSecretKey';
+const express = require('express');
+const cors = require('cors');
+const jwtRoutes = require('./routes/jwtRoutes');
 
-// Endpoint to generate a JWT token
-app.post('/jwt', (req, res) => {
-    const { program, course, professorEmail } = req.body;
+const app = express();
+app.use(express.json());
+app.use(cors());
+app.use(express.urlencoded({ extended: false }));
 
-    if (!req.user) {
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
+app.use('/', jwtRoutes);
 
-    // Construct the JWT payload
-    const payload = {
-        email: req.user.email,
-        firstname: req.user.firstname,
-        lastname: req.user.lastname,
-        program: program,
-        course: course,
-        professor_email: professorEmail
-    };
-
-    // Generate the token
-    const token = jwt.sign(payload, secretKey, { expiresIn: '24h' });
-
-    // Send the token back as the response
-    res.json({ result: token });
+const port = process.env.PORT || 1002;
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
