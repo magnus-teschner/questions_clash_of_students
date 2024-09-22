@@ -581,7 +581,7 @@ app.get('/course-members', (req, res) => {
 });
 
 app.get('/ranking', (req, res, next) => {
-  const courseQuery = `SELECT DISTINCT course_name, id FROM courses`;
+  const courseQuery = `SELECT DISTINCT course_name, course_id FROM courses`;
 
   const selectedCourse = req.query.course || 'all';
 
