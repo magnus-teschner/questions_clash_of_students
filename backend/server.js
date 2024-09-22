@@ -37,8 +37,6 @@ mailjet_public_key = "6a2924e64b4c454bbcdf6580e44e9ca2";
 mailjet_private_key = "9b2b92a8e47833cfaeb1488d47dc1790";
 backend = "127.0.0.1"
 
-
-
 const mailjet = Mailjet.apiConnect(
   mailjet_public_key,
   mailjet_private_key
@@ -61,17 +59,11 @@ app.use((req, res, next) => {
 
 const con = mysql.createConnection(config_mysql);
 
-
-
-
-
-
 passport.use('stud',
   new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, async (email, password, done) => {
     try {
       const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
       const values = [email, 1];
-
 
       con.query(query_retrieve, values, async (err, result) => {
         if (err) {
@@ -92,11 +84,11 @@ passport.use('stud',
 
         }
 
-
         const db_first = result[0].firstname;
         const db_last = result[0].lastname;
         const db_email = result[0].email;
         const db_password = result[0].password;
+        const db_id = result[0].user_id;
 
         try {
           const match = await bcrypt.compare(password, db_password);
@@ -104,20 +96,23 @@ passport.use('stud',
             // passwords do not match!
             return done(null, false, { message: "Incorrect password" })
           } else {
-            let query_score = "SELECT score FROM scores WHERE account_id =?";
-            const id_account = [result[0].id];
+            let query_score = "SELECT score FROM scores WHERE user_id =?";
+            const id_user = [db_id];
+            console.log('ID USER', id_user)
 
-            con.query(query_score, id_account, (err, accountScore) => {
+            con.query(query_score, id_user, (err, userScore) => {
               if (err) {
                 return done(err);
               }
-              const db_score = accountScore[0].score;
+              const db_score = userScore[0].score;
               let user = {
+                user_id: db_id,
                 firstname: db_first,
                 lastname: db_last,
                 email: db_email,
                 score: db_score,
               };
+              console.log(user)
               return done(null, user);
             });
           }
@@ -153,18 +148,18 @@ passport.use('prof',
 
         }
 
+        const db_id = result[0].user_id
         const db_first = result[0].firstname;
         const db_last = result[0].lastname;
         const db_email = result[0].email;
         const db_password = result[0].password;
-
 
         try {
           const match = await bcrypt.compare(password, db_password);
           if (!match) {
             return done(null, false, { message: "Incorrect password" })
           } else {
-            let user = { firstname: db_first, lastname: db_last, email: db_email };
+            let user = {user_id: db_id, firstname: db_first, lastname: db_last, email: db_email };
             return done(null, user);
           }
         } catch (bcryptError) {
@@ -187,26 +182,26 @@ passport.deserializeUser(async (email, done) => {
     const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
     const values = [email];
     con.query(query_retrieve, values, (err, result) => {
-      const db_id = result[0].id;
+      const db_id = result[0].user_id;
       const db_first = result[0].firstname;
       const db_last = result[0].lastname;
       const db_email = result[0].email;
       const db_role = result[0].role;
 
       if (db_role === 'student') {
-        const query_score = "SELECT score FROM scores WHERE account_id = ?";
-        const account_id = [db_id];
-        con.query(query_score, account_id, (err, accountScore) => {
+        const query_score = "SELECT score FROM scores WHERE user_id = ?";
+        const user_id = [db_id];
+        con.query(query_score, user_id, (err, userScore) => {
           if (err) {
             return done(err);
           }
 
-          const db_score = accountScore.length > 0 ? accountScore[0].score : 0;
-          let user = { id: db_id, firstname: db_first, lastname: db_last, email: db_email, score: db_score };
+          const db_score = userScore.length > 0 ? userScore[0].score : 0;
+          let user = { user_id: db_id, firstname: db_first, lastname: db_last, email: db_email, score: db_score };
           return done(null, user);
         });
       } else {
-        let user = { id: db_id, firstname: db_first, lastname: db_last, email: db_email, score: null };
+        let user = { user_id: db_id, firstname: db_first, lastname: db_last, email: db_email, score: null };
         return done(null, user);
       }
     });
@@ -287,8 +282,6 @@ app.get('/verify-email', async (req, res) => {
   }
 });
 
-
-
 app.delete('/delete-member', (req, res) => {
   const { course_id, user_email } = req.body;
   const query = `DELETE FROM course_members WHERE course_id = ? AND user_email = ?`;
@@ -298,19 +291,6 @@ app.delete('/delete-member', (req, res) => {
       return res.status(500).json({ error: 'Database query error' });
     }
     res.status(200).json({ message: 'Member deleted successfully' });
-  });
-});
-
-app.get('/course-members', (req, res) => {
-  const courseId = req.query.id;
-  const email = req.user.email;
-  const query = `SELECT * FROM course_members WHERE course_id = ?`;
-
-  con.query(query, [courseId, email], (error, results) => {
-    if (error) {
-      return res.status(500).json({ error: 'Database query error' });
-    }
-    res.json(results);
   });
 });
 
@@ -340,7 +320,7 @@ app.put('/rename-course', (req, res) => {
     }
 
     // Update the course name in the questions table
-    const query_update_questions = 'UPDATE questions SET course = ? WHERE course = (SELECT course_name FROM course WHERE id = ?) and program = (Select program_name from course where id = ?)';
+    const query_update_questions = 'UPDATE questions SET course = ? WHERE course = (SELECT course_name FROM courses WHERE id = ?) and program = (Select program_name from courses where id = ?)';
     const values_questions = [new_course_name, course_id, course_id];
 
     con.query(query_update_questions, values_questions, (err, result) => {
@@ -379,7 +359,7 @@ app.put('/move-course', (req, res) => {
     }
 
     // Update the program in the questions table
-    const query_update_questions = 'UPDATE questions SET program = ? WHERE course = (SELECT course_name FROM course WHERE id = ?)';
+    const query_update_questions = 'UPDATE questions SET program = ? WHERE course = (SELECT course_name FROM courses WHERE id = ?)';
     const values_questions = [new_program, course_id];
     console.log(values_questions);
 
@@ -448,13 +428,13 @@ app.get('/courses', (req, res) => {
     });
   }
 
-  const query_courses = 'SELECT * FROM course';
+  const query_courses = 'SELECT * FROM courses';
   const query_enrolled_courses = `
     SELECT c.*, cm.progress, cm.course_score 
-    FROM course c 
+    FROM courses c 
     JOIN course_members cm 
-    ON c.id = cm.course_id 
-    WHERE cm.user_email = ?`;
+    ON c.course_id = cm.course_id 
+    WHERE cm.user_id = ?`;
 
   con.query(query_courses, (err, courses) => {
     if (err) {
@@ -470,7 +450,7 @@ app.get('/courses', (req, res) => {
       }
     });
 
-    con.query(query_enrolled_courses, [req.user.email], (err, enrolledCourses) => {
+    con.query(query_enrolled_courses, [req.user.user_id], (err, enrolledCourses) => {
       if (err) {
         console.error('Error fetching enrolled courses:', err);
         return res.status(500).send('Internal Server Error');
@@ -522,11 +502,11 @@ app.post('/enroll-course', (req, res) => {
   }
 
   const courseId = req.body.course_id;
-  const userEmail = req.user.email;
+  const userId = req.user.user_id;
 
-  const query_enroll = 'INSERT INTO course_members (user_email, course_id, progress, course_score) VALUES (?, ?, 0, 0)';
+  const query_enroll = 'INSERT INTO course_members (user_id, course_id, progress, course_score) VALUES (?, ?, 0, 0)';
 
-  con.query(query_enroll, [userEmail, courseId], (err, result) => {
+  con.query(query_enroll, [userId, courseId], (err, result) => {
     if (err) {
       console.error('Error enrolling in course:', err);
       return res.status(500).send('Internal Server Error');
@@ -541,11 +521,11 @@ app.get('/course-progress', (req, res) => {
     return res.status(401).send('No User signed in!');
   }
 
-  const userEmail = req.user.email;
+  const userId = req.user.user_id;
 
-  const query_progress = 'SELECT course_id, progress, course_score FROM course_members WHERE user_email = ?';
+  const query_progress = 'SELECT course_id, progress, course_score FROM course_members WHERE user_id = ?';
 
-  con.query(query_progress, [userEmail], (err, results) => {
+  con.query(query_progress, [userId], (err, results) => {
     if (err) {
       console.error('Error fetching course progress:', err);
       return res.status(500).send('Internal Server Error');
@@ -562,11 +542,11 @@ app.post('/unenroll-course', (req, res) => {
   }
 
   const courseId = req.body.course_id;
-  const userEmail = req.user.email;
+  const userId = req.user.user_id;
 
-  const query_unenroll = 'DELETE FROM course_members WHERE user_email = ? AND course_id = ?';
+  const query_unenroll = 'DELETE FROM course_members WHERE usr_id = ? AND course_id = ?';
 
-  con.query(query_unenroll, [userEmail, courseId], (err, result) => {
+  con.query(query_unenroll, [userId, courseId], (err, result) => {
     if (err) {
       console.error('Error unenrolling from course:', err);
       return res.status(500).send('Internal Server Error');
@@ -576,8 +556,21 @@ app.post('/unenroll-course', (req, res) => {
   });
 });
 
+app.get('/course-members', (req, res) => {
+  const courseId = req.query.id;
+  const userId = req.user.user_id;
+  const query = `SELECT * FROM course_members WHERE course_id = ?`;
+
+  con.query(query, [courseId, userId], (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: 'Database query error' });
+    }
+    res.json(results);
+  });
+});
+
 app.get('/ranking', (req, res, next) => {
-  const courseQuery = `SELECT DISTINCT course_name, id FROM course`;
+  const courseQuery = `SELECT DISTINCT course_name, id FROM courses`;
 
   const selectedCourse = req.query.course || 'all';
 
@@ -587,18 +580,18 @@ app.get('/ranking', (req, res, next) => {
   if (selectedCourse === 'all') {
     // Gesamtranking (alle Kurse)
     rankingQuery = `
-      SELECT a.id, a.firstname, a.lastname, s.score
+      SELECT a.user_id, a.firstname, a.lastname, s.score
       FROM accounts a
-      JOIN scores s ON a.id = s.account_id
+      JOIN scores s ON a.user_id = s.user_id
       ORDER BY s.score DESC
     `;
   } else {
     // Kursbasiertes Ranking
     rankingQuery = `
-      SELECT a.id, a.firstname, a.lastname, cm.course_score, c.course_name
+      SELECT a.user_id, a.firstname, a.lastname, cm.course_score, c.course_name
       FROM accounts a
-      JOIN course_members cm ON a.id = cm.account_id
-      JOIN course c ON cm.course_id = c.id
+      JOIN course_members cm ON a.user_id = cm.user_id
+      JOIN courses c ON cm.course_id = c.course_id
       WHERE c.course_name = ?
       ORDER BY cm.course_score DESC
     `;
@@ -621,7 +614,7 @@ app.get('/ranking', (req, res, next) => {
         rankingList = rows.sort((a, b) => b.score - a.score).map((user, index, sortedUsers) => {
           const rank = index > 0 && sortedUsers[index - 1].score === user.score ? sortedUsers[index - 1].rank : index + 1;
           return {
-            id: user.id,
+            user_id: user.user_id,
             firstname: user.firstname,
             lastname: user.lastname,
             score: user.score,
@@ -633,7 +626,7 @@ app.get('/ranking', (req, res, next) => {
         rankingList = rows.sort((a, b) => b.course_score - a.course_score).map((user, index, sortedUsers) => {
           const rank = index > 0 && sortedUsers[index - 1].course_score === user.course_score ? sortedUsers[index - 1].rank : index + 1;
           return {
-            id: user.id,
+            user_id: user.user_id,
             firstname: user.firstname,
             lastname: user.lastname,
             course_score: user.course_score, 
@@ -694,7 +687,7 @@ app.delete('/delete-course', (req, res) => {
   const userId = req.user.email;
   const courseId = req.query.id;
 
-  const query_delete = 'DELETE FROM course WHERE id = ? AND user = ?';
+  const query_delete = 'DELETE FROM courses WHERE id = ? AND user = ?';
   const values = [courseId, userId];
   //console.log(values);
 
@@ -850,7 +843,7 @@ app.post("/sign-up-student", async (req, res, next) => {
             // Get the ID of the newly inserted account
             const accountId = idResult[0].id;
 
-            let query_insert_score = "INSERT INTO scores (account_id, score) VALUES (?,?)";
+            let query_insert_score = "INSERT INTO scores (user_id, score) VALUES (?,?)";
             const values_insert_score = [accountId, 0];
 
             con.query(query_insert_score, values_insert_score, async (err) => {
