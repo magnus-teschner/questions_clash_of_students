@@ -31,7 +31,7 @@
                     <h3 class="course-title">
                       <%= course.course_name %>
                     </h3>
-                    <button class="exit-icon" title="Kurs verlassen" onclick="unenrollCourse('<%= course.id %>')">
+                    <button class="exit-icon" title="Kurs verlassen" onclick="unenrollCourse('<%= course.course_id %>')">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
                         <path fill="black"
                           d="M7 6a1 1 0 0 0 0-2H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h2a1 1 0 0 0 0-2H6V6Zm13.82 5.42l-2.82-4a1 1 0 0 0-1.39-.24a1 1 0 0 0-.24 1.4L18.09 11H10a1 1 0 0 0 0 2h8l-1.8 2.4a1 1 0 0 0 .2 1.4a1 1 0 0 0 .6.2a1 1 0 0 0 .8-.4l3-4a1 1 0 0 0 .02-1.18" />
@@ -57,7 +57,7 @@
                       <div class="info-content">
                         <div>Dozent</div>
                         <span>
-                          Prof. <%= course.lastname %>
+                          Prof. <%= course.creator_lastname %>
                         </span>
                       </div>
                     </div>
@@ -95,10 +95,10 @@
                         <h3 class="course-title">
                           <%= course.course_name %>
                         </h3>
-                        <% const isEnrolled=enrolledCourses.some(enrolled=> enrolled.id === course.id); %>
+                        <% const isEnrolled = enrolledCourses.some(enrolled => enrolled.course_id === course.course_id); %>
                           <button class="enroll-btn <%= isEnrolled ? 'enrolled' : '' %>"
                             id="enroll-btn-<%= course.id %>" title="<%= isEnrolled ? 'Beigetreten' : 'Beitreten' %>"
-                            onclick="enrollCourse('<%= course.id %>')">
+                            onclick="enrollCourse('<%= course.course_id %>')">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
                               <path fill="black" d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z" />
                             </svg>
@@ -120,7 +120,7 @@
                           <div class="info-content">
                             <div>Dozent</div>
                             <span>
-                              Prof. <%= course.lastname %>
+                              Prof. <%= course.creator_lastname %>
                             </span>
                           </div>
                         </div>

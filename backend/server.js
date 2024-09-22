@@ -374,9 +374,6 @@ app.put('/move-course', (req, res) => {
   });
 });
 
-
-
-
 app.get("/log-out", (req, res, next) => {
   req.logout((err) => {
     if (err) {
@@ -419,6 +416,29 @@ app.get('/manage-questions', (req, res) => {
     });
 });
 
+const getLectionsForCourse = (program, course) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT DISTINCT q.lection_id
+      FROM questions q
+      JOIN lections l ON q.lection_id = l.lection_id
+      JOIN courses c ON l.course_id = c.course_id
+      WHERE c.program_id = ? AND c.course_name = ?`;
+    
+    con.query(query, [program, course], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results.map(r => r.lection_id));
+    });
+  });
+};
+
+const capitalizeFirstLetter = (str) => {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
 app.get('/courses', (req, res) => {
   if (!req.user) {
     return res.render("courses", {
@@ -428,12 +448,18 @@ app.get('/courses', (req, res) => {
     });
   }
 
-  const query_courses = 'SELECT * FROM courses';
+  const query_courses = `
+    SELECT c.*, p.program_name, a.lastname AS creator_lastname
+    FROM courses c
+    JOIN programs p ON c.program_id = p.program_id
+    JOIN accounts a ON c.creator = a.user_id`;
+
   const query_enrolled_courses = `
-    SELECT c.*, cm.progress, cm.course_score 
+    SELECT c.*, cm.progress, cm.course_score, p.program_name, a.lastname AS creator_lastname
     FROM courses c 
-    JOIN course_members cm 
-    ON c.course_id = cm.course_id 
+    JOIN course_members cm ON c.course_id = cm.course_id
+    JOIN programs p ON c.program_id = p.program_id
+    JOIN accounts a ON c.creator = a.user_id
     WHERE cm.user_id = ?`;
 
   con.query(query_courses, (err, courses) => {
@@ -442,55 +468,40 @@ app.get('/courses', (req, res) => {
       return res.status(500).send('Internal Server Error');
     }
 
-    const promises_unenroll = courses.map(course => {
-      if (course.user) {
-        const emailParts = course.user.split('@')[0].split('.');
-        course.lastname = emailParts.length > 1 ? emailParts[emailParts.length - 1] : '';
-        course.lastname = course.lastname.charAt(0).toUpperCase() + course.lastname.slice(1);
-      }
-    });
-
     con.query(query_enrolled_courses, [req.user.user_id], (err, enrolledCourses) => {
       if (err) {
         console.error('Error fetching enrolled courses:', err);
         return res.status(500).send('Internal Server Error');
       }
 
-      const getLectionsForCourse = (program, course) => {
-        return new Promise((resolve, reject) => {
-          const query = `SELECT DISTINCT lection FROM questions WHERE program = ? AND course = ?`
-
-          con.query(query, [program, course], (err, results) => {
-            if (err) {
-              return reject(err);
-            }
-            resolve(results.map(r => r.lection));
-          });
-        });
-      };
-
       const promises_enroll = enrolledCourses.map(course => {
-        if (course.user) {
-          const emailParts = course.user.split('@')[0].split('.');
-          course.lastname = emailParts.length > 1 ? emailParts[emailParts.length - 1] : '';
-          course.lastname = course.lastname.charAt(0).toUpperCase() + course.lastname.slice(1);
-        }
-
+        course.creator_lastname = capitalizeFirstLetter(course.creator_lastname);
         return getLectionsForCourse(course.program_name, course.course_name).then(lections => {
           course.lections = lections;
         });
       });
 
-      Promise.all(promises_enroll, promises_unenroll).then(() => {
-        return res.render("courses", {
-          user: req.user,
-          nonEnrolledCourses: courses,
-          enrolledCourses: enrolledCourses
-        });
-      }).catch(err => {
-        console.error('Error fetching lections:', err);
-        return res.status(500).send('Internal Server Error');
+      const nonEnrolledCourses = courses.filter(course =>
+        !enrolledCourses.some(enrolled => enrolled.course_id === course.course_id)
+      );
+
+      const promises_unenroll = nonEnrolledCourses.map(course => {
+        course.creator_lastname = capitalizeFirstLetter(course.creator_lastname);
+        return Promise.resolve();
       });
+
+      Promise.all([...promises_enroll, ...promises_unenroll])
+        .then(() => {
+          res.render("courses", {
+            user: req.user,
+            nonEnrolledCourses: nonEnrolledCourses,
+            enrolledCourses: enrolledCourses
+          });
+        })
+        .catch(err => {
+          console.error('Error processing courses:', err);
+          return res.status(500).send('Internal Server Error');
+        });
     });
   });
 });
@@ -544,7 +555,7 @@ app.post('/unenroll-course', (req, res) => {
   const courseId = req.body.course_id;
   const userId = req.user.user_id;
 
-  const query_unenroll = 'DELETE FROM course_members WHERE usr_id = ? AND course_id = ?';
+  const query_unenroll = 'DELETE FROM course_members WHERE user_id = ? AND course_id = ?';
 
   con.query(query_unenroll, [userId, courseId], (err, result) => {
     if (err) {
