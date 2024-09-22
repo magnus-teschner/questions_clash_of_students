@@ -33,6 +33,16 @@
     justify-content: space-between;
     align-items: center;
   }
+
+  .ranking-dropdown {
+    padding: 5px 5px;
+    font-size: 16px;
+    border: 1px solid #0d208b;
+    border-radius: 5px;
+    background-color: white;
+    color: #4dd0e1;
+    cursor: pointer;
+}
     
   /* Ranking Liste */
   ul {
