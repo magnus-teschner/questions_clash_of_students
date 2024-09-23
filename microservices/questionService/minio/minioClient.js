@@ -1,14 +1,12 @@
 const Minio = require('minio');
 const { v4: uuidv4 } = require('uuid');
-const questionRepository = require('../repositories/questionRepository');
-const config = require('../config/config');
 
 const minioClient = new Minio.Client({
-    endPoint: config.minioHost,
+    endPoint: "localhost",
     port: 9000,
     useSSL: false,
-    accessKey: config.minioAccessKey,
-    secretKey: config.minioSecretKey
+    accessKey: "IQ8WmkoR6EoyZtWIH4Pc",
+    secretKey: 'c7SiP3sIexrTxQH8yTak5zSxBYdIpLTCuxA1qsSk'
 });
 
 class MinioService {

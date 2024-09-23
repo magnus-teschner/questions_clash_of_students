@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const emailRoutes = require('./routes/emailRoutes'); // Adjust the path as necessary
+const emailRoutes = require('./routes/emailRoutes');
 
 const app = express();
 app.use(express.json());

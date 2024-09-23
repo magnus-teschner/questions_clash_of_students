@@ -1,101 +1,76 @@
-const con = require('../config/mysqlConfig');
+const db = require('../db/db'); // Assuming you have a db connection module
 
 class QuestionRepository {
-
-    static async insertQuestion(questionData) {
-        const query = `
-      INSERT INTO questions 
-      (user_id, question_type, frage, answer_a, answer_b, answer_c, answer_d, correct_answer, position, image_url, lection_id) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-        const values = [
-            questionData.user_id,
-            questionData.question_type,
-            questionData.frage,
-            questionData.answer_a,
-            questionData.answer_b,
-            questionData.answer_c,
-            questionData.answer_d,
-            questionData.correct_answer,
-            questionData.position,
-            questionData.image_url,
-            questionData.lection_id,
-        ];
-        return con.query(query, values);
+    static async getAllPrograms() {
+        const query = 'SELECT * FROM programs;';
+        return db.query(query);
     }
 
-    static async updateQuestion(updatedData) {
-        const query = `
-      UPDATE questions 
-      SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, 
-      position = ?, image_url = ?, lection_id = ?
-      WHERE question_id = ? 
-    `;
-        const values = [
-            updatedData.frage,
-            updatedData.question_type,
-            updatedData.answer_a,
-            updatedData.answer_b,
-            updatedData.answer_c,
-            updatedData.answer_d,
-            updatedData.correct_answer,
-            updatedData.position,
-            updatedData.image_url,
-            updatedData.lection_id,
-            updatedData.question_id
-        ];
-        return con.query(query, values);
-    }
-
-    static async getQuestionsByUser(user_id) {
-        const query = `
-      SELECT * FROM questions WHERE user_id = ?;
-    `;
-        const values = [user_id];
-        return con.query(query, values);
+    static async getQuestionsByUser(userId) {
+        const query = `SELECT * FROM questions WHERE user_id = ?;`;
+        const values = [userId];
+        return db.query(query, values);
     }
 
     static async getQuestion(course_id, lection_id, position) {
         const query = `
-      SELECT q.* FROM questions q
-      JOIN lections l ON q.lection_id = l.lection_id
-      WHERE l.course_id = ? AND q.lection_id = ? AND q.position = ?;
-    `;
+          SELECT q.* FROM questions q
+          JOIN lections l ON q.lection_id = l.lection_id
+          WHERE l.course_id = ? AND q.lection_id = ? AND q.position = ?;
+        `;
         const values = [course_id, lection_id, position];
         return con.query(query, values);
     }
 
-    // Get unused positions in a lection
-    static async getUnusedPositions(lection_id, user_id) {
+    static async addQuestion(question) {
         const query = `
-      SELECT position FROM questions WHERE lection_id = ? AND user_id = ?;
-    `;
-        const values = [lection_id, user_id];
-        const [existingPositions] = await con.query(query, values);
-
-        // Assuming position range is from 1 to 10
-        const allPositions = Array.from({ length: 10 }, (_, i) => i + 1);
-        const usedPositions = existingPositions.map((row) => row.position);
-        const unusedPositions = allPositions.filter((pos) => !usedPositions.includes(pos));
-
-        return unusedPositions;
+          INSERT INTO questions (user_id, question_type, frage, answer_a, answer_b, answer_c, answer_d, correct_answer, position, image_url, lection_id)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        `;
+        const values = [
+            question.user_id,
+            question.question_type,
+            question.frage,
+            question.answer_a,
+            question.answer_b,
+            question.answer_c,
+            question.answer_d,
+            question.correct_answer,
+            question.position,
+            question.image_url,
+            question.lection_id,
+        ];
+        return db.query(query, values);
     }
 
-    // Get all programs
-    static async getPrograms() {
-        const query = `SELECT * FROM programs;`;
-        return con.query(query);
+    static async updateQuestion(question) {
+        const query = `
+          UPDATE questions
+          SET frage = ?, question_type = ?, answer_a = ?, answer_b = ?, answer_c = ?, answer_d = ?, correct_answer = ?, image_url = ?
+          WHERE question_id = ? AND user_id = ?;
+        `;
+        const values = [
+            question.frage,
+            question.question_type,
+            question.answer_a,
+            question.answer_b,
+            question.answer_c,
+            question.answer_d,
+            question.correct_answer,
+            question.image_url,
+            question.question_id,
+            question.user_id,
+        ];
+        return db.query(query, values);
     }
 
-    // Get all courses by a specific user and program
-    static async getCourses(user_id, program_id) {
+    static async getUnusedPositions(userId, programId, courseId, lectionId) {
         const query = `
-      SELECT c.course_id, c.course_name FROM courses c
-      WHERE c.creator = ? AND c.program_id = ?;
-    `;
-        const values = [user_id, program_id];
-        return con.query(query, values);
+          SELECT position FROM questions
+          WHERE program_id = ? AND course_id = ? AND lection_id = ? AND user_id = ?;
+        `;
+        const values = [programId, courseId, lectionId, userId];
+        return db.query(query, values);
     }
 }
-
 module.exports = QuestionRepository;
