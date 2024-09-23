@@ -104,8 +104,8 @@ passport.use('stud',
             // passwords do not match!
             return done(null, false, { message: "Incorrect password" })
           } else {
-            let query_score = "SELECT score FROM scores WHERE account_id =?";
-            const id_account = [result[0].id];
+            let query_score = "SELECT score FROM scores WHERE user_id =?";
+            const id_account = [result[0].user_id];
 
             con.query(query_score, id_account, (err, accountScore) => {
               if (err) {
@@ -187,14 +187,14 @@ passport.deserializeUser(async (email, done) => {
     const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
     const values = [email];
     con.query(query_retrieve, values, (err, result) => {
-      const db_id = result[0].id;
+      const db_id = result[0].user_id;
       const db_first = result[0].firstname;
       const db_last = result[0].lastname;
       const db_email = result[0].email;
       const db_role = result[0].role;
 
       if (db_role === 'student') {
-        const query_score = "SELECT score FROM scores WHERE account_id = ?";
+        const query_score = "SELECT score FROM scores WHERE user_id = ?";
         const account_id = [db_id];
         con.query(query_score, account_id, (err, accountScore) => {
           if (err) {
@@ -448,13 +448,13 @@ app.get('/courses', (req, res) => {
     });
   }
 
-  const query_courses = 'SELECT * FROM course';
+  const query_courses = 'SELECT * FROM courses';
   const query_enrolled_courses = `
     SELECT c.*, cm.progress, cm.course_score 
-    FROM course c 
+    FROM courses c 
     JOIN course_members cm 
     ON c.id = cm.course_id 
-    WHERE cm.user_email = ?`;
+    WHERE cm.email = ?`;
 
   con.query(query_courses, (err, courses) => {
     if (err) {
