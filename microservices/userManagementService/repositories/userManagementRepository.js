@@ -36,9 +36,13 @@ class UserManagementRepository {
         return this.query(sql, [user_id]);
     }
 
-    static createAccount(firstname, lastname, email, hashedPassword, role, verificationToken) {
-        const sql = 'INSERT INTO accounts (firstname, lastname, email, password, role, verificationToken) VALUES (?, ?, ?, ?, ?, ?)';
-        return this.query(sql, [firstname, lastname, email, hashedPassword, role, verificationToken]);
+    static async createAccount(firstname, lastname, email, hashedPassword, role, verificationToken) {
+        const sql = `
+            INSERT INTO accounts (firstname, lastname, email, password, role, verificationToken)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        const result = await this.query(sql, [firstname, lastname, email, hashedPassword, role, verificationToken]);
+        return result.insertId;
     }
 
     static updatePassword(user_id, hashedPassword) {

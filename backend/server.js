@@ -37,6 +37,60 @@ mailjet_public_key = "6a2924e64b4c454bbcdf6580e44e9ca2";
 mailjet_private_key = "9b2b92a8e47833cfaeb1488d47dc1790";
 backend = "127.0.0.1"
 
+//microservices
+emailService = process.env.EMAILSERVICE || "localhost";
+emailPort = process.env.EMAILPORT || 1001;
+
+userManagementService = process.env.USERSERVICE || "localhost";
+userManagementPort = process.env.USERPORT || 1000;
+
+
+//common functions
+const axios = require('axios');
+
+const makePutRequest = async (url, data = {}, headers = { 'Content-Type': 'application/json' }) => {
+  try {
+    const response = await axios.put(url, data, { headers });
+    return { data: response.data, status: response.status }; // Return both data and status
+  } catch (error) {
+    // Return the error response instead of throwing it
+    return {
+      error: true,
+      data: error.response ? error.response.data : error.message,
+      status: error.response ? error.response.status : 500
+    };
+  }
+};
+
+const makeGetRequest = async (url, headers = { 'Content-Type': 'application/json' }) => {
+  try {
+    const response = await axios.get(url, { headers });
+    return { data: response.data, status: response.status }; // Return both data and status
+  } catch (error) {
+    // Return the error response instead of throwing it
+    return {
+      error: true,
+      data: error.response ? error.response.data : error.message,
+      status: error.response ? error.response.status : 500
+    };
+  }
+};
+
+const makePostRequest = async (url, data = {}, headers = { 'Content-Type': 'application/json' }) => {
+  try {
+    const response = await axios.post(url, data, { headers });
+    return { data: response.data, status: response.status }; // Return both data and status
+  } catch (error) {
+    // Return the error response instead of throwing it
+    return {
+      error: true,
+      data: error.response ? error.response.data : error.message,
+      status: error.response ? error.response.status : 500
+    };
+  }
+};
+
+
 
 
 const mailjet = Mailjet.apiConnect(
@@ -62,13 +116,19 @@ app.use((req, res, next) => {
 const con = mysql.createConnection(config_mysql);
 
 
-
-
-
-
 passport.use('stud',
   new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, async (email, password, done) => {
     try {
+      const account = await makeGetRequest(`http://${userManagementService}:${userManagementPort}/accounts/email/${email}`);
+      if (account.error) {
+        return done(null, false, { message: "Email not found" });
+      }
+
+      if (account.isVerified === 0) {
+        return done(null, false, { message: "Email not verified" });
+      }
+
+
       const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
       const values = [email, 1];
 
@@ -214,38 +274,6 @@ passport.deserializeUser(async (email, done) => {
     done(err);
   }
 });
-
-async function sendVerificationEmail(firstname, lastname, email, token) {
-  const verificationLink = `http://${backend}:${port}/verify-email?token=${token}`;
-
-  const request = mailjet
-    .post('send', { version: 'v3.1' })
-    .request({
-      Messages: [
-        {
-          From: {
-            Email: "clashofstudentes@gmail.com",
-            Name: "Clash of Students"
-          },
-          To: [
-            {
-              Email: email,
-              Name: `${firstname} ${lastname}`
-            }
-          ],
-          Subject: "Please verify your email address",
-          TextPart: `Hello ${firstname}, please verify your email by clicking the following link: ${verificationLink}`,
-          HTMLPart: `<p>Hello, please verify your email by clicking the following link:</p><a href="${verificationLink}">Verify Email</a>`
-        }
-      ]
-    });
-
-  try {
-    const result = await request;
-  } catch (err) {
-    console.log(err.statusCode);
-  }
-};
 
 
 app.get('/verify-email', async (req, res) => {
@@ -775,114 +803,45 @@ app.get('/sign-up-student', (req, res) => {
   return res.render("sign-up-student", { error: undefined });
 });
 
-app.post("/sign-up-student", async (req, res, next) => {
-  try {
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@student.reutlingen-university\.de$/;
-    if (emailPattern.test(req.body.email) === false) {
-      return res.render("sign-up-student", { error: "Not a reutlingen university student email." })
-
-    }
-
-    let query_check = "SELECT * FROM accounts WHERE email = ?";
-    const values_check = [req.body.email];
-
-    con.query(query_check, values_check, (err, result) => {
-      if (err) {
-        return next(err);
-      }
-
-      if (result.length > 0) {
-        return res.render("sign-up-student", { error: "Email already in use." })
-      }
-
-      const verificationToken = uuidv4();
-
-      bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
-        // If the email is not in use, proceed with the insertion
-        let query_insert = "INSERT INTO accounts (firstname, lastname, email, password, role, verificationToken) VALUES (?,?,?,?,?, ?)";
-        const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword, "student", verificationToken];
-
-        con.query(query_insert, values_insert, async (err) => {
-          if (err) {
-            return next(err);
-          }
-
-          con.query("SELECT LAST_INSERT_ID() as id", (err, idResult) => {
-            if (err) {
-              return next(err);
-            }
-            // Get the ID of the newly inserted account
-            const accountId = idResult[0].id;
-
-            let query_insert_score = "INSERT INTO scores (account_id, score) VALUES (?,?)";
-            const values_insert_score = [accountId, 0];
-
-            con.query(query_insert_score, values_insert_score, async (err) => {
-              if (err) {
-                return next(err);
-              }
-              try {
-                await sendVerificationEmail(req.body.fname, req.body.lname, req.body.email, verificationToken);
-                return res.render("login", { user: req.user, error: undefined, target: "student", verification: 1 });
-              } catch (emailError) {
-                return next(emailError);
-              }
-            });
-          });
-        });
-      });
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
 app.get('/sign-up-prof', (req, res) => {
   return res.render("sign-up-prof", { error: undefined });
 });
 
-app.post("/sign-up-prof", (req, res, next) => {
-  try {
+app.post("/sign-up", async (req, res, next) => {
+  const dataAccountCreation = {
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
+    email: req.body.email,
+    password: req.body.password,
+    role: req.body.role
+  };
+  const { role } = req.body;
+  const accountCreationResponse = await makePostRequest(`http://${userManagementService}:${userManagementPort}/accounts`, dataAccountCreation);
 
-    /*
-      const emailPattern = /^[a-zA-Z0-9._%+-]+@reutlingen-university\.de$/;
-      if (emailPattern.test(req.body.email) === false){
-        return res.render("sign-up-student", { error: "Not a reutlingen university professor email."} )
+  if (accountCreationResponse.error) {
+    if (role === "professor") {
+      return res.render("sign-up-prof", { error: accountCreationResponse.data.error });
+    } else if (role === "student") {
+      return res.render("sign-up-student", { error: accountCreationResponse.data.error });
+    }
+  }
 
-    
-      }
-        */
+  const dataVerificationEmail = {
+    firstname: req.body.fname,
+    lastname: req.body.lname,
+    email: req.body.email,
+    token: accountCreationResponse.data.token
+  };
+  console.log(`http://${emailService}:${emailPort}/send-verification`);
+  const emailResponse = await makePostRequest(`http://${emailService}:${emailPort}/email/send-verification`, dataVerificationEmail);
 
-    let query_check = "SELECT * FROM accounts WHERE email = ?";
-    const values_check = [req.body.email];
-
-    con.query(query_check, values_check, (err, result) => {
-      if (err) {
-        return next(err);
-      }
-
-      if (result.length > 0) {
-        return res.render("sign-up-prof", { error: "Email already in use." })
-      }
-
-      const verificationToken = uuidv4();
-
-      bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
-        // If the email is not in use, proceed with the insertion
-        let query_insert = "INSERT INTO accounts (firstname, lastname, email, password, role, verificationToken) VALUES (?,?,?,?,?,?)";
-        const values_insert = [req.body.fname, req.body.lname, req.body.email, hashedPassword, "professor", verificationToken];
-
-        con.query(query_insert, values_insert, async (err) => {
-          if (err) {
-            return next(err);
-          }
-          await sendVerificationEmail(req.body.fname, req.body.lname, req.body.email, verificationToken);
-          return res.render("login", { user: req.user, error: undefined, target: "professor", verification: 1 });
-        });
-      });
-    });
-  } catch (error) {
-    next(error);
+  const user_id = accountCreationResponse.data.user_id;
+  //TODO: insert score entry in db
+  // @ luca kannst für deinen microservice aufruf zum score eintragen den wert aus user_id nehmen
+  if (role === "professor") {
+    return res.render("login", { user: req.user, error: undefined, target: "professor", verification: 1 });
+  } else if (role === "student") {
+    return res.render("login", { user: req.user, error: undefined, target: "student", verification: 1 });
   }
 });
 

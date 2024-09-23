@@ -1,5 +1,6 @@
 const UserManagementRepository = require('../repositories/userManagementRepository');
 const { hashPassword } = require('../utils/hashUtils');
+const AppError = require('../utils/appError');
 const { v4: uuidv4 } = require('uuid');
 
 class UserManagementService {
@@ -15,6 +16,14 @@ class UserManagementService {
         }
 
         return emailPattern.test(email);
+    }
+
+    static async checkEmailinUse(email) {
+        const account = await this.findAccountByEmail(email);
+        if (!account) {
+            return false;
+        }
+        return true;
     }
 
     static generateVerificationToken() {
@@ -56,21 +65,26 @@ class UserManagementService {
 
     static async createAccount(firstname, lastname, email, password, role) {
         if (!this.validateEmailByRole(email, role)) {
-            throw new Error('Invalid email for the specified role');
+            throw new AppError('Invalid email for the specified role', 400);
+        }
+
+        const emailInUse = await this.checkEmailinUse(email);
+        if (emailInUse) {
+            throw new AppError('Email already in use', 409);
         }
 
         try {
             const hashedPassword = await hashPassword(password);
             const verificationToken = this.generateVerificationToken();
-            return await UserManagementRepository.createAccount(
+            const user_id = await UserManagementRepository.createAccount(
                 firstname, lastname, email, hashedPassword, role, verificationToken
             );
-            //send verification email
-            //insert user score in table
+            return { verificationToken, user_id };
         } catch (error) {
-            throw new Error(error);
+            throw new AppError('Failed to create account', 500);
         }
     }
+
 
     static async updatePassword(user_id, newPassword) {
         try {
