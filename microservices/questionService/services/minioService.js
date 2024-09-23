@@ -1,9 +1,13 @@
 const Minio = require('minio');
 const { v4: uuidv4 } = require('uuid');
 
+const endPoint = "localhost";
+const port = 9000;
+const bucket = "questions";
+
 const minioClient = new Minio.Client({
-    endPoint: "localhost",
-    port: 9000,
+    endPoint: endPoint,
+    port: port,
     useSSL: false,
     accessKey: "IQ8WmkoR6EoyZtWIH4Pc",
     secretKey: 'c7SiP3sIexrTxQH8yTak5zSxBYdIpLTCuxA1qsSk'
@@ -13,14 +17,13 @@ class MinioService {
 
     static async uploadImageToMinio(buffer, mimetype) {
         try {
-            const fileType = mimetype.split('/')[1]; // Extract file type from mimetype
+            const fileType = mimetype.split('/')[1];
             const filename = `${uuidv4()}.${fileType}`;
-            const bucket = 'images-questions-bucket';
 
             await minioClient.putObject(bucket, filename, buffer);
-            return { filename, fileType };
+            return `http://${endPoint}:${port}/${bucket}/${filename}`;
         } catch (error) {
-            throw new Error('Error uploading to Minio');
+            throw new Error(error);
         }
     }
 }

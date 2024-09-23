@@ -48,39 +48,166 @@ class QuestionController {
 
     static async addQuestion(req, res) {
         try {
-            upload.single('image')(req, res, async (err) => {
-                if (err) {
-                    return res.status(400).json({ error: 'Image upload failed' });
-                }
+            let questionData;
+            let imageFile = null;
 
-                const questionData = req.body;
-                const imageFile = req.file; // Image file is optional
-                await QuestionService.addQuestion(questionData, imageFile);
-                res.status(201).json({ message: 'Question added successfully' });
-            });
+            const contentType = req.headers['content-type'];
+
+            if (contentType.includes('multipart/form-data')) {
+                upload.single('image')(req, res, async (err) => {
+                    if (err) {
+                        return res.status(400).json({ error: 'Image upload failed' });
+                    }
+
+                    questionData = JSON.parse(req.body.questionData);
+                    imageFile = req.file;
+
+                    const {
+                        user_id,
+                        question_type,
+                        frage,
+                        answer_a,
+                        answer_b,
+                        answer_c,
+                        answer_d,
+                        correct_answer,
+                        position,
+                        lection_id
+                    } = questionData;
+
+                    await QuestionService.addQuestion(
+                        user_id,
+                        question_type,
+                        frage,
+                        answer_a,
+                        answer_b,
+                        answer_c,
+                        answer_d,
+                        correct_answer,
+                        position,
+                        lection_id,
+                        imageFile
+                    );
+                    return res.status(201).json({ message: 'Question added successfully' });
+                });
+            } else if (contentType.includes('application/json')) {
+                questionData = req.body;
+                const {
+                    user_id,
+                    question_type,
+                    frage,
+                    answer_a,
+                    answer_b,
+                    answer_c,
+                    answer_d,
+                    correct_answer,
+                    position,
+                    lection_id
+                } = questionData;
+
+                await QuestionService.addQuestion(
+                    user_id,
+                    question_type,
+                    frage,
+                    answer_a,
+                    answer_b,
+                    answer_c,
+                    answer_d,
+                    correct_answer,
+                    position,
+                    lection_id,
+                    imageFile
+                );
+                return res.status(201).json({ message: 'Question added successfully' });
+            } else {
+                return res.status(400).json({ error: 'Unsupported content type' });
+            }
         } catch (error) {
-            res.status(500).json({ error: 'An error occurred while adding the question' });
-            console.error(error);
+            console.log(error);
+            return res.status(500).json({ error: 'An error occurred while adding the question' });
         }
     }
+
 
     static async updateQuestion(req, res) {
         try {
-            upload.single('image')(req, res, async (err) => {
-                if (err) {
-                    return res.status(400).json({ error: 'Image upload failed' });
-                }
+            let questionData;
+            let imageFile = null;
 
-                const questionData = req.body;
-                const imageFile = req.file; // Image file is optional
-                await QuestionService.updateQuestion(questionData, imageFile);
-                res.status(200).json({ message: 'Question updated successfully' });
-            });
+            const contentType = req.headers['content-type'];
+            console.log(contentType);
+
+            if (contentType.includes('multipart/form-data')) {
+                upload.single('image')(req, res, async (err) => {
+                    if (err) {
+                        return res.status(400).json({ error: 'Image upload failed' });
+                    }
+
+                    questionData = JSON.parse(req.body.questionData);
+                    imageFile = req.file;
+
+                    const {
+                        question_id,
+                        user_id,
+                        question_type,
+                        frage,
+                        answer_a,
+                        answer_b,
+                        answer_c,
+                        answer_d,
+                        correct_answer
+                    } = questionData;
+
+                    await QuestionService.updateQuestion(
+                        question_id,
+                        user_id,
+                        question_type,
+                        frage,
+                        answer_a,
+                        answer_b,
+                        answer_c,
+                        answer_d,
+                        correct_answer,
+                        imageFile
+                    );
+                    return res.status(200).json({ message: 'Question updated successfully' });
+                });
+            } else if (contentType.includes('application/json')) {
+                questionData = req.body;
+                console.log(questionData);
+                const {
+                    question_id,
+                    user_id,
+                    question_type,
+                    frage,
+                    answer_a,
+                    answer_b,
+                    answer_c,
+                    answer_d,
+                    correct_answer
+                } = questionData;
+
+                await QuestionService.updateQuestion(
+                    question_id,
+                    user_id,
+                    question_type,
+                    frage,
+                    answer_a,
+                    answer_b,
+                    answer_c,
+                    answer_d,
+                    correct_answer,
+                    imageFile
+                );
+                return res.status(200).json({ message: 'Question updated successfully' });
+            } else {
+                return res.status(400).json({ error: 'Unsupported content type' });
+            }
         } catch (error) {
-            res.status(500).json({ error: 'An error occurred while updating the question' });
-            console.error(error);
+            return res.status(500).json({ error: 'An error occurred while updating the question' });
         }
     }
+
 
     static async getUnusedPositions(req, res) {
         try {

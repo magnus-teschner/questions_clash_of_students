@@ -1,5 +1,5 @@
 const QuestionRepository = require('../repositories/questionRepository');
-const minioClient = require('../minio/minioClient'); // MinIO client setup
+const minioService = require('../services/minioService');
 const { v4: uuidv4 } = require('uuid');
 
 class QuestionService {
@@ -12,29 +12,51 @@ class QuestionService {
     }
 
     static async getQuestion(courseId, lectionId, position) {
-        return await QuestionRepository.getQuestion(courseId, lectionId, position);
+        const result = await QuestionRepository.getQuestion(courseId, lectionId, position);
+        return result[0];
     }
 
-    static async addQuestion(question, file) {
-        let imageUrl = null;
+    static async addQuestion(user_id, question_type, frage, answer_a, answer_b, answer_c, answer_d, correct_answer, position, lection_id, file) {
+        let image_url = null;
 
         if (file) {
-            imageUrl = await this.uploadImageToMinIO(file);
+            image_url = await minioService.uploadImageToMinio(file.buffer, file.mimetype);
         }
 
-        const questionData = { ...question, imageUrl };
-        return await QuestionRepository.addQuestion(questionData);
+        return await QuestionRepository.addQuestion(
+            user_id,
+            question_type,
+            frage,
+            answer_a,
+            answer_b,
+            answer_c,
+            answer_d,
+            correct_answer,
+            position,
+            lection_id,
+            image_url
+        );
     }
 
-    static async updateQuestion(question, file) {
-        let imageUrl = null;
+    static async updateQuestion(question_id, user_id, question_type, frage, answer_a, answer_b, answer_c, answer_d, correct_answer, file) {
+        let image_url = null;
 
         if (file) {
-            imageUrl = await this.uploadImageToMinIO(file);
+            image_url = await minioService.uploadImageToMinio(file.buffer, file.mimetype);
         }
 
-        const questionData = { ...question, imageUrl };
-        return await QuestionRepository.updateQuestion(questionData);
+        return await QuestionRepository.updateQuestion(
+            question_id,
+            user_id,
+            question_type,
+            frage,
+            answer_a,
+            answer_b,
+            answer_c,
+            answer_d,
+            correct_answer,
+            image_url
+        );
     }
 
     static async getUnusedPositions(userId, programId, courseId, lectionId) {
@@ -43,21 +65,6 @@ class QuestionService {
         const allPositions = Array.from({ length: 9 }, (_, i) => i + 1);
         const unusedPositions = allPositions.filter(position => !existingValues.includes(position));
         return unusedPositions;
-    }
-
-    static async uploadImageToMinIO(file) {
-        try {
-            const fileEnding = file.mimetype.split('/')[1];
-            const fileName = `${uuidv4()}.${fileEnding}`;
-            const bucket = 'questions-images';
-
-            await minioClient.putObject(bucket, fileName, file.buffer);
-            const imageUrl = `http://${minioClient.endPoint}:${minioClient.port}/${bucket}/${fileName}`;
-            return imageUrl;
-        } catch (error) {
-            console.error('Error uploading to MinIO:', error);
-            throw new Error('Image upload failed');
-        }
     }
 }
 
