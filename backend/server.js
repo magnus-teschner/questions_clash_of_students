@@ -265,41 +265,17 @@ passport.deserializeUser(async (email, done) => {
 
 
 app.get('/verify-email', async (req, res) => {
-  const { token } = req.query;
-
   try {
-    let query = "SELECT * FROM accounts WHERE verificationToken = ?";
-    const values = [token];
-
-    con.query(query, values, async (err, result) => {
-      if (err) {
-        return res.status(500).send('Error querying the database.');
-      }
-
-      let user = result[0];
-      if (!user) {
-        return res.status(400).send('Invalid token.');
-      }
-
-      let updateQuery = "UPDATE accounts SET isVerified = 1 WHERE id = ?";
-      const updateValues = [user.id];
-
-      con.query(updateQuery, updateValues, (updateErr, updateResult) => {
-        if (updateErr) {
-          return res.status(500).send('Error updating the user.');
-        }
-
-        if (user.role == "professor") {
-          return res.render("login", { user: req.user, error: undefined, target: "professor", verification: undefined });
-        } else if (user.role == "student") {
-          return res.render("login", { user: req.user, error: undefined, target: "student", verification: undefined });
-        }
-
-      });
-    });
+    const { token } = req.query;
+    const account = await makeGetRequest(`http://${userManagementService}:${userManagementPort}/accounts/token/${token}`);
+    const verificationResponse = await makePutRequest(`http://${userManagementService}:${userManagementPort}/accounts/${account.data.user_id}/set-verified`)
+    if (account.data.role == "professor") {
+      return res.render("login", { user: req.user, error: undefined, target: "professor", verification: undefined });
+    } else if (account.data.role == "student") {
+      return res.render("login", { user: req.user, error: undefined, target: "student", verification: undefined });
+    }
   } catch (error) {
-    console.log(error);
-    return res.status(500).send('Error verifying email.');
+    next(error);
   }
 });
 
