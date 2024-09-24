@@ -1076,33 +1076,37 @@ app.post('/send-reset-email', async (req, res, next) => {
   }
 });
 
-app.get('/reset-password/:token', (req, res) => {
-  con.query('SELECT * FROM accounts WHERE verificationToken = ?',
-    [req.params.token], (err, user) => {
-      if (err || !user.length) return res.status(400).send('Password reset token is invalid or has expired.');
-      res.render('reset-password', { token: req.params.token });
-    });
+app.get('/reset-password/:token', async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    const account = await makeGetRequest(`http://${userManagementService}:${userManagementPort}/accounts/token/${token}`);
+    if (account.error) {
+      return res.status(404).send("Token does not match any account!")
+    }
+    return res.render('reset-password', { token: req.params.token })
+  } catch (error) {
+    next(error)
+  }
 });
 
-app.post('/reset-password', (req, res) => {
-  const { token, password, 'confirm-password': confirmPassword } = req.body;
+app.post('/reset-password', async (req, res, next) => {
+  try {
+    const { token, password, confirmPassword } = req.body;
 
-  if (password !== confirmPassword) return res.status(400).send('Passwords do not match.');
+    if (password !== confirmPassword) return res.status(400).send('Passwords do not match.');
+    const account = await makeGetRequest(`http://${userManagementService}:${userManagementPort}/accounts/token/${token}`);
+    if (account.error) {
+      return res.status(404).send('Password reset token is invalid or has expired.');
+    }
+    const newPasswordData = {
+      newPassword: password
+    }
+    const resetPasswordResponse = await makePutRequest(`http://${userManagementService}:${userManagementPort}/accounts/${account.data.user_id}/password`, newPasswordData);
+    res.render('success_change');
+  } catch (error) {
+    next(error)
+  }
 
-  con.query('SELECT * FROM accounts WHERE verificationToken = ?',
-    [token], (err, user) => {
-      if (err || !user.length) return res.status(400).send('Password reset token is invalid or has expired.');
-
-      bcrypt.hash(password, 10, (err, hashedPassword) => {
-        if (err) return res.status(500).send('Error hashing password.');
-
-        con.query('UPDATE accounts SET password = ?, verificationToken = NULL WHERE email = ?',
-          [hashedPassword, user[0].email], (err) => {
-            if (err) return res.status(500).send('Error updating password.');
-            res.render('success_change');
-          });
-      });
-    });
 });
 
 // JWT secret key
