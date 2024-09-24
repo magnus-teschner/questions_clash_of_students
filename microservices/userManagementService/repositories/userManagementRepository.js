@@ -36,6 +36,11 @@ class UserManagementRepository {
         return this.query(sql, [user_id]);
     }
 
+    static setVerificationToken(user_id, token) {
+        const sql = 'UPDATE accounts SET verificationToken = ? WHERE user_id = ?';
+        return this.query(sql, [token, user_id]);
+    }
+
     static async createAccount(firstname, lastname, email, hashedPassword, role, verificationToken) {
         const sql = `
             INSERT INTO accounts (firstname, lastname, email, password, role, verificationToken)

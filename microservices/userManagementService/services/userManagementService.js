@@ -63,6 +63,10 @@ class UserManagementService {
         return await UserManagementRepository.resetVerificationToken(user_id);
     }
 
+    static async setVerificationToken(user_id, token) {
+        return await UserManagementRepository.setVerificationToken(user_id, token);
+    }
+
     static async createAccount(firstname, lastname, email, password, role) {
         if (!this.validateEmailByRole(email, role)) {
             throw new AppError('Invalid email for the specified role', 400);

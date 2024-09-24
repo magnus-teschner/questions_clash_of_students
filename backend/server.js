@@ -1088,73 +1088,28 @@ app.get('/api/questions/:user/:program/:course/:lection/:position', (req, res) =
   });
 });
 
-
-//
-async function sendResetPasswordEmail(email, token) {
-  const resetLink = `http://${backend}:${port}/reset-password/${token}`;
-
-  const request = mailjet
-    .post('send', { version: 'v3.1' })
-    .request({
-      Messages: [
-        {
-          From: {
-            Email: "your_email@gmail.com",
-            Name: "Your App Name"
-          },
-          To: [
-            {
-              Email: email,
-              Name: "User"
-            }
-          ],
-          Subject: "Password Reset",
-          TextPart: `You are receiving this because you (or someone else) have requested to reset the password for your account.
-          Please click on the following link, or paste it into your browser to complete the process:
-          ${resetLink}`,
-          HTMLPart: `<p>You are receiving this because you (or someone else) have requested to reset the password for your account.</p>
-          <p>Please click on the following link, or paste it into your browser to complete the process:</p>
-          <a href="${resetLink}">Reset Password</a>`
-        }
-      ]
-    });
-
-  try {
-    await request;
-  } catch (err) {
-    console.log(err.statusCode);
-    throw err;
-  }
-}
-
-
-
-
 app.get('/reset-password-request', (req, res) => {
   res.render('request-reset', { user: req.user });
 });
 
-app.post('/send-reset-email', (req, res, next) => {
-  const email = req.body.email;
-  const token = uuidv4();
-  console.log(token);
-
-  const query_update = 'UPDATE accounts SET verificationToken = ? WHERE email = ?';
-  const values_update = [token, email];
-
-  con.query(query_update, values_update, async (err) => {
-    if (err) {
-      console.error('Error updating database:', err);
-      return res.status(500).send('Internal Server Error');
+app.post('/send-reset-email', async (req, res, next) => {
+  try {
+    const email = req.body.email;
+    const token = uuidv4();
+    const account = await makeGetRequest(`http://${userManagementService}:${userManagementPort}/accounts/email/${email}`);
+    const user_id = account.data.user_id;
+    await makePutRequest(`http://${userManagementService}:${userManagementPort}/accounts/${user_id}/token/${token}`);
+    const dataPasswordResetEmail = {
+      firstname: account.data.firstname,
+      lastname: account.data.lastname,
+      email: account.data.email,
+      token: token
     }
-
-    try {
-      await sendResetPasswordEmail(email, token);
-      res.render('success');
-    } catch (emailError) {
-      return next(emailError);
-    }
-  });
+    await makePostRequest(`http://${emailService}:${emailPort}/email/send-reset-password`, dataPasswordResetEmail);
+    return res.render('success');
+  } catch (error) {
+    return next(error);
+  }
 });
 
 app.get('/reset-password/:token', (req, res) => {

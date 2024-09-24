@@ -88,6 +88,17 @@ class UserManagementController {
         }
     }
 
+    static async setVerificationToken(req, res) {
+        try {
+            const { user_id, token } = req.params;
+            await UserManagementService.setVerificationToken(user_id, token);
+            res.status(200).json({ message: `Verification token set for user with user id ${user_id}` });
+        } catch (error) {
+            res.status(500).json({ error: 'An error occurred while setting the verification token' });
+            console.error(error);
+        }
+    }
+
     static async resetVerificationToken(req, res) {
         try {
             const { user_id } = req.params;
