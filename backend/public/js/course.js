@@ -133,8 +133,7 @@ document.querySelectorAll('.play-btn').forEach(btn => {
     })
       .then(response => response.json())
       .then(data => {
-        // Assuming 'data' is the result you want to append as a URL parameter
-        const result = encodeURIComponent(data.result); // Adjust 'result' as per your data structure
+        const result = encodeURIComponent(data.token);
 
         // Append the result as a URL parameter
         const newUrl = `${url}?token=${result}`;

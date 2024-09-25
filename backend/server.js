@@ -43,6 +43,9 @@ emailPort = process.env.EMAILPORT || 1001;
 userManagementService = process.env.USERSERVICE || "localhost";
 userManagementPort = process.env.USERPORT || 1000;
 
+jwtService = process.env.JWTSERVICE || "localhost";
+jwtPort = process.env.JWTPORT || 1002;
+
 
 //common functions
 const axios = require('axios');
@@ -445,8 +448,8 @@ app.get('/courses', (req, res) => {
     SELECT c.*, cm.progress, cm.course_score 
     FROM courses c 
     JOIN course_members cm 
-    ON c.id = cm.course_id 
-    WHERE cm.email = ?`;
+    ON c.course_id = cm.course_id 
+    WHERE cm.user_id = ?`;
 
   con.query(query_courses, (err, courses) => {
     if (err) {
@@ -1112,19 +1115,9 @@ app.post('/reset-password', async (req, res, next) => {
 
 });
 
-// JWT secret key
-const secretKey = 'yourSecretKey';
-
-// Endpoint to generate a JWT token
-app.post('/jwt', (req, res) => {
+app.post('/jwt', async (req, res) => {
   const { program, course, professorEmail } = req.body;
-
-  if (!req.user) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-
-  // Construct the JWT payload
-  const payload = {
+  const jwtGenerationData = {
     email: req.user.email,
     firstname: req.user.firstname,
     lastname: req.user.lastname,
@@ -1132,12 +1125,11 @@ app.post('/jwt', (req, res) => {
     course: course,
     professor_email: professorEmail
   };
-
-  // Generate the token
-  const token = jwt.sign(payload, secretKey, { expiresIn: '24h' });
-
-  // Send the token back as the response
-  res.json({ result: token });
+  const jwt = await makePostRequest(`http://${jwtService}:${jwtPort}/jwt`, jwtGenerationData);
+  if (jwt.error) {
+    res.status(jwt.status).send(jwt.data.error);
+  }
+  res.json({ token: jwt });
 });
 
 app.listen(port, () => {
