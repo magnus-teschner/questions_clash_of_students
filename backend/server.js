@@ -46,6 +46,9 @@ userManagementPort = process.env.USERPORT || 1000;
 jwtService = process.env.JWTSERVICE || "localhost";
 jwtPort = process.env.JWTPORT || 1002;
 
+questionService = process.env.QUESTIONSERVICE || "localhost";
+questionPort = process.env.JWTPORT || 1003;
+
 
 //common functions
 const axios = require('axios');
@@ -378,21 +381,19 @@ app.get("/log-out", (req, res, next) => {
   });
 });
 
-app.get('/questions', (req, res) => {
+app.get('/questions', async (req, res) => {
 
-  fetch(`http://${question_creator_service}:${port_question_service}/programs/`, {
-    method: 'GET',
-  })
-    .then(response => response.json())
-    .then(data => res.render("questions", { user: req.user, programs: data }))
-    .catch(error => {
-      console.error('Error:', error);
-      return res.status(500).send('Internal Server Error');
-    });
+  const programs = await makeGetRequest(`http://${questionService}:${questionPort}/programs`);
+  if (programs.error) {
+    return res.status(programs.status).send(programs.data.error);
+  }
+  return res.render("questions", { user: req.user, programs: programs.data })
 });
 
 
 app.get('/manage-questions', (req, res) => {
+
+
   if (!req.user) {
     return res.render("show-manage-questions", { user: req.user, data: undefined });
   }
