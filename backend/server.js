@@ -115,66 +115,41 @@ passport.use('stud',
         return done(null, false, { message: "Email not found" });
       }
 
-      if (account.isVerified === 0) {
+      if (account.data.isVerified === 0) {
         return done(null, false, { message: "Email not verified" });
       }
 
+      if (account.data.role !== 'student') {
+        return done(null, false, { message: "No access for professors" });
+      }
 
-      const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
-      const values = [email, 1];
+      const firstname = account.data.firstname;
+      const lastname = account.data.lastname;
+      const emailAccount = account.data.email;
+      const passwordAccount = account.data.password;
+      const user_id = account.data.user_id;
 
+      const match = await bcrypt.compare(password, passwordAccount);
+      if (!match) {
+        return done(null, false, { message: "Incorrect password" })
+      }
 
-      con.query(query_retrieve, values, async (err, result) => {
+      let query_score = "SELECT score FROM scores WHERE user_id =?";
+      const id_account = [user_id];
+
+      con.query(query_score, id_account, (err, accountScore) => {
         if (err) {
           return done(err);
         }
-
-        if (!result || result.length === 0) {
-          return done(null, false, { message: "Email not found" });
-        }
-
-        else if (result[0].isVerified == 0) {
-          return done(null, false, { message: "Email not verified" });
-
-        }
-
-        else if (result[0].role == 'professor') {
-          return done(null, false, { message: "No access for professors" });
-
-        }
-
-
-        const db_first = result[0].firstname;
-        const db_last = result[0].lastname;
-        const db_email = result[0].email;
-        const db_password = result[0].password;
-
-        try {
-          const match = await bcrypt.compare(password, db_password);
-          if (!match) {
-            // passwords do not match!
-            return done(null, false, { message: "Incorrect password" })
-          } else {
-            let query_score = "SELECT score FROM scores WHERE user_id =?";
-            const id_account = [result[0].user_id];
-
-            con.query(query_score, id_account, (err, accountScore) => {
-              if (err) {
-                return done(err);
-              }
-              const db_score = accountScore[0].score;
-              let user = {
-                firstname: db_first,
-                lastname: db_last,
-                email: db_email,
-                score: db_score,
-              };
-              return done(null, user);
-            });
-          }
-        } catch (bcryptError) {
-          return done(bcryptError);
-        }
+        const score = accountScore[0].score;
+        let user = {
+          user_id: user_id,
+          firstname: firstname,
+          lastname: lastname,
+          email: emailAccount,
+          score: score,
+        };
+        return done(null, user);
       });
 
     } catch (err) {
@@ -186,42 +161,38 @@ passport.use('stud',
 passport.use('prof',
   new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, async (email, password, done) => {
     try {
-      const query_retrieve = 'SELECT * FROM accounts WHERE email = ? AND role = ?';
-      const values = [email, "professor"];
+      const account = await makeGetRequest(`http://${userManagementService}:${userManagementPort}/accounts/email/${email}`);
+      if (account.error) {
+        return done(null, false, { message: "Email not found" });
+      }
 
+      if (account.data.isVerified === 0) {
+        return done(null, false, { message: "Email not verified" });
+      }
 
-      con.query(query_retrieve, values, async (err, result) => {
-        if (err) {
-          return done(err);
-        }
+      if (account.data.role !== 'professor') {
+        return done(null, false, { message: "No access for students" });
+      }
 
-        if (!result || result.length === 0) {
-          return done(null, false, { message: "Email not found" });
-        }
+      const firstname = account.data.firstname;
+      const lastname = account.data.lastname;
+      const emailAccount = account.data.email;
+      const passwordAccount = account.data.password;
+      const user_id = account.data.user_id;
 
-        else if (result[0].isVerified == 0) {
-          return done(null, false, { message: "Email not verified" });
+      const match = await bcrypt.compare(password, passwordAccount);
+      if (!match) {
+        return done(null, false, { message: "Incorrect password" })
+      }
 
-        }
+      let user = {
+        user_id: user_id,
+        firstname: firstname,
+        lastname: lastname,
+        email: emailAccount
+      };
+      return done(null, user);
 
-        const db_first = result[0].firstname;
-        const db_last = result[0].lastname;
-        const db_email = result[0].email;
-        const db_password = result[0].password;
-
-
-        try {
-          const match = await bcrypt.compare(password, db_password);
-          if (!match) {
-            return done(null, false, { message: "Incorrect password" })
-          } else {
-            let user = { firstname: db_first, lastname: db_last, email: db_email };
-            return done(null, user);
-          }
-        } catch (bcryptError) {
-          return done(bcryptError);
-        }
-      });
 
     } catch (err) {
       return done(err);
