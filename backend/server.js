@@ -42,6 +42,51 @@ const mailjet = Mailjet.apiConnect(
   mailjet_private_key
 );
 
+courseService = process.env.COURSESERVICE || "localhost";
+coursePort = process.env.COURSEPORT || 5003;
+
+
+//common functions
+const axios = require('axios');
+
+const makePutRequest = async (url, data = {}, headers = { 'Content-Type': 'application/json' }) => {
+  try {
+    const response = await axios.put(url, data, { headers });
+    return { data: response.data, status: response.status };
+  } catch (error) {
+    return {
+      error: true,
+      data: error.response ? error.response.data : error.message,
+      status: error.response ? error.response.status : 500
+    };
+  }
+};
+
+const makeGetRequest = async (url, headers = { 'Content-Type': 'application/json' }) => {
+  try {
+    const response = await axios.get(url, { headers });
+    return { data: response.data, status: response.status };
+  } catch (error) {
+    return {
+      error: true,
+      data: error.response ? error.response.data : error.message,
+      status: error.response ? error.response.status : 500
+    };
+  }
+};
+
+const makePostRequest = async (url, data = {}, headers = { 'Content-Type': 'application/json' }) => {
+  try {
+    const response = await axios.post(url, data, { headers });
+    return { data: response.data, status: response.status };
+  } catch (error) {
+    return {
+      error: true,
+      data: error.response ? error.response.data : error.message,
+      status: error.response ? error.response.status : 500
+    };
+  }
+};
 
 const config_mysql = {
   user: "admin",
@@ -416,94 +461,29 @@ app.get('/manage-questions', (req, res) => {
     });
 });
 
-const getLectionsForCourse = (program, course) => {
-  return new Promise((resolve, reject) => {
-    const query = `
-      SELECT DISTINCT q.lection_id
-      FROM questions q
-      JOIN lections l ON q.lection_id = l.lection_id
-      JOIN courses c ON l.course_id = c.course_id
-      WHERE c.program_id = ? AND c.course_name = ?`;
-    
-    con.query(query, [program, course], (err, results) => {
-      if (err) {
-        return reject(err);
-      }
-      resolve(results.map(r => r.lection_id));
-    });
-  });
-};
-
-const capitalizeFirstLetter = (str) => {
-  if (!str) return '';
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
 
 app.get('/courses', (req, res) => {
   if (!req.user) {
-    return res.render("courses", {
-      user: req.user,
-      nonEnrolledCourses: [],
-      enrolledCourses: []
-    });
+    return res.status(401).json({ message: 'User not authenticated' });
   }
 
-  const query_courses = `
-    SELECT c.*, p.program_name, a.lastname AS creator_lastname
-    FROM courses c
-    JOIN programs p ON c.program_id = p.program_id
-    JOIN accounts a ON c.creator = a.user_id`;
-
-  const query_enrolled_courses = `
-    SELECT c.*, cm.progress, cm.course_score, p.program_name, a.lastname AS creator_lastname
-    FROM courses c 
-    JOIN course_members cm ON c.course_id = cm.course_id
-    JOIN programs p ON c.program_id = p.program_id
-    JOIN accounts a ON c.creator = a.user_id
-    WHERE cm.user_id = ?`;
-
-  con.query(query_courses, (err, courses) => {
-    if (err) {
-      console.error('Error fetching courses:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    con.query(query_enrolled_courses, [req.user.user_id], (err, enrolledCourses) => {
-      if (err) {
-        console.error('Error fetching enrolled courses:', err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-      const promises_enroll = enrolledCourses.map(course => {
-        course.creator_lastname = capitalizeFirstLetter(course.creator_lastname);
-        return getLectionsForCourse(course.program_name, course.course_name).then(lections => {
-          course.lections = lections;
-        });
-      });
-
-      const nonEnrolledCourses = courses.filter(course =>
-        !enrolledCourses.some(enrolled => enrolled.course_id === course.course_id)
-      );
-
-      const promises_unenroll = nonEnrolledCourses.map(course => {
-        course.creator_lastname = capitalizeFirstLetter(course.creator_lastname);
-        return Promise.resolve();
-      });
-
-      Promise.all([...promises_enroll, ...promises_unenroll])
-        .then(() => {
-          res.render("courses", {
-            user: req.user,
-            nonEnrolledCourses: nonEnrolledCourses,
-            enrolledCourses: enrolledCourses
-          });
-        })
-        .catch(err => {
-          console.error('Error processing courses:', err);
-          return res.status(500).send('Internal Server Error');
-        });
-    });
+  const queryParams = new URLSearchParams({
+    user_id: req.user.user_id  // Eindeutige Benutzer-ID
   });
+
+  let url = `http://${courseService}:${coursePort}/courses/?${queryParams}`;
+
+  fetch(url, {
+    method: 'GET',
+  })
+    .then(response => response.json())
+    .then(data => {
+      res.status(200).json(data);
+    })
+    .catch(error => {
+      console.error('Error fetching courses from microservice:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    });
 });
 
 // Endpoint to handle course enrollment
