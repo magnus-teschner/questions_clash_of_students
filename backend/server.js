@@ -271,7 +271,13 @@ app.get('/verify-email', async (req, res) => {
   try {
     const { token } = req.query;
     const account = await makeGetRequest(`http://${userManagementService}:${userManagementPort}/accounts/token/${token}`);
-    const verificationResponse = await makePutRequest(`http://${userManagementService}:${userManagementPort}/accounts/${account.data.user_id}/set-verified`)
+    if (account.error) {
+      res.status(account.status).send(account.data.error);
+    }
+    const setVerifiedResponse = await makePutRequest(`http://${userManagementService}:${userManagementPort}/accounts/${account.data.user_id}/set-verified`)
+    if (setVerifiedResponse.error) {
+      res.status(setVerifiedResponse.status).send(setVerifiedResponse.data.error);
+    }
     if (account.data.role == "professor") {
       return res.render("login", { user: req.user, error: undefined, target: "professor", verification: undefined });
     } else if (account.data.role == "student") {
@@ -800,8 +806,10 @@ app.post("/sign-up", async (req, res, next) => {
     token: accountCreationResponse.data.token
   };
   console.log(`http://${emailService}:${emailPort}/send-verification`);
-  const emailResponse = await makePostRequest(`http://${emailService}:${emailPort}/email/send-verification`, dataVerificationEmail);
-
+  const sendEmailResponse = await makePostRequest(`http://${emailService}:${emailPort}/email/send-verification`, dataVerificationEmail);
+  if (sendEmailResponse.error) {
+    res.status(sendEmailResponse.status).send(sendEmailResponse.data.error);
+  }
   const user_id = accountCreationResponse.data.user_id;
   //TODO: insert score entry in db
   // @ luca kannst für deinen microservice aufruf zum score eintragen den wert aus user_id nehmen
@@ -1064,15 +1072,24 @@ app.post('/send-reset-email', async (req, res, next) => {
     const email = req.body.email;
     const token = uuidv4();
     const account = await makeGetRequest(`http://${userManagementService}:${userManagementPort}/accounts/email/${email}`);
+    if (account.error) {
+      res.status(account.status).send(account.data.error);
+    }
     const user_id = account.data.user_id;
-    await makePutRequest(`http://${userManagementService}:${userManagementPort}/accounts/${user_id}/token/${token}`);
+    const setTokenResponse = await makePutRequest(`http://${userManagementService}:${userManagementPort}/accounts/${user_id}/token/${token}`);
+    if (setTokenResponse.error) {
+      res.status(setTokenResponse.status).send(setTokenResponse.data.error);
+    }
     const dataPasswordResetEmail = {
       firstname: account.data.firstname,
       lastname: account.data.lastname,
       email: account.data.email,
       token: token
     }
-    await makePostRequest(`http://${emailService}:${emailPort}/email/send-reset-password`, dataPasswordResetEmail);
+    const sendEmailResponse = await makePostRequest(`http://${emailService}:${emailPort}/email/send-reset-password`, dataPasswordResetEmail);
+    if (sendEmailResponse.error) {
+      res.status(sendEmailResponse.status).send(sendEmailResponse.data.error);
+    }
     return res.render('success');
   } catch (error) {
     return next(error);
