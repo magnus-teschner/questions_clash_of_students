@@ -40,6 +40,22 @@ class CourseController {
         }
     }
 
+    static async renameCourse(req, res) {
+        const { user_id, course_id, new_course_name } = req.body;
+        try {
+            const result = await CourseService.renameCourse(user_id, course_id, new_course_name);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).send('Course not found or not authorized to rename this course');
+            }
+
+            return res.status(200).send('Course renamed and questions updated successfully');
+        } catch (error) {
+            console.error('Error renaming course:', error);
+            return res.status(500).send('Internal Server Error');
+        }
+    }
+
     static async deleteCourse(req, res) {
         const { user_id, course_id } = req.body;
 

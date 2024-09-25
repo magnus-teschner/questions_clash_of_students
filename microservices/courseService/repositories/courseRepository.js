@@ -33,6 +33,17 @@ class CourseRepository {
         return this.query(query, [user_id, course_id]);
     }
 
+    static async renameCourse(user_id, course_id, new_course_name) {
+        const query_update_course = 'UPDATE courses SET course_name = ? WHERE course_id = ? AND creator = ?';
+        const values_course = [new_course_name, course_id, user_id];
+        const result_course = await this.query(query_update_course, values_course);
+
+        if (result_course.affectedRows === 0) {
+            throw new Error('Course not found or not authorized to rename this course');
+        }
+        return result_course;
+    }
+
     static deleteCourse(user_id, course_id) {
         const query = 'DELETE FROM courses WHERE course_id = ? AND creator = ?';
         const values = [course_id, user_id];

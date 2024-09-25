@@ -341,44 +341,31 @@ app.delete('/delete-member', (req, res) => {
 
 
 app.put('/rename-course', (req, res) => {
-  const { course_id, new_course_name } = req.body;
-  //console.log(course_id, new_course_name);
+  const user_id = req.user.user_id;
+  const course_id = req.body.course_id;
+  const new_course_name = req.body;
 
-  if (!req.session.passport.user) {
-    return res.status(401).send('No User signed in!');
-  }
+  let url = `http://${courseService}:${coursePort}/rename-course`;
 
-  const userId = req.user.email;
-
-  // Update the course name in the course table
-  const query_update_course = 'UPDATE course SET course_name = ? WHERE id = ? AND user = ?';
-  const values_course = [new_course_name, course_id, userId];
-
-  con.query(query_update_course, values_course, (err, result) => {
-    if (err) {
-      console.error('Error renaming course:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).send('Course not found or not authorized to rename this course');
-    }
-
-    // Update the course name in the questions table
-    const query_update_questions = 'UPDATE questions SET course = ? WHERE course = (SELECT course_name FROM courses WHERE id = ?) and program = (Select program_name from courses where id = ?)';
-    const values_questions = [new_course_name, course_id, course_id];
-
-    con.query(query_update_questions, values_questions, (err, result) => {
-      if (err) {
-        console.error('Error updating course name in questions:', err);
-        return res.status(500).send('Internal Server Error');
+  fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ user_id, course_id, new_course_name }),  // Übergabe der Daten
+  })
+    .then(response => {
+      if (response.ok) {
+        res.status(200).send('Course renamed successfully');
+      } else {
+        return response.text().then(text => res.status(response.status).send(text));
       }
-
-      return res.status(200).send('Course renamed and questions updated successfully');
+    })
+    .catch(error => {
+      console.error('Error renaming course:', error);
+      return res.status(500).send('Internal Server Error');
     });
-  });
 });
-
 
 app.put('/move-course', (req, res) => {
   const { course_id, new_program } = req.body;
@@ -699,7 +686,7 @@ app.get('/manage-courses', async (req, res) => {
 });
 
 app.delete('/delete-course', (req, res) => {
-  const user_id = req.user.user_id; 
+  const user_id = req.user.user_id;
   const course_id = req.body.course_id;
 
   let url = `http://${courseService}:${coursePort}/delete-course`;

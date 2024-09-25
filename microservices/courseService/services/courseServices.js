@@ -42,6 +42,10 @@ class CourseService {
         return CourseRepository.unenrollCourse(user_id, course_id);
     }
 
+    static async renameCourse(user_id, course_id, new_course_name) {
+        return CourseRepository.renameCourse(user_id, course_id, new_course_name);
+    }
+
     static async deleteCourse(user_id, course_id) {
         return CourseRepository.deleteCourse(user_id, course_id);
     }
