@@ -382,7 +382,9 @@ app.get("/log-out", (req, res, next) => {
 });
 
 app.get('/questions', async (req, res) => {
-
+  if (!req.user) {
+    return res.render("questions", { user: undefined, programs: undefined })
+  }
   const programs = await makeGetRequest(`http://${questionService}:${questionPort}/programs`);
   if (programs.error) {
     return res.status(programs.status).send(programs.data.error);
@@ -391,25 +393,16 @@ app.get('/questions', async (req, res) => {
 });
 
 
-app.get('/manage-questions', (req, res) => {
-
-
+app.get('/manage-questions', async (req, res) => {
   if (!req.user) {
-    return res.render("show-manage-questions", { user: req.user, data: undefined });
+    return res.render("show-manage-questions", { user: undefined, questions: undefined })
   }
-  let user = req.user;
-  fetch(`http://${question_creator_service}:${port_question_service}/all_entrys/`, {
-    method: 'GET',
-    headers: {
-      'user': user.email
-    }
-  })
-    .then(response => response.json())
-    .then(data => res.render("show-manage-questions", { user: req.user, data: data }))
-    .catch(error => {
-      console.error('Error:', error);
-      return res.status(500).send('Internal Server Error');
-    });
+  const questions = await makeGetRequest(`http://${questionService}:${questionPort}/questions/${req.user.user_id}`);
+  if (questions.error) {
+    return res.status(questions.status).send(questions.data.error);
+  }
+  console.log(questions);
+  return res.render("show-manage-questions", { user: req.user, questions: questions.data })
 });
 
 app.get('/courses', (req, res) => {

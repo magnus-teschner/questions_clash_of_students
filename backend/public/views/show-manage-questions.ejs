@@ -34,52 +34,51 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% for(let i=0; i < data.length; i++) { %>
+                            <% for(let i=0; i < questions.length; i++) { %>
                                 <tr>
                                     <td class="hidden" data-label="ID">
-                                        <%= data[i].id %>
+                                        <%= questions[i].question_id %>
                                     </td>
                                     <td data-label="Question Type">
-                                        <%= data[i].question_type %>
+                                        <%= questions[i].question_type %>
                                     </td>
                                     <td data-label="Question">
-                                        <%= data[i].frage %>
+                                        <%= questions[i].frage %>
                                     </td>
                                     <td data-label="Answer A">
-                                        <%= data[i].answer_a %>
+                                        <%= questions[i].answer_a %>
                                     </td>
                                     <td data-label="Answer B">
-                                        <%= data[i].answer_b %>
+                                        <%= questions[i].answer_b %>
                                     </td>
                                     <td data-label="Answer C">
-                                        <%= data[i].answer_c %>
+                                        <%= questions[i].answer_c %>
                                     </td>
                                     <td data-label="Answer D">
-                                        <%= data[i].answer_d %>
+                                        <%= questions[i].answer_d %>
                                     </td>
                                     <td data-label="Correct Answer">
-                                        <%= data[i].correct_answer %>
+                                        <%= questions[i].correct_answer %>
                                     </td>
                                     <td data-label="Program">
-                                        <%= data[i].program %>
+                                        <%= questions[i].program_name %>
                                     </td>
                                     <td data-label="Course">
-                                        <%= data[i].course %>
+                                        <%= questions[i].course_name %>
                                     </td>
                                     <td data-label="Lection">
-                                        <%= data[i].lection %>
+                                        <%= questions[i].lection_name %>
                                     </td>
                                     <td data-label="Position">
-                                        <%= data[i].position %>
+                                        <%= questions[i].position %>
                                     </td>
                                     <td data-label="Image">
-                                        <% if(data[i].image_url) { %>
+                                        <% if(questions[i].image_url) { %>
                                             <p class="store-url hidden">
-                                                <%=data[i].image_url%>
+                                                <%=questions[i].image_url%>
                                             </p>
-                                            <img class="row-image"
-                                                src="<%= 'http://localhost:9000/images-questions-bucket/' + data[i].image_url %>"
-                                                alt="Image" style="width: 100px;">
+                                            <img class="row-image" src=<%=questions[i].image_url%>
+                                            alt="Image" style="width: 100px;">
                                             <% } else { %>
                                                 <p class="store-url hidden">N/A</p>
                                                 <img class="row-image hidden" src="" alt="Image" style="width: 100px;">
@@ -99,7 +98,7 @@
             <div id="edit-modal" class="modal hidden">
                 <div class="modal-content">
                     <span class="close-btn">&times;</span>
-                    <h2>Edit Row</h2>
+                    <h2>Edit Question</h2>
                     <p id="id-container" class="hidden"></p>
                     <form id="edit-form">
                         <div class="form-group">
@@ -135,34 +134,26 @@
                             <label for="edit-correct-answer">Correct Answer</label>
                             <input type="text" id="edit-correct-answer">
                         </div>
+
+                        <!-- Non-editable fields -->
                         <div class="form-group">
-                            <label for="edit-program">Program</label>
-                            <select id="edit-program">
-                            </select>
+                            <label>Program</label>
+                            <p id="edit-program"></p>
                         </div>
                         <div class="form-group">
-                            <label for="edit-course">Course</label>
-                            <select id="edit-course">
-                            </select>
+                            <label>Course</label>
+                            <p id="edit-course"></p>
                         </div>
                         <div class="form-group">
-                            <label for="edit-lection">Lection</label>
-                            <select id="edit-lection">
-                                <option value="1">Lection 1</option>
-                                <option value="2">Lection 2</option>
-                                <option value="3">Lection 3</option>
-                                <option value="4">Lection 4</option>
-                                <option value="5">Lection 5</option>
-                                <option value="6">Lection 6</option>
-                                <option value="7">Lection 7</option>
-                                <option value="8">Lection 8</option>
-                            </select>
+                            <label>Lection</label>
+                            <p id="edit-lection"></p>
                         </div>
                         <div class="form-group">
-                            <label for="edit-position">Position</label>
-                            <select id="edit-position">
-                            </select>
+                            <label>Position</label>
+                            <p id="edit-position"></p>
                         </div>
+
+
                         <div class="form-group" id="image-field-modal">
                             <p id="modal-image-header">Image</p>
                             <div id="img-modal-div">
