@@ -1081,7 +1081,7 @@ app.get('/reset-password/:token', async (req, res, next) => {
     const { token } = req.params;
     const account = await makeGetRequest(`http://${userManagementService}:${userManagementPort}/accounts/token/${token}`);
     if (account.error) {
-      return res.status(404).send("Token does not match any account!")
+      return res.status(account.status).send(account.data.status)
     }
     return res.render('reset-password', { token: req.params.token })
   } catch (error) {
@@ -1096,12 +1096,15 @@ app.post('/reset-password', async (req, res, next) => {
     if (password !== confirmPassword) return res.status(400).send('Passwords do not match.');
     const account = await makeGetRequest(`http://${userManagementService}:${userManagementPort}/accounts/token/${token}`);
     if (account.error) {
-      return res.status(404).send('Password reset token is invalid or has expired.');
+      return res.status(account.status).send(account.data.status);
     }
     const newPasswordData = {
       newPassword: password
     }
     const resetPasswordResponse = await makePutRequest(`http://${userManagementService}:${userManagementPort}/accounts/${account.data.user_id}/password`, newPasswordData);
+    if (resetPasswordResponse.error) {
+      return res.status(resetPasswordResponse.status).send(resetPasswordResponse.data.error)
+    }
     res.render('success_change');
   } catch (error) {
     next(error)
