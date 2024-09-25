@@ -206,32 +206,32 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (email, done) => {
   try {
-    const query_retrieve = 'SELECT * FROM accounts WHERE email = ?';
-    const values = [email];
-    con.query(query_retrieve, values, (err, result) => {
-      const db_id = result[0].user_id;
-      const db_first = result[0].firstname;
-      const db_last = result[0].lastname;
-      const db_email = result[0].email;
-      const db_role = result[0].role;
+    const account = await makeGetRequest(`http://${userManagementService}:${userManagementPort}/accounts/email/${email}`);
+    if (account.error) {
+      return res.status(account.status).send(account.data.error);
+    }
 
-      if (db_role === 'student') {
-        const query_score = "SELECT score FROM scores WHERE user_id = ?";
-        const account_id = [db_id];
-        con.query(query_score, account_id, (err, accountScore) => {
-          if (err) {
-            return done(err);
-          }
+    const user_id = account.data.user_id;
+    const firstname = account.data.firstname;
+    const lastname = account.data.lastname;
+    const emailAccount = account.data.email;
+    const role = account.data.role;
+    if (role === "student") {
+      const query_score = "SELECT score FROM scores WHERE user_id = ?";
+      const account_id = [user_id];
+      con.query(query_score, account_id, (err, accountScore) => {
+        if (err) {
+          return done(err);
+        }
 
-          const db_score = accountScore.length > 0 ? accountScore[0].score : 0;
-          let user = { id: db_id, firstname: db_first, lastname: db_last, email: db_email, score: db_score };
-          return done(null, user);
-        });
-      } else {
-        let user = { id: db_id, firstname: db_first, lastname: db_last, email: db_email, score: null };
+        const score = accountScore.length > 0 ? accountScore[0].score : 0;
+        let user = { user_id: user_id, firstname: firstname, lastname: lastname, email: emailAccount, score: score };
         return done(null, user);
-      }
-    });
+      });
+    }
+    let user = { user_id: user_id, firstname: firstname, lastname: lastname, email: emailAccount, score: null };
+    return done(null, user);
+
   } catch (err) {
     done(err);
   }
@@ -243,11 +243,11 @@ app.get('/verify-email', async (req, res) => {
     const { token } = req.query;
     const account = await makeGetRequest(`http://${userManagementService}:${userManagementPort}/accounts/token/${token}`);
     if (account.error) {
-      res.status(account.status).send(account.data.error);
+      return res.status(account.status).send(account.data.error);
     }
     const setVerifiedResponse = await makePutRequest(`http://${userManagementService}:${userManagementPort}/accounts/${account.data.user_id}/set-verified`)
     if (setVerifiedResponse.error) {
-      res.status(setVerifiedResponse.status).send(setVerifiedResponse.data.error);
+      return res.status(setVerifiedResponse.status).send(setVerifiedResponse.data.error);
     }
     if (account.data.role == "professor") {
       return res.render("login", { user: req.user, error: undefined, target: "professor", verification: undefined });
