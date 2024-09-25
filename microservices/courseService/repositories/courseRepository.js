@@ -23,6 +23,16 @@ class CourseRepository {
         return this.query(query, [userId]);
     }
 
+    static enrollCourse(user_id, course_id) {
+        const query = `INSERT INTO course_members (user_id, course_id, progress, course_score) VALUES (?, ?, 0, 0)`;
+        return this.query(query, [user_id, course_id]);
+    }
+
+    static unenrollCourse(user_id, course_id) {
+        const query = `DELETE FROM course_members WHERE user_id = ? AND course_id = ?`;
+        return this.query(query, [user_id, course_id]);
+    }
+
     static query(sql, params = []) {
         return new Promise((resolve, reject) => {
             db.query(sql, params, (err, results) => {

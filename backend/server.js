@@ -461,14 +461,13 @@ app.get('/manage-questions', (req, res) => {
     });
 });
 
-
 app.get('/courses', (req, res) => {
   if (!req.user) {
     return res.status(401).json({ message: 'User not authenticated' });
   }
 
   const queryParams = new URLSearchParams({
-    user_id: req.user.user_id  // Eindeutige Benutzer-ID
+    user_id: req.user.user_id
   });
 
   let url = `http://${courseService}:${coursePort}/courses/?${queryParams}`;
@@ -478,7 +477,15 @@ app.get('/courses', (req, res) => {
   })
     .then(response => response.json())
     .then(data => {
-      res.status(200).json(data);
+      // Data vom Microservice in der Antwort enthalten
+      const enrolledCourses = data.enrolledCourses || [];
+      const nonEnrolledCourses = data.nonEnrolledCourses || [];
+
+      res.render('courses', {
+        user: req.user,
+        enrolledCourses: enrolledCourses,
+        nonEnrolledCourses: nonEnrolledCourses
+      });
     })
     .catch(error => {
       console.error('Error fetching courses from microservice:', error);
@@ -489,22 +496,64 @@ app.get('/courses', (req, res) => {
 // Endpoint to handle course enrollment
 app.post('/enroll-course', (req, res) => {
   if (!req.user) {
-    return res.status(401).send('No User signed in!');
+    return res.status(401).json({ message: 'User not authenticated' });
+  }
+  const user_id = req.user.user_id;
+  const course_id = req.body.course_id;
+
+  console.log(user_id, course_id, 'HIEERRR')
+
+  let url = `http://${courseService}:${coursePort}/enroll-course`;
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ user_id, course_id }),
+  })
+    .then(response => {
+      if (response.ok) {
+        res.status(200).send('Enrolled successfully');
+      } else {
+        return response.text().then(text => res.status(500).send(text));
+      }
+    })
+    .catch(error => {
+      console.error('Error enrolling in course:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    });
+});
+
+// Endpoint to handle course unenrollment
+app.post('/unenroll-course', (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'User not authenticated' });
   }
 
-  const courseId = req.body.course_id;
-  const userId = req.user.user_id;
+  const user_id = req.user.user_id; 
+  const course_id = req.body.course_id;
 
-  const query_enroll = 'INSERT INTO course_members (user_id, course_id, progress, course_score) VALUES (?, ?, 0, 0)';
+  let url = `http://${courseService}:${coursePort}/unenroll-course`;
 
-  con.query(query_enroll, [userId, courseId], (err, result) => {
-    if (err) {
-      console.error('Error enrolling in course:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    res.status(200).send('Enrolled successfully');
-  });
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ user_id, course_id }),
+  })
+    .then(response => {
+      if (response.ok) {
+        res.status(200).send('Unenrolled successfully');
+      } else {
+        return response.text().then(text => res.status(500).send(text));
+      }
+    })
+    .catch(error => {
+      console.error('Error unenrolling from course:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    });
 });
 
 app.get('/course-progress', (req, res) => {
@@ -523,27 +572,6 @@ app.get('/course-progress', (req, res) => {
     }
 
     res.status(200).json(results);
-  });
-});
-
-// Endpoint to handle course unenrollment
-app.post('/unenroll-course', (req, res) => {
-  if (!req.user) {
-    return res.status(401).send('No User signed in!');
-  }
-
-  const courseId = req.body.course_id;
-  const userId = req.user.user_id;
-
-  const query_unenroll = 'DELETE FROM course_members WHERE user_id = ? AND course_id = ?';
-
-  con.query(query_unenroll, [userId, courseId], (err, result) => {
-    if (err) {
-      console.error('Error unenrolling from course:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    res.status(200).send('Unenrolled successfully');
   });
 });
 
