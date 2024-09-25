@@ -699,31 +699,30 @@ app.get('/manage-courses', async (req, res) => {
 });
 
 app.delete('/delete-course', (req, res) => {
-  if (!req.session.passport.user) {
-    return res.status(401).send('No User signed in!');
-  }
+  const user_id = req.user.user_id; 
+  const course_id = req.body.course_id;
 
-  const userId = req.user.email;
-  const courseId = req.query.id;
+  let url = `http://${courseService}:${coursePort}/delete-course`;
 
-  const query_delete = 'DELETE FROM courses WHERE id = ? AND user = ?';
-  const values = [courseId, userId];
-  //console.log(values);
-
-  con.query(query_delete, values, (err, result) => {
-    if (err) {
-      console.error('Error deleting course:', err);
+  fetch(url, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ user_id, course_id }),
+  })
+    .then(response => {
+      if (response.ok) {
+        res.status(200).send('Course deleted successfully');
+      } else {
+        return response.text().then(text => res.status(response.status).send(text));
+      }
+    })
+    .catch(error => {
+      console.error('Error deleting course:', error);
       return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).send('Course not found or not authorized to delete this course');
-    }
-
-    return res.status(200).send('Course deleted successfully');
-  });
+    });
 });
-
 
 
 app.get("/log-in-prof", (req, res) => {

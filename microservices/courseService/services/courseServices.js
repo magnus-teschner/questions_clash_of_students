@@ -41,6 +41,10 @@ class CourseService {
     static async unenrollCourse(user_id, course_id) {
         return CourseRepository.unenrollCourse(user_id, course_id);
     }
+
+    static async deleteCourse(user_id, course_id) {
+        return CourseRepository.deleteCourse(user_id, course_id);
+    }
 }
 
 module.exports = CourseService;

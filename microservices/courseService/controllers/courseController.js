@@ -16,29 +16,46 @@ class CourseController {
         }
     }
     static async enrollCourse(req, res) {
-        
+
         const { user_id, course_id } = req.body;
-        
+
         try {
-          await CourseService.enrollCourse(user_id, course_id);
-          return res.status(200).send('Enrolled successfully');
+            await CourseService.enrollCourse(user_id, course_id);
+            return res.status(200).send('Enrolled successfully');
         } catch (error) {
-          console.error('Error enrolling in course:', error);
-          return res.status(500).send('Internal Server Error');
+            console.error('Error enrolling in course:', error);
+            return res.status(500).send('Internal Server Error');
         }
-      }
-    
-      static async unenrollCourse(req, res) {
+    }
+
+    static async unenrollCourse(req, res) {
         const { user_id, course_id } = req.body;
-        
+
         try {
-          await CourseService.unenrollCourse(user_id, course_id);
-          return res.status(200).send('Unenrolled successfully');
+            await CourseService.unenrollCourse(user_id, course_id);
+            return res.status(200).send('Unenrolled successfully');
         } catch (error) {
-          console.error('Error unenrolling from course:', error);
-          return res.status(500).send('Internal Server Error');
+            console.error('Error unenrolling from course:', error);
+            return res.status(500).send('Internal Server Error');
         }
-      }
+    }
+
+    static async deleteCourse(req, res) {
+        const { user_id, course_id } = req.body;
+
+        try {
+            const result = await CourseService.deleteCourse(user_id, course_id);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).send('Course not found or not authorized to delete this course');
+            }
+
+            return res.status(200).send('Course deleted successfully');
+        } catch (error) {
+            console.error('Error deleting course:', error);
+            return res.status(500).send('Internal Server Error');
+        }
+    }
 }
 
 module.exports = CourseController;
