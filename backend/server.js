@@ -52,6 +52,7 @@ questionPort = process.env.JWTPORT || 1003;
 
 //common functions
 const axios = require('axios');
+const { send } = require('process');
 
 const makePutRequest = async (url, data = {}, headers = { 'Content-Type': 'application/json' }) => {
   try {
@@ -668,27 +669,6 @@ app.get('/', (req, res) => {
   return res.render("login", { user: req.user, error: undefined, target: undefined, verification: undefined });
 });
 
-
-/*
-app.post(
-  "/log-in-student",
-  passport.authenticate("stud", {
-    successRedirect: "/courses",
-    failureRedirect: "/log-in-student",
-    failureMessage: true
-  })
-);
-
-app.post(
-  "/log-in-prof",
-  passport.authenticate("prof", {
-    successRedirect: "/questions",
-    failureRedirect: "/log-in-prof",
-    failureMessage: true
-  })
-);
-
-*/
 app.post("/log-in-student", (req, res, next) => {
   let return_to_req = req.session.returnTo;
   console.log(return_to_req);
@@ -786,56 +766,92 @@ app.post("/sign-up", async (req, res, next) => {
 });
 
 
-app.post('/upload_min', upload.single('image'), (req, res) => {
+app.post('/question', upload.single('image'), async (req, res) => {
   if (!req.session.passport.user) {
     return res.status(500).send('No User signed in!')
   }
 
-  let userData = {
-    user: req.session.passport.user,
-    ...JSON.parse(req.body.json)
-  };
-  userData = JSON.stringify(userData);
-  const formData = new FormData();
-  const blob = new Blob([req.file.buffer], { mimetype: req.file.mimetype });
-  formData.append('image', blob);
-  formData.append('json', userData)
-  formData.append('mimetype', req.file.mimetype)
+  const contentType = req.headers['content-type'];
+  if (contentType.includes('multipart/form-data')) {
+    upload.single('image')(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ error: 'Image upload failed' });
+      }
 
-  fetch(`http://${question_creator_service}:${port_question_service}/upload_min/`, {
-    method: 'POST',
-    body: formData
-  })
-    .then(response => res.send(response))
-    .catch(error => {
-      console.error('Error:', error);
-      return res.status(500).send('Internal Server Error');
+      questionData = JSON.parse(req.body.questionData);
+      imageFile = req.file;
+
+      const {
+        question_type,
+        frage,
+        answer_a,
+        answer_b,
+        answer_c,
+        answer_d,
+        correct_answer,
+        position,
+        lection_id
+      } = questionData;
+
+      const sendQuestionData = {
+        user_id: req.user.user_id,
+        question_type: question_type,
+        frage: frage,
+        answer_a: answer_a,
+        answer_b: answer_b,
+        answer_c: answer_c,
+        answer_d: answer_d,
+        correct_answer: correct_answer,
+        position: position,
+        lection_id: lection_id,
+      }
+
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      formData.append('questionData', sendQuestionData);
+
+      const questionCreationResponse = await makePostRequest(`http://${questionService}:${questionPort}/question`, formData, {
+        'Content-Type':
+          "multipart/form-data"
+      })
+      if (questionCreationResponse.error) {
+        return res.status(questionCreationResponse.status).send(questionCreationResponse.data.error);
+      }
+      return res.status(201).send(questionCreationResponse.data.message);
     });
-});
+  } else if (contentType.includes('application/json')) {
+    const {
+      question_type,
+      frage,
+      answer_a,
+      answer_b,
+      answer_c,
+      answer_d,
+      correct_answer,
+      position,
+      lection_id
+    } = req.body;
 
+    const sendQuestionData = {
+      user_id: req.user.user_id,
+      question_type: question_type,
+      frage: frage,
+      answer_a: answer_a,
+      answer_b: answer_b,
+      answer_c: answer_c,
+      answer_d: answer_d,
+      correct_answer: correct_answer,
+      position: position,
+      lection_id: lection_id,
+    }
 
-app.post('/send', (req, res) => {
-  if (!req.session.passport.user) {
-    return res.status(500).send('No User signed in!')
+    const questionCreationResponse = await makePostRequest(`http://${questionService}:${questionPort}/question`, sendQuestionData)
+    if (questionCreationResponse.error) {
+      return res.status(questionCreationResponse.status).send(questionCreationResponse.data.error);
+    }
+    return res.status(201).send(questionCreationResponse.data.message);
   }
-  const userData = {
-    user: req.session.passport.user,
-    ...req.body
-  };
-  fetch(`http://${question_creator_service}:${port_question_service}/send/`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(userData)
-  })
-    .then(response => response.json())
-    .then(data => res.send(data))
-    .catch(error => {
-      console.error('Error:', error);
-      return res.status(500).send('Internal Server Error');
-    });
-});
+})
 
 app.post('/add_course', (req, res) => {
   if (!req.session.passport.user) {
