@@ -1007,25 +1007,6 @@ app.get('/get_courses', (req, res) => {
 });
 
 
-
-app.get('/programs', (req, res) => {
-
-  // Construct the URL with parameters
-  let url = `http://${question_creator_service}:${port_question_service}/programs`;
-
-  // Make the GET request
-  fetch(url, {
-    method: 'GET',
-  })
-    .then(response => response.json())
-    .then(data => res.send(data))
-    .catch(error => {
-      console.error('Error:', error);
-      return res.status(500).send('Internal Server Error');
-    });
-});
-
-
 app.get('/get_positions', (req, res) => {
   const queryParams = new URLSearchParams({
     user: req.user.email,
