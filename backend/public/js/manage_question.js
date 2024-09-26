@@ -155,10 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
         row.cells[5].innerText = document.getElementById('edit-answer-c').value;
         row.cells[6].innerText = document.getElementById('edit-answer-d').value;
         row.cells[7].innerText = document.getElementById('edit-correct-answer').value;
-        row.cells[8].innerText = document.getElementById('edit-program').value;
-        row.cells[9].innerText = document.getElementById('edit-course').value;
-        row.cells[10].innerText = document.getElementById('edit-lection').value;
-        row.cells[11].innerText = document.getElementById('edit-position').value;
+        row.cells[8].innerText = document.getElementById('edit-program').textContent;
+        row.cells[9].innerText = document.getElementById('edit-course').textContent;
+        row.cells[10].innerText = document.getElementById('edit-lection').textContent;
+        row.cells[11].innerText = document.getElementById('edit-position').textContent;
 
         let type_selector_value = document.getElementById('edit-question-type').value
         if (type_selector_value === 'multiple-choice' || type_selector_value === 'text-description') {
