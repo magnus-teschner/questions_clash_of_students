@@ -766,8 +766,8 @@ app.post("/sign-up", async (req, res, next) => {
 });
 
 
-app.post('/question', upload.single('image'), async (req, res) => {
-  if (!req.session.passport.user) {
+app.post('/question', async (req, res) => {
+  if (!req.user) {
     return res.status(500).send('No User signed in!')
   }
 
@@ -853,6 +853,89 @@ app.post('/question', upload.single('image'), async (req, res) => {
   }
 })
 
+app.put('/question', async (req, res) => {
+  if (!req.user) {
+    return res.status(500).send('No User signed in!')
+  }
+
+  const contentType = req.headers['content-type'];
+  if (contentType.includes('multipart/form-data')) {
+    upload.single('image')(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ error: 'Image upload failed' });
+      }
+
+      questionData = JSON.parse(req.body.questionData);
+      imageFile = req.file;
+
+      const {
+        question_id,
+        question_type,
+        frage,
+        answer_a,
+        answer_b,
+        answer_c,
+        answer_d,
+        correct_answer
+      } = questionData;
+
+      const sendQuestionData = {
+        user_id: req.user.user_id,
+        question_id: question_id,
+        question_type: question_type,
+        frage: frage,
+        answer_a: answer_a,
+        answer_b: answer_b,
+        answer_c: answer_c,
+        answer_d: answer_d,
+        correct_answer: correct_answer
+      }
+
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      formData.append('questionData', sendQuestionData);
+
+      const questionCreationResponse = await makePutRequest(`http://${questionService}:${questionPort}/question`, formData, {
+        'Content-Type':
+          "multipart/form-data"
+      })
+      if (questionCreationResponse.error) {
+        return res.status(questionCreationResponse.status).send(questionCreationResponse.data.error);
+      }
+      return res.status(200).send(questionCreationResponse.data.message);
+    });
+  } else if (contentType.includes('application/json')) {
+    const {
+      question_id,
+      question_type,
+      frage,
+      answer_a,
+      answer_b,
+      answer_c,
+      answer_d,
+      correct_answer
+    } = req.body;
+
+    const sendQuestionData = {
+      user_id: req.user.user_id,
+      question_id: question_id,
+      question_type: question_type,
+      frage: frage,
+      answer_a: answer_a,
+      answer_b: answer_b,
+      answer_c: answer_c,
+      answer_d: answer_d,
+      correct_answer: correct_answer
+    }
+
+    const questionCreationResponse = await makePutRequest(`http://${questionService}:${questionPort}/question`, sendQuestionData)
+    if (questionCreationResponse.error) {
+      return res.status(questionCreationResponse.status).send(questionCreationResponse.data.error);
+    }
+    return res.status(200).send(questionCreationResponse.data.message);
+  }
+})
+
 app.post('/add_course', (req, res) => {
   if (!req.session.passport.user) {
     return res.status(500).send('No User signed in!')
@@ -876,59 +959,6 @@ app.post('/add_course', (req, res) => {
     });
 });
 
-
-
-app.post('/update', (req, res) => {
-  if (!req.session.passport.user) {
-    return res.status(500).send('No User signed in!')
-  }
-
-  const userData = {
-    user: req.session.passport.user,
-    ...req.body
-  };
-  fetch(`http://${question_creator_service}:${port_question_service}/change/`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(userData)
-  })
-    .then(response => res.redirect('/manage-questions'))
-    .catch(error => {
-      console.error('Error:', error);
-      return res.status(500).send('Internal Server Error');
-    });
-});
-
-
-
-app.post('/update_img', upload.single('image'), (req, res) => {
-  if (!req.session.passport.user) {
-    return res.status(500).send('No User signed in!')
-  }
-
-  let userData = {
-    user: req.session.passport.user,
-    ...JSON.parse(req.body.json)
-  };
-  userData = JSON.stringify(userData);
-  const formData = new FormData();
-  const blob = new Blob([req.file.buffer], { mimetype: req.file.mimetype });
-  formData.append('image', blob);
-  formData.append('json', userData)
-  formData.append('mimetype', req.file.mimetype)
-
-  fetch(`http://${question_creator_service}:${port_question_service}/change-img/`, {
-    method: 'POST',
-    body: formData
-  })
-    .then(response => res.redirect('/manage-questions'))
-    .catch(error => {
-      console.error('Error:', error);
-      return res.status(500).send('Internal Server Error');
-    });
-});
 
 
 
