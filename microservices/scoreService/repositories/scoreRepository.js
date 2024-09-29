@@ -1,6 +1,11 @@
 const db = require('../db/db');
 
 class ScoreRepository {
+    static async createUserScore(userId) {
+        const sql = 'Insert into scores (user_id, score) VALUES (?, 0)';
+        return this.query(sql, [userId]);
+    }
+
     static async updateLectionScore(userId, lectionId, newLectionScore) {
         const sqlSelect = `SELECT lection_score FROM lection_scores WHERE lection_id = ? AND user_id = ?`;
 

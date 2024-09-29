@@ -52,6 +52,9 @@ questionPort = process.env.JWTPORT || 1003;
 courseService = process.env.COURSESERVICE || "localhost";
 coursePort = process.env.COURSEPORT || 5003;
 
+scoreService = process.env.SCORESERVICE || "localhost";
+scorePort = process.env.SCOREPORT || 5002;
+
 
 //common functions
 const axios = require('axios');
@@ -746,14 +749,18 @@ app.post("/sign-up", async (req, res, next) => {
     email: req.body.email,
     token: accountCreationResponse.data.token
   };
-  console.log(`http://${emailService}:${emailPort}/send-verification`);
   const sendEmailResponse = await makePostRequest(`http://${emailService}:${emailPort}/email/send-verification`, dataVerificationEmail);
   if (sendEmailResponse.error) {
-    res.status(sendEmailResponse.status).send(sendEmailResponse.data.error);
+    return res.status(sendEmailResponse.status).send(sendEmailResponse.data.error);
   }
   const user_id = accountCreationResponse.data.user_id;
-  //TODO: insert score entry in db
-  // @ luca kannst für deinen microservice aufruf zum score eintragen den wert aus user_id nehmen
+
+  const createScoreResponse = await makePostRequest(`http://${scoreService}:${scorePort}/score/user/${user_id}/score`, {});
+  console.log(createScoreResponse);
+  if (createScoreResponse.error) {
+    return res.status(createScoreResponse.status).send(createScoreResponse.data.error);
+  }
+
   if (role === "professor") {
     return res.render("login", { user: req.user, error: undefined, target: "professor", verification: 1 });
   } else if (role === "student") {

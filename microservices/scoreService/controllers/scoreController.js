@@ -1,6 +1,19 @@
 const ScoreService = require('../services/scoreService');
 
 class ScoreController {
+    createUserScore
+
+    static async createUserScore(req, res) {
+        try {
+            const { userId } = req.params;
+            await ScoreService.createUserScore(userId);
+            res.status(200).send('Created User Score');
+        } catch (error) {
+            res.status(500).json({ error: 'Error creating user score' });
+            console.error(error);
+        }
+    }
+
     static async updateLectionScore(req, res) {
         try {
             const { userId, lectionId, lectionScore } = req.body;
