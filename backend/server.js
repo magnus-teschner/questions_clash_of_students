@@ -52,6 +52,9 @@ questionPort = process.env.JWTPORT || 1003;
 courseService = process.env.COURSESERVICE || "localhost";
 coursePort = process.env.COURSEPORT || 5003;
 
+scoreService = process.env.SCORESERVICE || "localhost";
+scorePort = process.env.SCOREPORT || 5002;
+
 
 //common functions
 const axios = require('axios');
@@ -746,14 +749,18 @@ app.post("/sign-up", async (req, res, next) => {
     email: req.body.email,
     token: accountCreationResponse.data.token
   };
-  console.log(`http://${emailService}:${emailPort}/send-verification`);
   const sendEmailResponse = await makePostRequest(`http://${emailService}:${emailPort}/email/send-verification`, dataVerificationEmail);
   if (sendEmailResponse.error) {
-    res.status(sendEmailResponse.status).send(sendEmailResponse.data.error);
+    return res.status(sendEmailResponse.status).send(sendEmailResponse.data.error);
   }
   const user_id = accountCreationResponse.data.user_id;
-  //TODO: insert score entry in db
-  // @ luca kannst für deinen microservice aufruf zum score eintragen den wert aus user_id nehmen
+
+  const createScoreResponse = await makePostRequest(`http://${scoreService}:${scorePort}/score/user/${user_id}/score`, {});
+  console.log(createScoreResponse);
+  if (createScoreResponse.error) {
+    return res.status(createScoreResponse.status).send(createScoreResponse.data.error);
+  }
+
   if (role === "professor") {
     return res.render("login", { user: req.user, error: undefined, target: "professor", verification: 1 });
   } else if (role === "student") {
@@ -932,27 +939,26 @@ app.put('/question', async (req, res) => {
   }
 })
 
-app.post('/add_course', (req, res) => {
+app.post('/add_course', async (req, res) => {
   if (!req.session.passport.user) {
     return res.status(500).send('No User signed in!')
   }
-  const userData = {
-    user: req.session.passport.user,
-    ...req.body
+
+  const { program_id, course_name } = req.body;
+  const sendCourseData = {
+    userId: req.user.user_id,
+    programId: program_id,
+    courseName: course_name
+  }
+  const courseCreationResponse = await makePostRequest(`http://${courseService}:${coursePort}/course`, sendCourseData);
+  if (courseCreationResponse.error) {
+    return res.status(courseCreationResponse.status).send(courseCreationResponse.data.error);
   };
-  fetch(`http://${question_creator_service}:${port_question_service}/add_course/`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(userData)
-  })
-    .then(response => response.json())
-    .then(data => res.send(data))
-    .catch(error => {
-      console.error('Error:', error);
-      return res.status(500).send('Internal Server Error');
-    });
+  const lectionCreationResponse = await makePostRequest(`http://${courseService}:${coursePort}/course/${courseCreationResponse.data.courseId}/lections`, {})
+  if (lectionCreationResponse.error) {
+    return res.status(lectionCreationResponse.status).send(lectionCreationResponse.data.error);
+  }
+  return res.status(200).send(courseCreationResponse.data);
 });
 
 
@@ -981,50 +987,34 @@ app.get('/get_question', (req, res) => {
 });
 
 
-app.get('/get_courses', (req, res) => {
-  const queryParams = new URLSearchParams({
-    user: req.user.email,
-    program: req.query.program
-  });
-
-  // Construct the URL with parameters
-  let url = `http://${question_creator_service}:${port_question_service}/get_courses/?${queryParams}`;
-
-  // Make the GET request
-  fetch(url, {
-    method: 'GET',
-  })
-    .then(response => response.json())
-    .then(data => res.send(data))
-    .catch(error => {
-      console.error('Error:', error);
-      return res.status(500).send('Internal Server Error');
-    });
+app.get('/get_courses/:program_id', async (req, res) => {
+  let user = req.user;
+  const user_id = user.user_id;
+  const { program_id } = req.params;
+  const courses = await makeGetRequest(`http://${courseService}:${coursePort}/programs/${program_id}/user/${user_id}/courses`);
+  console.log(courses);
+  if (courses.error) {
+    return res.status(courses.status).send(courses.data.message);
+  }
+  return res.status(200).send(courses.data)
 });
 
+app.get('/get_lections/:course_id', async (req, res) => {
+  const { course_id } = req.params;
+  const lections = await makeGetRequest(`http://${courseService}:${coursePort}/course/${course_id}/lections`);
+  if (lections.error) {
+    return res.status(lections.status).send(lections.data.message);
+  }
+  return res.status(200).send(lections.data)
+});
 
-app.get('/get_positions', (req, res) => {
-  const queryParams = new URLSearchParams({
-    user: req.user.email,
-    program: req.query.program,
-    course: req.query.course,
-    lection: req.query.lection
-
-  });
-
-  // Construct the URL with parameters
-  let url = `http://${question_creator_service}:${port_question_service}/get_positions/?${queryParams}`;
-
-  // Make the GET request
-  fetch(url, {
-    method: 'GET',
-  })
-    .then(response => response.json())
-    .then(data => res.send(data))
-    .catch(error => {
-      console.error('Error:', error);
-      return res.status(500).send('Internal Server Error');
-    });
+app.get('/get_positions/:lection_id', async (req, res) => {
+  const { lection_id } = req.params;
+  const lections = await makeGetRequest(`http://${questionService}:${questionPort}/lection/${lection_id}/unused-positions`);
+  if (lections.error) {
+    return res.status(lections.status).send(lections.data.message);
+  }
+  return res.status(200).send(lections.data)
 });
 
 app.get('/api/questions/:user/:program/:course/:lection/:position', (req, res) => {

@@ -1,6 +1,35 @@
 const db = require('../db/db');
 
 class CourseRepository {
+    static async createLection(courseId, lectionName) {
+        const query = `
+            Insert into lections (lection_name, course_id) VALUES (?,?)
+        `;
+        return this.query(query, [lectionName, courseId]);
+    }
+
+    static async createCourse(userId, programId, courseName) {
+        const query = `
+            Insert into courses (course_name, program_id, creator) VALUES (?,?,?)
+        `;
+        const result = await this.query(query, [courseName, programId, userId]);
+        return { courseId: result.insertId, courseName: courseName };
+    }
+
+    static async getCoursesAfterProgram(userId, programId) {
+        const query = `
+            Select * from courses where program_id = ? and creator = ?
+        `;
+        return this.query(query, [programId, userId]);
+    }
+
+    static async getLections(courseId) {
+        const query = `
+            Select * from lections where course_id = ?
+        `;
+        return this.query(query, [courseId]);
+    }
+
     static async getAllCourses() {
         const query = `
             SELECT c.*, p.program_name, a.lastname AS creator_lastname

@@ -209,11 +209,11 @@ class QuestionController {
 
     static async getUnusedPositions(req, res) {
         try {
-            const { userId, programId, courseId, lectionId } = req.query;
-            if (!userId || !programId || !courseId || !lectionId) {
-                return res.status(400).json({ error: 'All parameters (userId, programId, courseId, lectionId) are required' });
+            const { lectionId } = req.params;
+            if (!lectionId) {
+                return res.status(400).json({ error: 'All parameters (lectionId) are required' });
             }
-            const unusedPositions = await QuestionService.getUnusedPositions(userId, programId, courseId, lectionId);
+            const unusedPositions = await QuestionService.getUnusedPositions(lectionId);
             if (!unusedPositions.length) {
                 return res.status(404).json({ error: 'No unused positions found' });
             }

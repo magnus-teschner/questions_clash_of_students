@@ -1,6 +1,9 @@
 const ScoreRepository = require('../repositories/scoreRepository');
 
 class ScoreService {
+    static async createUserScore(userId) {
+        return await ScoreRepository.createUserScore(userId);
+    }
     static async updateLectionScore(userId, lectionId, lectionScore) {
         try {
             await ScoreRepository.updateLectionScore(userId, lectionId, lectionScore);

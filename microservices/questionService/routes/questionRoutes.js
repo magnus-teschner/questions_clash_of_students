@@ -7,6 +7,6 @@ router.get('/questions/:userId', QuestionController.getQuestionsByUser);
 router.get('/question', QuestionController.getQuestion);
 router.post('/question', QuestionController.addQuestion);
 router.put('/question', QuestionController.updateQuestion);
-router.get('/unused-positions', QuestionController.getUnusedPositions);
+router.get('/lection/:lectionId/unused-positions', QuestionController.getUnusedPositions);
 
 module.exports = router;

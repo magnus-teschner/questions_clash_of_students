@@ -55,12 +55,12 @@ class QuestionRepository {
         return this.query(sql, values);
     }
 
-    static async getUnusedPositions(userId, programId, courseId, lectionId) {
+    static async getUnusedPositions(lectionId) {
         const sql = `
             SELECT position FROM questions
-            WHERE program_id = ? AND course_id = ? AND lection_id = ? AND user_id = ?;
+            WHERE lection_id = ?;
         `;
-        return this.query(sql, [programId, courseId, lectionId, userId]);
+        return this.query(sql, [lectionId]);
     }
 
     static query(sql, params = []) {

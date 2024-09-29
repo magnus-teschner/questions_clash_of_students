@@ -2,6 +2,25 @@ const CourseRepository = require('../repositories/courseRepository');
 const { capitalizeFirstLetter, getLectionsForCourse } = require('../utils/helperFunctions');
 
 class CourseService {
+    static async createCourse(userId, programId, courseName) {
+        return await CourseRepository.createCourse(userId, programId, courseName);
+    }
+
+    static async getCoursesAfterProgram(userId, programId) {
+        return await CourseRepository.getCoursesAfterProgram(userId, programId);
+    }
+
+    static async createLections(courseId) {
+        for (let lectionName = 1; lectionName < 9; lectionName++) {
+            await CourseRepository.createLection(courseId, lectionName);
+        }
+        return
+    }
+
+    static async getLections(courseId) {
+        return await CourseRepository.getLections(courseId);
+    }
+
     static async getAllCourses(user_id) {
         try {
             const courses = await CourseRepository.getAllCourses();
