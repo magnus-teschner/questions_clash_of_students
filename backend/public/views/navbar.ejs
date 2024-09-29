@@ -68,11 +68,7 @@
             </div>
         </div>
         <% } else { %>
-            <div id="container">
-                <div id="login-hint">
-                    Please <a href="/"> log in</a> to view this page!
-                </div>
-            </div>
+            <%- include('login-hint') %>
             <% } %>
                 <script src="js/navbar.js"></script>
 </body>

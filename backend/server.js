@@ -49,6 +49,9 @@ jwtPort = process.env.JWTPORT || 1002;
 questionService = process.env.QUESTIONSERVICE || "localhost";
 questionPort = process.env.JWTPORT || 1003;
 
+courseService = process.env.COURSESERVICE || "localhost";
+coursePort = process.env.COURSEPORT || 5003;
+
 
 //common functions
 const axios = require('axios');
@@ -263,8 +266,6 @@ app.get('/verify-email', async (req, res) => {
   }
 });
 
-
-
 app.delete('/delete-member', (req, res) => {
   const { course_id, user_email } = req.body;
   const query = `DELETE FROM course_members WHERE course_id = ? AND user_email = ?`;
@@ -277,59 +278,33 @@ app.delete('/delete-member', (req, res) => {
   });
 });
 
-app.get('/course-members', (req, res) => {
-  const courseId = req.query.id;
-  const email = req.user.email;
-  const query = `SELECT * FROM course_members WHERE course_id = ?`;
-
-  con.query(query, [courseId, email], (error, results) => {
-    if (error) {
-      return res.status(500).json({ error: 'Database query error' });
-    }
-    res.json(results);
-  });
-});
-
 
 app.put('/rename-course', (req, res) => {
-  const { course_id, new_course_name } = req.body;
-  //console.log(course_id, new_course_name);
+  const user_id = req.user.user_id;
+  const course_id = req.body.course_id;
+  const new_course_name = req.body;
 
-  if (!req.session.passport.user) {
-    return res.status(401).send('No User signed in!');
-  }
+  let url = `http://${courseService}:${coursePort}/rename-course`;
 
-  const userId = req.user.email;
-
-  // Update the course name in the course table
-  const query_update_course = 'UPDATE course SET course_name = ? WHERE id = ? AND user = ?';
-  const values_course = [new_course_name, course_id, userId];
-
-  con.query(query_update_course, values_course, (err, result) => {
-    if (err) {
-      console.error('Error renaming course:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).send('Course not found or not authorized to rename this course');
-    }
-
-    // Update the course name in the questions table
-    const query_update_questions = 'UPDATE questions SET course = ? WHERE course = (SELECT course_name FROM course WHERE id = ?) and program = (Select program_name from course where id = ?)';
-    const values_questions = [new_course_name, course_id, course_id];
-
-    con.query(query_update_questions, values_questions, (err, result) => {
-      if (err) {
-        console.error('Error updating course name in questions:', err);
-        return res.status(500).send('Internal Server Error');
+  fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ user_id, course_id, new_course_name }),  // Übergabe der Daten
+  })
+    .then(response => {
+      if (response.ok) {
+        res.status(200).send('Course renamed successfully');
+      } else {
+        return response.text().then(text => res.status(response.status).send(text));
       }
-
-      return res.status(200).send('Course renamed and questions updated successfully');
+    })
+    .catch(error => {
+      console.error('Error renaming course:', error);
+      return res.status(500).send('Internal Server Error');
     });
-  });
 });
-
 
 app.put('/move-course', (req, res) => {
   const { course_id, new_program } = req.body;
@@ -355,7 +330,7 @@ app.put('/move-course', (req, res) => {
     }
 
     // Update the program in the questions table
-    const query_update_questions = 'UPDATE questions SET program = ? WHERE course = (SELECT course_name FROM course WHERE id = ?)';
+    const query_update_questions = 'UPDATE questions SET program = ? WHERE course = (SELECT course_name FROM courses WHERE id = ?)';
     const values_questions = [new_program, course_id];
     console.log(values_questions);
 
@@ -369,9 +344,6 @@ app.put('/move-course', (req, res) => {
     });
   });
 });
-
-
-
 
 app.get("/log-out", (req, res, next) => {
   req.logout((err) => {
@@ -407,99 +379,97 @@ app.get('/manage-questions', async (req, res) => {
 
 app.get('/courses', (req, res) => {
   if (!req.user) {
-    return res.render("courses", {
-      user: req.user,
-      nonEnrolledCourses: [],
-      enrolledCourses: []
-    });
+    return res.status(401).json({ message: 'User not authenticated' });
   }
 
-  const query_courses = 'SELECT * FROM courses';
-  const query_enrolled_courses = `
-    SELECT c.*, cm.progress, cm.course_score 
-    FROM courses c 
-    JOIN course_members cm 
-    ON c.course_id = cm.course_id 
-    WHERE cm.user_id = ?`;
-
-  con.query(query_courses, (err, courses) => {
-    if (err) {
-      console.error('Error fetching courses:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    const promises_unenroll = courses.map(course => {
-      if (course.user) {
-        const emailParts = course.user.split('@')[0].split('.');
-        course.lastname = emailParts.length > 1 ? emailParts[emailParts.length - 1] : '';
-        course.lastname = course.lastname.charAt(0).toUpperCase() + course.lastname.slice(1);
-      }
-    });
-
-    con.query(query_enrolled_courses, [req.user.email], (err, enrolledCourses) => {
-      if (err) {
-        console.error('Error fetching enrolled courses:', err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-      const getLectionsForCourse = (program, course) => {
-        return new Promise((resolve, reject) => {
-          const query = `SELECT DISTINCT lection FROM questions WHERE program = ? AND course = ?`
-
-          con.query(query, [program, course], (err, results) => {
-            if (err) {
-              return reject(err);
-            }
-            resolve(results.map(r => r.lection));
-          });
-        });
-      };
-
-      const promises_enroll = enrolledCourses.map(course => {
-        if (course.user) {
-          const emailParts = course.user.split('@')[0].split('.');
-          course.lastname = emailParts.length > 1 ? emailParts[emailParts.length - 1] : '';
-          course.lastname = course.lastname.charAt(0).toUpperCase() + course.lastname.slice(1);
-        }
-
-        return getLectionsForCourse(course.program_name, course.course_name).then(lections => {
-          course.lections = lections;
-        });
-      });
-
-      Promise.all(promises_enroll, promises_unenroll).then(() => {
-        return res.render("courses", {
-          user: req.user,
-          nonEnrolledCourses: courses,
-          enrolledCourses: enrolledCourses
-        });
-      }).catch(err => {
-        console.error('Error fetching lections:', err);
-        return res.status(500).send('Internal Server Error');
-      });
-    });
+  const queryParams = new URLSearchParams({
+    user_id: req.user.user_id
   });
+
+  let url = `http://${courseService}:${coursePort}/courses/?${queryParams}`;
+
+  fetch(url, {
+    method: 'GET',
+  })
+    .then(response => response.json())
+    .then(data => {
+      // Data vom Microservice in der Antwort enthalten
+      const enrolledCourses = data.enrolledCourses || [];
+      const nonEnrolledCourses = data.nonEnrolledCourses || [];
+
+      res.render('courses', {
+        user: req.user,
+        enrolledCourses: enrolledCourses,
+        nonEnrolledCourses: nonEnrolledCourses
+      });
+    })
+    .catch(error => {
+      console.error('Error fetching courses from microservice:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    });
 });
 
 // Endpoint to handle course enrollment
 app.post('/enroll-course', (req, res) => {
   if (!req.user) {
-    return res.status(401).send('No User signed in!');
+    return res.status(401).json({ message: 'User not authenticated' });
+  }
+  const user_id = req.user.user_id;
+  const course_id = req.body.course_id;
+
+  console.log(user_id, course_id, 'HIEERRR')
+
+  let url = `http://${courseService}:${coursePort}/enroll-course`;
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ user_id, course_id }),
+  })
+    .then(response => {
+      if (response.ok) {
+        res.status(200).send('Enrolled successfully');
+      } else {
+        return response.text().then(text => res.status(500).send(text));
+      }
+    })
+    .catch(error => {
+      console.error('Error enrolling in course:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    });
+});
+
+// Endpoint to handle course unenrollment
+app.post('/unenroll-course', (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'User not authenticated' });
   }
 
-  const courseId = req.body.course_id;
-  const userEmail = req.user.email;
+  const user_id = req.user.user_id;
+  const course_id = req.body.course_id;
 
-  const query_enroll = 'INSERT INTO course_members (user_email, course_id, progress, course_score) VALUES (?, ?, 0, 0)';
+  let url = `http://${courseService}:${coursePort}/unenroll-course`;
 
-  con.query(query_enroll, [userEmail, courseId], (err, result) => {
-    if (err) {
-      console.error('Error enrolling in course:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    res.status(200).send('Enrolled successfully');
-  });
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ user_id, course_id }),
+  })
+    .then(response => {
+      if (response.ok) {
+        res.status(200).send('Unenrolled successfully');
+      } else {
+        return response.text().then(text => res.status(500).send(text));
+      }
+    })
+    .catch(error => {
+      console.error('Error unenrolling from course:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    });
 });
 
 app.get('/course-progress', (req, res) => {
@@ -507,11 +477,11 @@ app.get('/course-progress', (req, res) => {
     return res.status(401).send('No User signed in!');
   }
 
-  const userEmail = req.user.email;
+  const userId = req.user.user_id;
 
-  const query_progress = 'SELECT course_id, progress, course_score FROM course_members WHERE user_email = ?';
+  const query_progress = 'SELECT course_id, progress, course_score FROM course_members WHERE user_id = ?';
 
-  con.query(query_progress, [userEmail], (err, results) => {
+  con.query(query_progress, [userId], (err, results) => {
     if (err) {
       console.error('Error fetching course progress:', err);
       return res.status(500).send('Internal Server Error');
@@ -521,65 +491,93 @@ app.get('/course-progress', (req, res) => {
   });
 });
 
-// Endpoint to handle course unenrollment
-app.post('/unenroll-course', (req, res) => {
-  if (!req.user) {
-    return res.status(401).send('No User signed in!');
-  }
+app.get('/course-members', (req, res) => {
+  const courseId = req.query.id;
+  const userId = req.user.user_id;
+  const query = `SELECT * FROM course_members WHERE course_id = ?`;
 
-  const courseId = req.body.course_id;
-  const userEmail = req.user.email;
-
-  const query_unenroll = 'DELETE FROM course_members WHERE user_email = ? AND course_id = ?';
-
-  con.query(query_unenroll, [userEmail, courseId], (err, result) => {
-    if (err) {
-      console.error('Error unenrolling from course:', err);
-      return res.status(500).send('Internal Server Error');
+  con.query(query, [courseId, userId], (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: 'Database query error' });
     }
-
-    res.status(200).send('Unenrolled successfully');
+    res.json(results);
   });
 });
 
-app.get('/ranking', (req, res) => {
-  const rankingQuery = `
-    SELECT a.id, a.firstname, a.lastname, s.score
-    FROM accounts a
-    JOIN scores s ON a.id = s.account_id
-  `;
+app.get('/ranking', (req, res, next) => {
+  const courseQuery = `SELECT DISTINCT course_name, course_id FROM courses`;
 
-  con.query(rankingQuery, [], (err, rows) => {
+  const selectedCourse = req.query.course || 'all';
+
+  let rankingQuery;
+  let queryParams = [];
+
+  if (selectedCourse === 'all') {
+    // Gesamtranking (alle Kurse)
+    rankingQuery = `
+      SELECT a.user_id, a.firstname, a.lastname, s.score
+      FROM accounts a
+      JOIN scores s ON a.user_id = s.user_id
+      ORDER BY s.score DESC
+    `;
+  } else {
+    // Kursbasiertes Ranking
+    rankingQuery = `
+      SELECT a.user_id, a.firstname, a.lastname, cm.course_score, c.course_name
+      FROM accounts a
+      JOIN course_members cm ON a.user_id = cm.user_id
+      JOIN courses c ON cm.course_id = c.course_id
+      WHERE c.course_name = ?
+      ORDER BY cm.course_score DESC
+    `;
+    queryParams = [selectedCourse];
+  }
+
+  con.query(courseQuery, [], (err, courses) => {
     if (err) {
       return next(err);
     }
 
-    const sortedData = rows.sort((a, b) => {
-      if (b.score === a.score) {
-        return a.firstname.localeCompare(b.firstname);
+    con.query(rankingQuery, queryParams, (err, rows) => {
+      if (err) {
+        return next(err);
       }
-      return b.score - a.score;
-    });
 
-    let currentRank = 1;
-    let currentScore = sortedData[0].score;
-    sortedData.forEach((user, index) => {
-      if (user.score < currentScore) {
-        currentRank = index + 1;
-        currentScore = user.score;
+      let rankingList;
+      if (selectedCourse === 'all') {
+        // Alle Kurse
+        rankingList = rows.sort((a, b) => b.score - a.score).map((user, index, sortedUsers) => {
+          const rank = index > 0 && sortedUsers[index - 1].score === user.score ? sortedUsers[index - 1].rank : index + 1;
+          return {
+            user_id: user.user_id,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            score: user.score,
+            rank: rank
+          };
+        });
+      } else {
+        // Ausgewählter Kurs
+        rankingList = rows.sort((a, b) => b.course_score - a.course_score).map((user, index, sortedUsers) => {
+          const rank = index > 0 && sortedUsers[index - 1].course_score === user.course_score ? sortedUsers[index - 1].rank : index + 1;
+          return {
+            user_id: user.user_id,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            course_score: user.course_score,
+            course_name: user.course_name,
+            rank: rank
+          };
+        });
       }
-      user.rank = currentRank;
+
+      res.render('ranking', {
+        user: req.user,
+        rankingList: rankingList,
+        courses: courses,
+        selectedCourse: selectedCourse
+      });
     });
-
-    const rankingList = sortedData.map(user => ({
-      rank: user.rank,
-      id: user.id,
-      firstname: user.firstname,
-      lastname: user.lastname,
-      score: user.score
-    }));
-
-    res.render('ranking', { user: req.user, rankingList: rankingList });
   });
 });
 
@@ -617,31 +615,30 @@ app.get('/manage-courses', async (req, res) => {
 });
 
 app.delete('/delete-course', (req, res) => {
-  if (!req.session.passport.user) {
-    return res.status(401).send('No User signed in!');
-  }
+  const user_id = req.user.user_id;
+  const course_id = req.body.course_id;
 
-  const userId = req.user.email;
-  const courseId = req.query.id;
+  let url = `http://${courseService}:${coursePort}/delete-course`;
 
-  const query_delete = 'DELETE FROM course WHERE id = ? AND user = ?';
-  const values = [courseId, userId];
-  //console.log(values);
-
-  con.query(query_delete, values, (err, result) => {
-    if (err) {
-      console.error('Error deleting course:', err);
+  fetch(url, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ user_id, course_id }),
+  })
+    .then(response => {
+      if (response.ok) {
+        res.status(200).send('Course deleted successfully');
+      } else {
+        return response.text().then(text => res.status(response.status).send(text));
+      }
+    })
+    .catch(error => {
+      console.error('Error deleting course:', error);
       return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).send('Course not found or not authorized to delete this course');
-    }
-
-    return res.status(200).send('Course deleted successfully');
-  });
+    });
 });
-
 
 
 app.get("/log-in-prof", (req, res) => {

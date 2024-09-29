@@ -180,9 +180,7 @@
                 </div>
             </div>
             <% } else { %>
-                <div id="login-hint">
-                    Please <a href="/log-in-prof">log in</a> to view this page!
-                </div>
+                <%- include('login-hint') %>
                 <% } %>
                     <script src="../js/manage_question.js"></script>
                     <script src="../js/send_change.js"></script>

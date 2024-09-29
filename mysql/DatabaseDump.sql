@@ -71,8 +71,8 @@ CREATE TABLE IF NOT EXISTS `lection_scores` (
   `user_id` INT,
   `lection_score` INT,
   FOREIGN KEY (`user_id`) REFERENCES `accounts` (`user_id`) ON DELETE CASCADE,
-  FOREIGN KEY (`lection_id`) REFERENCES `lections` (`lection_id`) ON DELETE CASCADE
+  FOREIGN KEY (`lection_id`) REFERENCES `lections` (`lection_id`) ON DELETE CASCADE,
+  UNIQUE KEY `unique_lection_user` (`lection_id`, `user_id`)
 );
-
 INSERT INTO `programs`(`program_name`) VALUES ('Digital Business');
 INSERT INTO `programs`(`program_name`) VALUES ('Digital Business Engineering');
