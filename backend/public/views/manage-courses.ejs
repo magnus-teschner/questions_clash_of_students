@@ -19,46 +19,49 @@
                         <h1>
                             <%= program.program_name %>
                         </h1>
+
                         <% program.courses.forEach(course=> { %>
-                            <div class="course-item draggable" id="course-<%= course.id %>" draggable="true"
-                                ondragstart="drag(event)" data-course-id="<%= course.id %>">
+                            <div class="course-item draggable" id="course-<%= course.course_id %>" draggable="true"
+                                ondragstart="drag(event)" data-course-id="<%= course.course_id %>">
                                 <div class="course-name">
-                                    <span id="course-name-<%= course.id %>">
+                                    <span id="course-name-<%= course.course_id %>">
                                         <%= course.course_name %>
                                     </span>
-                                    <input type="text" id="edit-course-name-<%= course.id %>" class="hidden"
+                                    <input type="text" id="edit-course-name-<%= course.course_id %>" class="hidden"
                                         value="<%= course.course_name %>">
-                                    <button class="edit-btn" onclick="editCourseName('<%= course.id %>')">Edit</button>
-                                    <button class="save-btn hidden" id="save-btn-<%= course.id %>"
-                                        onclick="saveCourseName('<%= course.id %>')">Save</button>
-                                    <button class="cancel-btn hidden" id="cancel-btn-<%= course.id %>"
-                                        onclick="cancelEdit('<%= course.id %>')">Cancel</button>
+                                    <button class="edit-btn"
+                                        onclick="editCourseName('<%= course.course_id %>')">Edit</button>
+                                    <button class="save-btn hidden" id="save-btn-<%= course.course_id %>"
+                                        onclick="saveCourseName('<%= course.course_id %>')">Save</button>
+                                    <button class="cancel-btn hidden" id="cancel-btn-<%= course.course_id %>"
+                                        onclick="cancelEdit('<%= course.course_id %>')">Cancel</button>
                                 </div>
                                 <div class="course-actions">
-                                    <button class="edit-btn" onclick="editCourse('<%= course.id %>')">Members</button>
+                                    <button class="edit-btn"
+                                        onclick="editCourse('<%= course.course_id %>')">Members</button>
                                     <button class="delete-btn"
-                                        onclick="deleteCourse('<%= course.id %>')">Delete</button>
+                                        onclick="deleteCourse('<%= course.course_id %>')">Delete</button>
                                 </div>
                             </div>
                             <% }) %>
                     </div>
                     <% }) %>
-            </div>
+
             </div>
             <% } else { %>
                 <%- include('login-hint') %>
-            <% } %>
+                    <% } %>
 
-                    <!-- Modal for displaying course members -->
-                    <div id="members-modal" class="modal">
-                        <div class="modal-content">
-                            <span id="modal-close-btn" class="close">&times;</span>
-                            <h2>Course Members</h2>
-                            <ul id="members-list"></ul>
+                        <!-- Modal for displaying course members -->
+                        <div id="members-modal" class="modal">
+                            <div class="modal-content">
+                                <span id="modal-close-btn" class="close">&times;</span>
+                                <h2>Course Members</h2>
+                                <ul id="members-list"></ul>
+                            </div>
                         </div>
-                    </div>
 
-                    <script src="../js/manage-courses.js"></script>
+                        <script src="../js/manage-courses.js"></script>
 </body>
 
 </html>

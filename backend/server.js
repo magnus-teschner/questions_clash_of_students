@@ -586,36 +586,33 @@ app.get('/ranking', (req, res, next) => {
 
 app.get('/manage-courses', async (req, res) => {
   try {
-    const user = req.user;
-    const programsUrl = `http://${question_creator_service}:${port_question_service}/programs`;
+    const userId = req.user.user_id;
+    const programs = await makeGetRequest(`http://${questionService}:${questionPort}/programs`);
 
-    const programsResponse = await fetch(programsUrl, { method: 'GET' });
-    const programs = await programsResponse.json();
+    if (programs.error) {
+      return res.status(programs.status).send(programs.data.error);
+    }
 
-    const coursesPromises = programs.map(program => {
-      console.log(user);
-      const queryParams = new URLSearchParams({
-        user: user.email,
-        program: program.program_name
-      });
-      const coursesUrl = `http://${question_creator_service}:${port_question_service}/get_courses/?${queryParams}`;
-      return fetch(coursesUrl, { method: 'GET' }).then(response => response.json());
-    });
+    const programsWithCourses = await Promise.all(programs.data.map(async (program) => {
+      const courses = await makeGetRequest(`http://${courseService}:${coursePort}/programs/${program.program_id}/user/${userId}/courses`);
 
-    const allCourses = await Promise.all(coursesPromises);
+      const coursesData = courses.error ? [] : courses.data;
 
-    const programsWithCourses = programs.map((program, index) => ({
-      program_name: program.program_name,
-      courses: allCourses[index]
+      return {
+        program_id: program.program_id,
+        program_name: program.program_name,
+        courses: coursesData
+      };
     }));
 
-
     res.render("manage-courses", { user: req.user, programsWithCourses });
+
   } catch (error) {
     console.error('Error:', error);
-    res.render("manage-courses", { user: req.user, programsWithCourses: [] });
+    res.status(500).send("Internal server error");
   }
 });
+
 
 app.delete('/delete-course', (req, res) => {
   const user_id = req.user.user_id;
