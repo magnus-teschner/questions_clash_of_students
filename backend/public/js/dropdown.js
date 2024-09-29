@@ -126,6 +126,7 @@ function eventlistenerLinksLection(parentDiv) {
             const lectionId = event.target.getAttribute('data-lection-id');
 
             parentDiv.previousElementSibling.textContent = lectionName;
+            parentDiv.previousElementSibling.setAttribute('data-lection-id', lectionId);
             parentDiv.style.display = 'none';
 
             let url = `/get_positions/${lectionId}`;
@@ -143,6 +144,7 @@ function eventlistenerLinksLection(parentDiv) {
                     data.forEach(positionItem => {
                         let link_a = document.createElement('a');
                         link_a.textContent = `Position ${positionItem}`;
+                        link_a.setAttribute('data-position', positionItem);
 
                         position.insertBefore(link_a, position.firstChild);
 
@@ -166,6 +168,7 @@ function eventlistenerLinksPosition(parentDiv) {
         const updateSiblingText = (event) => {
             event.preventDefault();
             parentDiv.previousElementSibling.textContent = event.target.textContent;
+            parentDiv.previousElementSibling.setAttribute('data-position', event.target.getAttribute('data-position'));
             parentDiv.style.display = 'none';
         };
         links.forEach(link => link.addEventListener('click', updateSiblingText));
