@@ -7,7 +7,23 @@ class QuestionRepository {
     }
 
     static async getQuestionsByUser(userId) {
-        const sql = 'SELECT * FROM questions WHERE user_id = ?;';
+        const sql = `
+            SELECT 
+                q.*, -- Get all columns from the questions table
+                p.program_name, 
+                c.course_name, 
+                l.lection_name
+            FROM 
+                questions q
+            JOIN 
+                lections l ON q.lection_id = l.lection_id
+            JOIN 
+                courses c ON l.course_id = c.course_id
+            JOIN 
+                programs p ON c.program_id = p.program_id
+            WHERE 
+                q.user_id = ?;
+        `;
         return this.query(sql, [userId]);
     }
 

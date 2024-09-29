@@ -10,7 +10,7 @@ router.get('/accounts/:user_id/:is-verified', UserManagementController.checkVeri
 
 router.put('/accounts/:user_id/set-verified', UserManagementController.verifyAccount);
 router.put('/accounts/:user_id/password', UserManagementController.updatePassword);
-
+router.put('/accounts/:user_id/token/:token', UserManagementController.setVerificationToken);
 
 router.post('/accounts', UserManagementController.createAccount);
 

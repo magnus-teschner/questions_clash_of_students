@@ -168,11 +168,8 @@
 				</div>
 			</div>
 			<% } else { %>
-				<div id="login-hint">
-					Please <a href="/log-in-prof"> log in</a> to view this page!
-				</div>
-
-				<% } %>
+				<%- include('login-hint') %>
+			<% } %>
 					<script src="../js/question.js"></script>
 					<script src="../js/image-upload.js"></script>
 					<script src="../js/dropdown.js"></script>

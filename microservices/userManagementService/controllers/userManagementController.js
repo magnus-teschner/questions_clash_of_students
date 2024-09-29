@@ -1,4 +1,5 @@
 const UserManagementService = require('../services/userManagementService');
+const AppError = require('../utils/appError');
 
 class UserManagementController {
     static async getHealth(req, res) {
@@ -87,6 +88,17 @@ class UserManagementController {
         }
     }
 
+    static async setVerificationToken(req, res) {
+        try {
+            const { user_id, token } = req.params;
+            await UserManagementService.setVerificationToken(user_id, token);
+            res.status(200).json({ message: `Verification token set for user with user id ${user_id}` });
+        } catch (error) {
+            res.status(500).json({ error: 'An error occurred while setting the verification token' });
+            console.error(error);
+        }
+    }
+
     static async resetVerificationToken(req, res) {
         try {
             const { user_id } = req.params;
@@ -104,13 +116,23 @@ class UserManagementController {
             if (!firstname || !lastname || !email || !password || !role) {
                 return res.status(400).json({ error: 'All fields are required' });
             }
-            await UserManagementService.createAccount(firstname, lastname, email, password, role);
-            res.status(201).json({ message: 'Account created successfully' });
+
+            const { verificationToken, user_id } = await UserManagementService.createAccount(firstname, lastname, email, password, role);
+            res.status(201).json({
+                message: 'Account created successfully',
+                token: verificationToken,
+                user_id: user_id
+            });
+
         } catch (error) {
-            res.status(500).json({ error: 'An error occurred while creating the account' });
-            console.error(error);
+            if (error instanceof AppError) {
+                res.status(error.statusCode).json({ error: error.message });
+            } else {
+                res.status(500).json({ error: 'An unexpected error occurred' });
+            }
         }
     }
+
 
     static async updatePassword(req, res) {
         try {

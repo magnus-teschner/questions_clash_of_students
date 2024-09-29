@@ -135,7 +135,6 @@ class QuestionController {
             let imageFile = null;
 
             const contentType = req.headers['content-type'];
-            console.log(contentType);
 
             if (contentType.includes('multipart/form-data')) {
                 upload.single('image')(req, res, async (err) => {
@@ -174,7 +173,6 @@ class QuestionController {
                 });
             } else if (contentType.includes('application/json')) {
                 questionData = req.body;
-                console.log(questionData);
                 const {
                     question_id,
                     user_id,

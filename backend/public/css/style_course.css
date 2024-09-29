@@ -180,7 +180,7 @@ h2 {
   color: white;
   padding: 8px 10px;
   border-radius: 50%;
-  margin-left: auto; /* Schiebt den Button ganz nach rechts */
+  margin-left: auto; 
   cursor: pointer;
 }
 
@@ -201,30 +201,4 @@ h2 {
 .enroll-btn.enrolled {
   background-color: #a4ecb4;
   cursor: default;
-}
-
-#login-hint {
-  width: 500px;
-  height: 200px;
-  background: white;
-  align-self: center;
-  border-radius: 10px;
-  margin-top: 100px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  color: black;
-}
-
-#login-hint a {
-  text-decoration: underline;
-  margin-left: 5px;
-  margin-right: 5px;
-  color: blue;
-}
-
-#container {
-  display: flex;
-  flex-direction: column;
 }

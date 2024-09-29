@@ -6,7 +6,7 @@ class JWTController {
 
         try {
             const token = JWTService.generateToken(email, firstname, lastname, program, course, professorEmail);
-            res.json({ result: token });
+            res.json({ token: token });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Error generating token' });
