@@ -943,9 +943,13 @@ app.post('/add_course', async (req, res) => {
     programId: program_id,
     courseName: course_name
   }
-  const courseCreationResponse = await makePostRequest(`http://${courseService}:${coursePort}/course`, sendCourseData)
+  const courseCreationResponse = await makePostRequest(`http://${courseService}:${coursePort}/course`, sendCourseData);
   if (courseCreationResponse.error) {
     return res.status(courseCreationResponse.status).send(courseCreationResponse.data.error);
+  };
+  const lectionCreationResponse = await makePostRequest(`http://${courseService}:${coursePort}/course/${courseCreationResponse.data.courseId}/lections`, {})
+  if (lectionCreationResponse.error) {
+    return res.status(lectionCreationResponse.status).send(lectionCreationResponse.data.error);
   }
   return res.status(200).send(courseCreationResponse.data);
 });

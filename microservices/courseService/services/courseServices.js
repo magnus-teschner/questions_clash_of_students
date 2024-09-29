@@ -10,6 +10,13 @@ class CourseService {
         return await CourseRepository.getCoursesAfterProgram(userId, programId);
     }
 
+    static async createLections(courseId) {
+        for (let lectionName = 1; lectionName < 9; lectionName++) {
+            await CourseRepository.createLection(courseId, lectionName);
+        }
+        return
+    }
+
     static async getLections(courseId) {
         return await CourseRepository.getLections(courseId);
     }

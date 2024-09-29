@@ -1,6 +1,13 @@
 const db = require('../db/db');
 
 class CourseRepository {
+    static async createLection(courseId, lectionName) {
+        const query = `
+            Insert into lections (lection_name, course_id) VALUES (?,?)
+        `;
+        return this.query(query, [lectionName, courseId]);
+    }
+
     static async createCourse(userId, programId, courseName) {
         const query = `
             Insert into courses (course_name, program_id, creator) VALUES (?,?,?)

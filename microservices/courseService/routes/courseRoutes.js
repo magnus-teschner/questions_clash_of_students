@@ -14,5 +14,6 @@ router.get('/course/:courseId/lections', CourseController.getLections)
 router.put('/rename-course', CourseController.renameCourse);
 router.delete('/delete-course', CourseController.deleteCourse);
 router.post('/course', CourseController.createCourse);
+router.post('/course/:courseId/lections', CourseController.createLections)
 
 module.exports = router;

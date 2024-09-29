@@ -28,6 +28,17 @@ class CourseController {
         }
     }
 
+    static async createLections(req, res) {
+        try {
+            const { courseId } = req.params;
+
+            const lections = await CourseService.createLections(courseId);
+            return res.status(200).send('Created Lections');
+        } catch (error) {
+            res.status(500).json({ error: 'An error occurred while retrieving lections for a course' });
+            console.error(error);
+        }
+    }
     static async getLections(req, res) {
         try {
             const { courseId } = req.params;

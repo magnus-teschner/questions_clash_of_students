@@ -43,7 +43,7 @@ function eventlistenerLinksCourses(parentDiv) {
 
                     data.forEach(lectionItem => {
                         let link_a = document.createElement('a');
-                        link_a.textContent = lectionItem.lection_name;
+                        link_a.textContent = `${document.querySelector('#dropbtn-course').textContent} Lection ${lectionItem.lection_name}`;
 
                         link_a.setAttribute('data-lection-id', lectionItem.lection_id);
 
