@@ -61,6 +61,8 @@ class QuestionController {
 
                     questionData = JSON.parse(req.body.questionData);
                     imageFile = req.file;
+                    console.log(imageFile);
+                    console.log(questionData);
 
                     const {
                         user_id,

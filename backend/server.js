@@ -807,8 +807,8 @@ app.post('/question', async (req, res) => {
       }
 
       const formData = new FormData();
-      formData.append('image', imageFile);
-      formData.append('questionData', sendQuestionData);
+      formData.append('image', new Blob([req.file.buffer], { type: req.file.mimetype }));
+      formData.append('questionData', JSON.stringify(sendQuestionData));
 
       const questionCreationResponse = await makePostRequest(`http://${questionService}:${questionPort}/question`, formData, {
         'Content-Type':
@@ -833,7 +833,7 @@ app.post('/question', async (req, res) => {
     } = req.body;
 
     const sendQuestionData = {
-      user_id: req.user.user_id,
+      user_id: 2,
       question_type: question_type,
       frage: frage,
       answer_a: answer_a,
@@ -892,8 +892,8 @@ app.put('/question', async (req, res) => {
       }
 
       const formData = new FormData();
-      formData.append('image', imageFile);
-      formData.append('questionData', sendQuestionData);
+      formData.append('image', new Blob([req.file.buffer], { type: req.file.mimetype }));
+      formData.append('questionData', JSON.stringify(sendQuestionData));
 
       const questionCreationResponse = await makePutRequest(`http://${questionService}:${questionPort}/question`, formData, {
         'Content-Type':
