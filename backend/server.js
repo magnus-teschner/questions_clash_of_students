@@ -402,7 +402,6 @@ app.get('/manage-questions', async (req, res) => {
   if (questions.error) {
     return res.status(questions.status).send(questions.data.error);
   }
-  console.log(questions);
   return res.render("show-manage-questions", { user: req.user, questions: questions.data })
 });
 
