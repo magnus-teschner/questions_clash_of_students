@@ -1,6 +1,48 @@
 const CourseService = require('../services/courseServices');
 
 class CourseController {
+    static async createCourse(req, res) {
+        try {
+            const { userId, programId, courseName } = req.body;
+
+            const courseInfos = await CourseService.createCourse(userId, programId, courseName);
+            res.json(courseInfos);
+        } catch (error) {
+            res.status(500).json({ error: 'An error occurred while creating a course' });
+            console.error(error);
+        }
+    }
+
+    static async getCoursesAfterProgram(req, res) {
+        try {
+            const { userId, programId } = req.params;
+
+            const courses = await CourseService.getCoursesAfterProgram(userId, programId);
+            if (!courses.length) {
+                return res.status(404).json({ error: "No courses found" });
+            }
+            res.json(courses);
+        } catch (error) {
+            res.status(500).json({ error: 'An error occurred while retrieving courses for a program' });
+            console.error(error);
+        }
+    }
+
+    static async getLections(req, res) {
+        try {
+            const { courseId } = req.params;
+
+            const lections = await CourseService.getLections(courseId);
+            if (!lections.length) {
+                return res.status(404).json({ error: "No Lections found" });
+            }
+            res.json(lections);
+        } catch (error) {
+            res.status(500).json({ error: 'An error occurred while retrieving lections for a course' });
+            console.error(error);
+        }
+    }
+
     static async getAllCourses(req, res) {
         try {
             const user_id = req.query.user_id;

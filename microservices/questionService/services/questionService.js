@@ -59,8 +59,8 @@ class QuestionService {
         );
     }
 
-    static async getUnusedPositions(userId, programId, courseId, lectionId) {
-        const usedPositions = await QuestionRepository.getUnusedPositions(userId, programId, courseId, lectionId);
+    static async getUnusedPositions(lectionId) {
+        const usedPositions = await QuestionRepository.getUnusedPositions(lectionId);
         const existingValues = usedPositions.map(row => row.position);
         const allPositions = Array.from({ length: 9 }, (_, i) => i + 1);
         const unusedPositions = allPositions.filter(position => !existingValues.includes(position));
