@@ -374,6 +374,9 @@ app.get('/manage-questions', async (req, res) => {
     return res.render("show-manage-questions", { user: undefined, questions: undefined })
   }
   const questions = await makeGetRequest(`http://${questionService}:${questionPort}/questions/${req.user.user_id}`);
+  if (questions.status === 404) {
+    return res.render("show-manage-questions", { user: req.user, questions: [] })
+  }
   if (questions.error) {
     return res.status(questions.status).send(questions.data.error);
   }
@@ -497,13 +500,45 @@ app.get('/course-progress', (req, res) => {
 app.get('/course-members', (req, res) => {
   const courseId = req.query.id;
   const userId = req.user.user_id;
-  const query = `SELECT * FROM course_members WHERE course_id = ?`;
+  const query = `SELECT cm.*, a.firstname, a.lastname, a.email
+    FROM course_members cm
+    JOIN accounts a ON cm.user_id = a.user_id
+    WHERE cm.course_id = ?
+  `;
 
   con.query(query, [courseId, userId], (error, results) => {
     if (error) {
       return res.status(500).json({ error: 'Database query error' });
     }
+    console.log(results);
     res.json(results);
+  });
+});
+
+app.delete('/delete-course-member', (req, res) => {
+  const { course_id, user_id } = req.body;
+
+  // Check if both course_id and user_id are provided
+  if (!course_id || !user_id) {
+    return res.status(400).json({ error: 'course_id and user_id are required' });
+  }
+
+  // SQL query to delete a member from the course
+  const query = 'DELETE FROM course_members WHERE course_id = ? AND user_id = ?';
+
+  // Execute the query
+  con.query(query, [course_id, user_id], (error, results) => {
+    if (error) {
+      console.error('Error executing query:', error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    // Check if a row was affected (i.e., if the user was deleted from the course)
+    if (results.affectedRows > 0) {
+      res.status(200).json({ message: 'Member deleted successfully' });
+    } else {
+      res.status(404).json({ error: 'Member not found' });
+    }
   });
 });
 
@@ -586,6 +621,9 @@ app.get('/ranking', (req, res, next) => {
 
 app.get('/manage-courses', async (req, res) => {
   try {
+    if (!req.user) {
+      return res.render("manage-courses", { user: undefined, programsWithCourses: undefined })
+    }
     const userId = req.user.user_id;
     const programs = await makeGetRequest(`http://${questionService}:${questionPort}/programs`);
 
