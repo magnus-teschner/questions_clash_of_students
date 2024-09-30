@@ -460,9 +460,14 @@ app.get('/course-progress', (req, res) => {
     });
 });
 
-app.post('/update-lection-score', (req, res, next) => {
-  const { userId, lectionName, lectionScore } = req.body;
-
+app.post('/score-submission', (req, res, next) => {
+  const { user, course, lection, final_score } = req.body;
+  const sendScoreSubmissionData = {
+    userId: user,
+    courseId: course,
+    lectionName: lection,
+    score: final_score
+  };
   const url = `http://${scoreService}:${scorePort}/score/update-lection-score`;
 
   fetch(url, {
@@ -470,7 +475,7 @@ app.post('/update-lection-score', (req, res, next) => {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ userId, lectionName, lectionScore })
+    body: JSON.stringify(sendScoreSubmissionData)
   })
     .then(response => {
       if (!response.ok) {

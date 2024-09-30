@@ -14,26 +14,11 @@ class ScoreController {
 
     static async updateLectionScore(req, res) {
         try {
-            const { userId, lectionName, lectionScore } = req.body;  // Lection Name wird verwendet
-            await ScoreService.updateLectionScore(userId, lectionName, lectionScore);  // Aufruf des Services
-
-            // Kursfortschritt aktualisieren
-            const progress = await ScoreService.updateCourseProgress(userId, lectionName);
-
-            res.status(200).json({ message: 'Lection score updated and course progress updated', progress });
+            const { userId, courseId, lectionName, score } = req.body;
+            await ScoreService.updateLectionScore(userId, courseId, lectionName, score);
+            res.status(200).json({ message: 'Lection score updated and course progress updated' });
         } catch (error) {
             res.status(500).json({ error: 'Error updating lection score and course progress' });
-            console.error(error);
-        }
-    }
-
-    static async getCourseScore(req, res) {
-        try {
-            const { userId, lectionId } = req.params;
-            const { courseId, courseScore } = await ScoreService.getCourseScore(userId, lectionId);
-            res.json({ courseId, courseScore });
-        } catch (error) {
-            res.status(500).json({ error: 'Error fetching course score' });
             console.error(error);
         }
     }
