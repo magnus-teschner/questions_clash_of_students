@@ -83,12 +83,14 @@
                         <%= userItem.lastname %>
                     </span>
                     <span>
-                      <% if (selectedCourse==='all' ) { %>
-                        <%= userItem.score %>
-                          <% } else { %>
-                            <%= userItem.course_score %>
-                              <% } %>
-                    </span>
+                      <% if (selectedCourse === 'all') { %>
+                          <%= userItem.score %>
+                      <% } else if (selectedLection === 'all' || !selectedLection) { %>
+                          <%= userItem.course_score %>
+                      <% } else { %>
+                          <%= userItem.lection_score %>
+                      <% } %>
+                  </span>
                   </div>
                 </li>
                 <% }) %>
