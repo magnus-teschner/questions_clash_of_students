@@ -40,21 +40,9 @@ class CourseService {
 
             if (user_id) {
                 enrolledCourses = await CourseRepository.getEnrolledCourses(user_id);
-
-                const promises_enroll = enrolledCourses.map(async course => {
-                    course.creator_lastname = capitalizeFirstLetter(course.creator_lastname);
-                    course.lections = await getLectionsForCourse(course.program_name, course.course_name);
-                });
-                await Promise.all(promises_enroll);
-
                 nonEnrolledCourses = courses.filter(course =>
                     !enrolledCourses.some(enrolled => enrolled.course_id === course.course_id)
                 );
-
-                const promises_unenroll = nonEnrolledCourses.map(async course => {
-                    course.creator_lastname = capitalizeFirstLetter(course.creator_lastname);
-                });
-                await Promise.all(promises_unenroll);
             } else {
                 nonEnrolledCourses = courses;
             }
