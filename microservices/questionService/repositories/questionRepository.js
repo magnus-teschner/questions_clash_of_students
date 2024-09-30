@@ -27,13 +27,15 @@ class QuestionRepository {
         return this.query(sql, [userId]);
     }
 
-    static async getQuestion(course_id, lection_id, position) {
+    static async getQuestion(course_id, lectionName, position) {
         const sql = `
-            SELECT q.* FROM questions q
+            SELECT q.*
+            FROM questions q
             JOIN lections l ON q.lection_id = l.lection_id
-            WHERE l.course_id = ? AND q.lection_id = ? AND q.position = ?;
+            JOIN courses c ON l.course_id = c.course_id
+            WHERE c.course_id = ? AND l.lection_name = ? AND q.position = ?;
         `;
-        return this.query(sql, [course_id, lection_id, position]);
+        return this.query(sql, [course_id, lectionName, position]);
     }
 
     static async addQuestion(user_id, question_type, frage, answer_a, answer_b, answer_c, answer_d, correct_answer, position, lection_id, image_url) {

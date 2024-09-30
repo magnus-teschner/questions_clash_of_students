@@ -34,10 +34,10 @@ class QuestionController {
 
     static async getQuestion(req, res) {
         try {
-            const { courseId, lectionId, position } = req.query;
-            const question = await QuestionService.getQuestion(courseId, lectionId, position);
+            const { courseId, lectionName, position } = req.params;
+            const question = await QuestionService.getQuestion(courseId, lectionName, position);
             if (!question) {
-                return res.status(404).json({ error: `No question found for course ID ${courseId}, lection ID ${lectionId}, and position ${position}` });
+                return res.status(404).json({ error: `No question found for course ID ${courseId}, lection ID ${lectionName}, and position ${position}` });
             }
             res.json(question);
         } catch (error) {

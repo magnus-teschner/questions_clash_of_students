@@ -4,7 +4,6 @@ const path = require('path');
 const multer = require("multer");
 const app = express();
 const port = 1999;
-const port_question_service = 2000;
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const mysql = require('mysql2');
@@ -28,13 +27,6 @@ app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
-question_creator_service = process.env.QUESTIONCREATOR;
-question_creator_service = "127.0.0.1";
-mailjet_public_key = process.env.PUBLICMAIL;
-mailjet_private_key = process.env.PRIVATEMAIL;
-mailjet_public_key = "6a2924e64b4c454bbcdf6580e44e9ca2";
-mailjet_private_key = "9b2b92a8e47833cfaeb1488d47dc1790";
-backend = "127.0.0.1"
 
 //microservices
 emailService = process.env.EMAILSERVICE || "localhost";
@@ -111,7 +103,6 @@ const makeDeleteRequest = async (url, data = {}, headers = { 'Content-Type': 'ap
     };
   }
 };
-
 
 const config_mysql = {
   user: "admin",
@@ -966,31 +957,6 @@ app.post('/add_course', async (req, res) => {
 });
 
 
-
-
-app.get('/get_question', (req, res) => {
-
-  const queryParams = new URLSearchParams({
-    course: req.query.course,
-    lection: req.query.lection,
-    position: req.query.position
-  });
-  // Construct the URL with parameters
-  let url = `http://${question_creator_service}:${port_question_service}/get_question/?${queryParams}`;
-
-  // Make the GET request
-  fetch(url, {
-    method: 'GET',
-  })
-    .then(response => response.json())
-    .then(data => res.send(data))
-    .catch(error => {
-      console.error('Error:', error);
-      return res.status(500).send('Internal Server Error');
-    });
-});
-
-
 app.get('/get_courses/:program_id', async (req, res) => {
   let user = req.user;
   const user_id = user.user_id;
@@ -1021,28 +987,15 @@ app.get('/get_positions/:lection_id', async (req, res) => {
   return res.status(200).send(lections.data)
 });
 
-app.get('/api/questions/:user/:program/:course/:lection/:position', (req, res) => {
+app.get('/api/questions/:user/:program/:course/:lection/:position', async (req, res) => {
+
   const { user, program, course, lection, position } = req.params;
+  const question = await makeGetRequest(`http://${questionService}:${questionPort}/course/${course}/lection/${lection}/position/${position}/question/`);
+  if (question.error) {
+    return res.status(question.status).send(question.data.error);
+  }
 
-  const query = `
-    SELECT * FROM questions
-    WHERE user = ? AND program = ? AND course = ? AND lection = ? AND position = ?
-  `;
-
-  console.log(user, program, course, lection, position);
-
-  con.query(query, [user, program, course, lection, position], (err, result) => {
-    if (err) {
-      console.error('Error fetching question:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.length === 0) {
-      return res.status(404).json({ message: 'Question not found' });
-    }
-
-    res.json(result[0]);
-  });
+  return res.json(question.data)
 });
 
 app.get('/reset-password-request', (req, res) => {
