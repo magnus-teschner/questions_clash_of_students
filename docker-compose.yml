@@ -45,8 +45,68 @@ services:
     ports:
       - "8080:80"
 
+  #microservices
+  course_service:
+    build: ./microservices/courseService
+    ports:
+      - "5003:80"
+    restart: always
+    environment:
+      DB: mysqldb
 
+  email_service:
+    build: ./microservices/emailService
+    ports:
+      - "1001:80"
+    restart: always
+    environment:
+      DB: mysqldb
 
+  jwt_service:
+    build: ./microservices/jwtService
+    ports:
+      - "1002:80"
+    restart: always
+    environment:
+      DB: mysqldb
+
+  question_service:
+    build: ./microservices/questionService
+    ports:
+      - "1003:80"
+    restart: always
+    environment:
+      DB: mysqldb
+
+  score_service:
+    build: ./microservices/scoreService
+    ports:
+      - "5002:80"
+    restart: always
+    environment:
+      DB: mysqldb
+
+  user_management_service:
+    build: ./microservices/userManagementService
+    ports:
+      - "1000:80"
+    restart: always
+    environment:
+      DB: mysqldb
+
+  backend_service:
+    build: ./backend
+    ports:
+      - "1999:80"
+    restart: always
+    environment:
+      DB: mysqldb
+      COURSESERVICE: course_service
+      EMAILSERVICE: email_service
+      JWTSERVICE: jwt_service
+      QUESTIONSERVICE: question_service
+      SCORESERVICE: score_service
+      USERSERVICE: user_management_service
 
 
 volumes:

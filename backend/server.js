@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const multer = require("multer");
 const app = express();
-const port = 1999;
+const port = 80;
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const mysql = require('mysql2');
@@ -30,22 +30,22 @@ app.use(express.urlencoded({ extended: false }));
 
 //microservices
 emailService = process.env.EMAILSERVICE || "localhost";
-emailPort = process.env.EMAILPORT || 1001;
+emailPort = process.env.EMAILPORT || 80;
 
 userManagementService = process.env.USERSERVICE || "localhost";
-userManagementPort = process.env.USERPORT || 1000;
+userManagementPort = process.env.USERPORT || 80;
 
 jwtService = process.env.JWTSERVICE || "localhost";
-jwtPort = process.env.JWTPORT || 1002;
+jwtPort = process.env.JWTPORT || 80;
 
 questionService = process.env.QUESTIONSERVICE || "localhost";
-questionPort = process.env.JWTPORT || 1003;
+questionPort = process.env.JWTPORT || 80;
 
 courseService = process.env.COURSESERVICE || "localhost";
-coursePort = process.env.COURSEPORT || 5003;
+coursePort = process.env.COURSEPORT || 80;
 
 scoreService = process.env.SCORESERVICE || "localhost";
-scorePort = process.env.SCOREPORT || 5002;
+scorePort = process.env.SCOREPORT || 80;
 
 
 //common functions
@@ -107,7 +107,7 @@ const makeDeleteRequest = async (url, data = {}, headers = { 'Content-Type': 'ap
 const config_mysql = {
   user: "admin",
   password: "admin",
-  host: "127.0.0.1",
+  host: process.env.DB,
   database: "clashOfStudents"
 };
 
