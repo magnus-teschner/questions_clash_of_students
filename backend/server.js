@@ -492,9 +492,11 @@ app.get('/ranking', (req, res, next) => {
   const courseQuery = `SELECT DISTINCT course_name, course_id FROM courses`;
 
   const selectedCourse = req.query.course || 'all';
+  const selectedLection = req.query.lection || null;
 
   let rankingQuery;
   let queryParams = [];
+  let lections = [];
 
   if (selectedCourse === 'all') {
     // Gesamtranking (alle Kurse)
@@ -512,25 +514,75 @@ app.get('/ranking', (req, res, next) => {
       JOIN course_members cm ON a.user_id = cm.user_id
       JOIN courses c ON cm.course_id = c.course_id
       WHERE c.course_name = ?
-      ORDER BY cm.course_score DESC
     `;
     queryParams = [selectedCourse];
-  }
 
-  con.query(courseQuery, [], (err, courses) => {
-    if (err) {
-      return next(err);
+    if (selectedLection) {
+      rankingQuery += `
+        AND EXISTS (
+          SELECT 1 
+          FROM lections l 
+          WHERE l.course_id = c.course_id
+          AND l.lection_name = ?
+        )
+      `;
+      queryParams.push(selectedLection);
     }
 
+    // Sortiere nach Kurs-Score
+    rankingQuery += ` ORDER BY cm.course_score DESC`;
+  }
+
+  const lectionQuery = `
+    SELECT lection_id, lection_name 
+    FROM lections 
+    WHERE course_id = (
+      SELECT course_id FROM courses WHERE course_name = ?
+    )
+  `;
+
+  const getCourses = new Promise((resolve, reject) => {
+    con.query(courseQuery, [], (err, courses) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(courses);
+      }
+    });
+  });
+
+  const getLections = new Promise((resolve, reject) => {
+    if (selectedCourse !== 'all') {
+      con.query(lectionQuery, [selectedCourse], (err, lectionRows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(lectionRows);
+        }
+      });
+    } else {
+      resolve([]);
+    }
+  });
+
+  const getRanking = new Promise((resolve, reject) => {
     con.query(rankingQuery, queryParams, (err, rows) => {
       if (err) {
-        return next(err);
+        reject(err);
+      } else {
+        resolve(rows);
       }
+    });
+  });
+
+  Promise.all([getCourses, getLections, getRanking])
+    .then(([courses, lectionRows, rankingRows]) => {
+      lections = lectionRows;
 
       let rankingList;
       if (selectedCourse === 'all') {
-        // Alle Kurse
-        rankingList = rows.sort((a, b) => b.score - a.score).map((user, index, sortedUsers) => {
+        // Ranking für alle Kurse
+        rankingList = rankingRows.sort((a, b) => b.score - a.score).map((user, index, sortedUsers) => {
           const rank = index > 0 && sortedUsers[index - 1].score === user.score ? sortedUsers[index - 1].rank : index + 1;
           return {
             user_id: user.user_id,
@@ -541,8 +593,8 @@ app.get('/ranking', (req, res, next) => {
           };
         });
       } else {
-        // Ausgewählter Kurs
-        rankingList = rows.sort((a, b) => b.course_score - a.course_score).map((user, index, sortedUsers) => {
+        // Ranking für den ausgewählten Kurs (und ggf. Lection)
+        rankingList = rankingRows.sort((a, b) => b.course_score - a.course_score).map((user, index, sortedUsers) => {
           const rank = index > 0 && sortedUsers[index - 1].course_score === user.course_score ? sortedUsers[index - 1].rank : index + 1;
           return {
             user_id: user.user_id,
@@ -559,10 +611,15 @@ app.get('/ranking', (req, res, next) => {
         user: req.user,
         rankingList: rankingList,
         courses: courses,
-        selectedCourse: selectedCourse
+        lections: lections,
+        selectedCourse: selectedCourse,
+        selectedLection: selectedLection
       });
+    })
+    .catch(err => {
+      console.error('Error fetching data:', err);
+      next(err);
     });
-  });
 });
 
 app.get('/manage-courses', async (req, res) => {

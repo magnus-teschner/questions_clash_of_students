@@ -23,6 +23,17 @@
                   </option>
                   <% }); %>
               </select>
+              <% if (selectedCourse !=='all' ) { %>
+                <select id="lection-filter" name="lection" class="ranking-dropdown" onchange="this.form.submit()">
+                  <option value="" <% if (!selectedLection) { %>selected<% } %>>Alle Lections</option>
+                  <% lections.forEach(function(lection) { %>
+                    <option value="<%= lection.lection_name %>" <% if (selectedLection===lection.lection_name) { %>
+                      selected<% } %>>
+                        <%= lection.lection_name %>
+                    </option>
+                    <% }); %>
+                </select>
+                <% } %>
             </form>
           </div>
           <ul>
@@ -86,8 +97,8 @@
       </div>
       <% } else { %>
         <%- include('login-hint') %>
-      <% } %>
-  <script src="js/ranking.js"></script>
+          <% } %>
+            <script src="js/ranking.js"></script>
 </body>
 
 </html>
