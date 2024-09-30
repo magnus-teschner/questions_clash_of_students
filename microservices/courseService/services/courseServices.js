@@ -2,6 +2,11 @@ const CourseRepository = require('../repositories/courseRepository');
 const { capitalizeFirstLetter, getLectionsForCourse } = require('../utils/helperFunctions');
 
 class CourseService {
+
+    static async moveCourse(userId, programId, courseId) {
+        return await CourseRepository.moveCourse(userId, programId, courseId);
+    }
+
     static async createCourse(userId, programId, courseName) {
         return await CourseRepository.createCourse(userId, programId, courseName);
     }
@@ -68,6 +73,12 @@ class CourseService {
     static async deleteCourse(user_id, course_id) {
         return CourseRepository.deleteCourse(user_id, course_id);
     }
+
+    static async deleteMember(userId, courseId) {
+        return CourseRepository.deleteMember(userId, courseId);
+    }
+
+
 }
 
 module.exports = CourseService;

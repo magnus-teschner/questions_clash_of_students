@@ -1,6 +1,15 @@
 const db = require('../db/db');
 
 class CourseRepository {
+
+    static async moveCourse(userId, programId, courseId) {
+        const query = `
+            UPDATE courses SET program_id = ? WHERE course_id = ? AND creator = ?
+        `;
+        return this.query(query, [programId, courseId, userId]);
+    }
+
+
     static async createLection(courseId, lectionName) {
         const query = `
             Insert into lections (lection_name, course_id) VALUES (?,?)
@@ -76,6 +85,12 @@ class CourseRepository {
     static deleteCourse(user_id, course_id) {
         const query = 'DELETE FROM courses WHERE course_id = ? AND creator = ?';
         const values = [course_id, user_id];
+        return this.query(query, values);
+    }
+
+    static deleteMember(userId, courseId) {
+        const query = 'DELETE FROM course_members WHERE course_id = ? AND user_id = ?';
+        const values = [courseId, userId];
         return this.query(query, values);
     }
 

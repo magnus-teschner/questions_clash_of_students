@@ -99,6 +99,19 @@ const makePostRequest = async (url, data = {}, headers = { 'Content-Type': 'appl
   }
 };
 
+const makeDeleteRequest = async (url, data = {}, headers = { 'Content-Type': 'application/json' }) => {
+  try {
+    const response = await axios.delete(url, data, { headers });
+    return { data: response.data, status: response.status };
+  } catch (error) {
+    return {
+      error: true,
+      data: error.response ? error.response.data : error.message,
+      status: error.response ? error.response.status : 500
+    };
+  }
+};
+
 
 const config_mysql = {
   user: "admin",
@@ -269,23 +282,11 @@ app.get('/verify-email', async (req, res) => {
   }
 });
 
-app.delete('/delete-member', (req, res) => {
-  const { course_id, user_email } = req.body;
-  const query = `DELETE FROM course_members WHERE course_id = ? AND user_email = ?`;
-
-  con.query(query, [course_id, user_email], (error, results) => {
-    if (error) {
-      return res.status(500).json({ error: 'Database query error' });
-    }
-    res.status(200).json({ message: 'Member deleted successfully' });
-  });
-});
-
 
 app.put('/rename-course', (req, res) => {
   const user_id = req.user.user_id;
   const course_id = req.body.course_id;
-  const new_course_name = req.body;
+  const new_course_name = req.body.new_course_name;
 
   let url = `http://${courseService}:${coursePort}/rename-course`;
 
@@ -297,8 +298,9 @@ app.put('/rename-course', (req, res) => {
     body: JSON.stringify({ user_id, course_id, new_course_name }),  // Übergabe der Daten
   })
     .then(response => {
+      console.log(response);
       if (response.ok) {
-        res.status(200).send('Course renamed successfully');
+        return res.status(200).send('Course renamed successfully');
       } else {
         return response.text().then(text => res.status(response.status).send(text));
       }
@@ -309,44 +311,27 @@ app.put('/rename-course', (req, res) => {
     });
 });
 
-app.put('/move-course', (req, res) => {
+app.put('/move-course', async (req, res) => {
   const { course_id, new_program } = req.body;
 
   if (!req.session.passport.user) {
     return res.status(401).send('No User signed in!');
   }
 
-  const userId = req.user.email;
+  const userId = req.user.user_id;
+  const sendMoveData = {
+    userId: userId,
+    courseId: course_id,
+    programId: new_program
+  }
 
-  // Update the program in the course table
-  const query_update_course = 'UPDATE course SET program_name = ? WHERE id = ? AND user = ?';
-  const values_course = [new_program, course_id, userId];
-
-  con.query(query_update_course, values_course, (err, result) => {
-    if (err) {
-      console.error('Error moving course:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).send('Course not found or not authorized to move this course');
-    }
-
-    // Update the program in the questions table
-    const query_update_questions = 'UPDATE questions SET program = ? WHERE course = (SELECT course_name FROM courses WHERE id = ?)';
-    const values_questions = [new_program, course_id];
-    console.log(values_questions);
-
-    con.query(query_update_questions, values_questions, (err, result) => {
-      if (err) {
-        console.error('Error updating program in questions:', err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-      return res.status(200).send('Course moved and questions updated successfully');
-    });
-  });
+  const courseMove = await makePutRequest(`http://${courseService}:${coursePort}/course/move`, sendMoveData)
+  if (courseMove.error) {
+    return res.status(courseMove.status).send(courseMove.data.error)
+  }
+  return res.status(200).send('Course moved successfully');
 });
+
 
 app.get("/log-out", (req, res, next) => {
   req.logout((err) => {
@@ -374,11 +359,15 @@ app.get('/manage-questions', async (req, res) => {
     return res.render("show-manage-questions", { user: undefined, questions: undefined })
   }
   const questions = await makeGetRequest(`http://${questionService}:${questionPort}/questions/${req.user.user_id}`);
+  if (questions.status === 404) {
+    return res.render("show-manage-questions", { user: req.user, questions: [] })
+  }
   if (questions.error) {
     return res.status(questions.status).send(questions.data.error);
   }
   return res.render("show-manage-questions", { user: req.user, questions: questions.data })
 });
+
 
 app.get('/courses', (req, res) => {
   if (!req.user) {
@@ -389,7 +378,7 @@ app.get('/courses', (req, res) => {
     user_id: req.user.user_id
   });
 
-  let url = `http://${courseService}:${coursePort}/courses/?${queryParams}`;
+  let url = `http://${courseService}:${coursePort}/courses/?user_id=${req.user.user_id}`;
 
   fetch(url, {
     method: 'GET',
@@ -411,6 +400,9 @@ app.get('/courses', (req, res) => {
       return res.status(500).json({ message: 'Internal Server Error' });
     });
 });
+
+
+
 
 // Endpoint to handle course enrollment
 app.post('/enroll-course', (req, res) => {
@@ -497,14 +489,35 @@ app.get('/course-progress', (req, res) => {
 app.get('/course-members', (req, res) => {
   const courseId = req.query.id;
   const userId = req.user.user_id;
-  const query = `SELECT * FROM course_members WHERE course_id = ?`;
+  const query = `SELECT cm.*, a.firstname, a.lastname, a.email
+    FROM course_members cm
+    JOIN accounts a ON cm.user_id = a.user_id
+    WHERE cm.course_id = ?
+  `;
 
   con.query(query, [courseId, userId], (error, results) => {
     if (error) {
       return res.status(500).json({ error: 'Database query error' });
     }
+    console.log(results);
     res.json(results);
   });
+});
+
+app.delete('/delete-course-member', (req, res) => {
+  const { course_id, user_id } = req.body;
+
+  // Check if both course_id and user_id are provided
+  if (!course_id || !user_id) {
+    return res.status(400).json({ error: 'course_id and user_id are required' });
+  }
+
+  const courseMemberDeletion = makeDeleteRequest(`http://${courseService}:${coursePort}/course/${course_id}/user/${user_id}`, {})
+  if (courseMemberDeletion.error) {
+    return res.status(courseMemberDeletion.status).send(courseMemberDeletion.data.error)
+  }
+
+  return res.status(200).send("Member deleted successfully")
 });
 
 app.get('/ranking', (req, res, next) => {
@@ -586,6 +599,9 @@ app.get('/ranking', (req, res, next) => {
 
 app.get('/manage-courses', async (req, res) => {
   try {
+    if (!req.user) {
+      return res.render("manage-courses", { user: undefined, programsWithCourses: undefined })
+    }
     const userId = req.user.user_id;
     const programs = await makeGetRequest(`http://${questionService}:${questionPort}/programs`);
 
