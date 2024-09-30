@@ -99,6 +99,19 @@ const makePostRequest = async (url, data = {}, headers = { 'Content-Type': 'appl
   }
 };
 
+const makeDeleteRequest = async (url, data = {}, headers = { 'Content-Type': 'application/json' }) => {
+  try {
+    const response = await axios.delete(url, data, { headers });
+    return { data: response.data, status: response.status };
+  } catch (error) {
+    return {
+      error: true,
+      data: error.response ? error.response.data : error.message,
+      status: error.response ? error.response.status : 500
+    };
+  }
+};
+
 
 const config_mysql = {
   user: "admin",
@@ -269,18 +282,6 @@ app.get('/verify-email', async (req, res) => {
   }
 });
 
-app.delete('/delete-member', (req, res) => {
-  const { course_id, user_email } = req.body;
-  const query = `DELETE FROM course_members WHERE course_id = ? AND user_email = ?`;
-
-  con.query(query, [course_id, user_email], (error, results) => {
-    if (error) {
-      return res.status(500).json({ error: 'Database query error' });
-    }
-    res.status(200).json({ message: 'Member deleted successfully' });
-  });
-});
-
 
 app.put('/rename-course', (req, res) => {
   const user_id = req.user.user_id;
@@ -310,31 +311,25 @@ app.put('/rename-course', (req, res) => {
     });
 });
 
-app.put('/move-course', (req, res) => {
+app.put('/move-course', async (req, res) => {
   const { course_id, new_program } = req.body;
 
   if (!req.session.passport.user) {
     return res.status(401).send('No User signed in!');
   }
 
-  const userId = req.user.user_id;  // Assuming you want to use user_id instead of email
+  const userId = req.user.user_id;
+  const sendMoveData = {
+    userId: userId,
+    courseId: course_id,
+    programId: new_program
+  }
 
-  // Update the program_id in the courses table
-  const query_update_course = 'UPDATE courses SET program_id = ? WHERE course_id = ? AND creator = ?';
-  const values_course = [new_program, course_id, userId];
-
-  con.query(query_update_course, values_course, (err, result) => {
-    if (err) {
-      console.error('Error moving course:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).send('Course not found or not authorized to move this course');
-    }
-
-    return res.status(200).send('Course moved successfully');
-  });
+  const courseMove = await makePutRequest(`http://${courseService}:${coursePort}/course/move`, sendMoveData)
+  if (courseMove.error) {
+    return res.status(courseMove.status).send(courseMove.data.error)
+  }
+  return res.status(200).send('Course moved successfully');
 });
 
 
@@ -373,6 +368,7 @@ app.get('/manage-questions', async (req, res) => {
   return res.render("show-manage-questions", { user: req.user, questions: questions.data })
 });
 
+
 app.get('/courses', (req, res) => {
   if (!req.user) {
     return res.status(401).json({ message: 'User not authenticated' });
@@ -382,7 +378,7 @@ app.get('/courses', (req, res) => {
     user_id: req.user.user_id
   });
 
-  let url = `http://${courseService}:${coursePort}/courses/?${queryParams}`;
+  let url = `http://${courseService}:${coursePort}/courses/?user_id=${req.user.user_id}`;
 
   fetch(url, {
     method: 'GET',
@@ -404,6 +400,9 @@ app.get('/courses', (req, res) => {
       return res.status(500).json({ message: 'Internal Server Error' });
     });
 });
+
+
+
 
 // Endpoint to handle course enrollment
 app.post('/enroll-course', (req, res) => {
@@ -513,23 +512,12 @@ app.delete('/delete-course-member', (req, res) => {
     return res.status(400).json({ error: 'course_id and user_id are required' });
   }
 
-  // SQL query to delete a member from the course
-  const query = 'DELETE FROM course_members WHERE course_id = ? AND user_id = ?';
+  const courseMemberDeletion = makeDeleteRequest(`http://${courseService}:${coursePort}/course/${course_id}/user/${user_id}`, {})
+  if (courseMemberDeletion.error) {
+    return res.status(courseMemberDeletion.status).send(courseMemberDeletion.data.error)
+  }
 
-  // Execute the query
-  con.query(query, [course_id, user_id], (error, results) => {
-    if (error) {
-      console.error('Error executing query:', error);
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
-
-    // Check if a row was affected (i.e., if the user was deleted from the course)
-    if (results.affectedRows > 0) {
-      res.status(200).json({ message: 'Member deleted successfully' });
-    } else {
-      res.status(404).json({ error: 'Member not found' });
-    }
-  });
+  return res.status(200).send("Member deleted successfully")
 });
 
 app.get('/ranking', (req, res, next) => {

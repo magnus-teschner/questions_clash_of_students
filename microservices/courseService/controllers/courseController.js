@@ -13,6 +13,17 @@ class CourseController {
         }
     }
 
+    static async moveCourse(req, res) {
+        try {
+            const { userId, programId, courseId } = req.body;
+            const courseMovement = await CourseService.moveCourse(userId, programId, courseId);
+            res.json(courseMovement);
+        } catch (error) {
+            res.status(500).json({ error: 'An error occurred while creating a course' });
+            console.error(error);
+        }
+    }
+
     static async getCoursesAfterProgram(req, res) {
         try {
             const { userId, programId } = req.params;
@@ -125,6 +136,27 @@ class CourseController {
             return res.status(500).send('Internal Server Error');
         }
     }
+
+    static async deleteMember(req, res) {
+        const { userId, courseId } = req.params;
+
+        try {
+            const result = await CourseService.deleteMember(userId, courseId);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).send('Member not found or not authorized to delete the member');
+            }
+
+            return res.status(200).send('Course member deleted successfully');
+        } catch (error) {
+            console.error('Error deleting course member:', error);
+            return res.status(500).send('Internal Server Error');
+        }
+    }
+
+
 }
+
+
 
 module.exports = CourseController;
