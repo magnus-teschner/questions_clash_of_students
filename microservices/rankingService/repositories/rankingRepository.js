@@ -20,7 +20,7 @@ class RankingRepository {
     static getRanking(selectedCourse, selectedLection) {
         let query;
         let queryParams = [];
-
+    
         if (selectedCourse === 'all') {
             query = `
                 SELECT a.user_id, a.firstname, a.lastname, s.score
@@ -28,31 +28,29 @@ class RankingRepository {
                 JOIN scores s ON a.user_id = s.user_id
                 ORDER BY s.score DESC
             `;
-        } else {
+        } else if (selectedLection === 'all' || !selectedLection) {
             query = `
                 SELECT a.user_id, a.firstname, a.lastname, cm.course_score, c.course_name
                 FROM accounts a
                 JOIN course_members cm ON a.user_id = cm.user_id
                 JOIN courses c ON cm.course_id = c.course_id
                 WHERE c.course_name = ?
+                ORDER BY cm.course_score DESC
             `;
             queryParams = [selectedCourse];
-
-            if (selectedLection) {
-                query += `
-                    AND EXISTS (
-                        SELECT 1 
-                        FROM lections l 
-                        WHERE l.course_id = c.course_id
-                        AND l.lection_name = ?
-                    )
-                `;
-                queryParams.push(selectedLection);
-            }
-
-            query += ' ORDER BY cm.course_score DESC';
+        } else {
+            query = `
+                SELECT a.user_id, a.firstname, a.lastname, ls.lection_score, l.lection_name
+                FROM accounts a
+                JOIN lection_scores ls ON a.user_id = ls.user_id
+                JOIN lections l ON ls.lection_id = l.lection_id
+                JOIN courses c ON l.course_id = c.course_id
+                WHERE c.course_name = ? AND l.lection_name = ?
+                ORDER BY ls.lection_score DESC
+            `;
+            queryParams = [selectedCourse, selectedLection];
         }
-
+    
         return this.query(query, queryParams);
     }
 
