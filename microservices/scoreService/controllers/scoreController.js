@@ -1,8 +1,6 @@
 const ScoreService = require('../services/scoreService');
 
 class ScoreController {
-    createUserScore
-
     static async createUserScore(req, res) {
         try {
             const { userId } = req.params;
@@ -16,10 +14,11 @@ class ScoreController {
 
     static async updateLectionScore(req, res) {
         try {
-            const { userId, lectionId, lectionScore } = req.body;
-            await ScoreService.updateLectionScore(userId, lectionId, lectionScore);
+            const { userId, lectionName, lectionScore } = req.body;  // Lection Name wird verwendet
+            await ScoreService.updateLectionScore(userId, lectionName, lectionScore);  // Aufruf des Services
 
-            const progress = await ScoreService.updateCourseProgress(userId, lectionId);
+            // Kursfortschritt aktualisieren
+            const progress = await ScoreService.updateCourseProgress(userId, lectionName);
 
             res.status(200).json({ message: 'Lection score updated and course progress updated', progress });
         } catch (error) {

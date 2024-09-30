@@ -4,11 +4,11 @@ class ScoreService {
     static async createUserScore(userId) {
         return await ScoreRepository.createUserScore(userId);
     }
-    static async updateLectionScore(userId, lectionId, lectionScore) {
+    static async updateLectionScore(userId, lectionName, lectionScore) {
         try {
-            await ScoreRepository.updateLectionScore(userId, lectionId, lectionScore);
+            await ScoreRepository.updateLectionScore(userId, lectionName, lectionScore);
 
-            const courseScoreResult = await ScoreRepository.calculateCourseScore(lectionId, userId);
+            const courseScoreResult = await ScoreRepository.calculateCourseScore(lectionName, userId);
             const courseScore = courseScoreResult[0]?.total_course_score || 0;
             const courseId = courseScoreResult[0]?.course_id;
 
@@ -41,12 +41,14 @@ class ScoreService {
         }
     }
 
-    static async updateCourseProgress(userId, lectionId) {
+    static async updateCourseProgress(userId, lectionName) {
         try {
-            const result = await ScoreRepository.calculateCourseScore(lectionId, userId);
+            const result = await ScoreRepository.calculateCourseScore(lectionName, userId);
+
             if (!result[0]) {
                 throw new Error('No course found for this lection');
             }
+
             const courseId = result[0].course_id;
             const progressResult = await ScoreRepository.calculateCourseProgress(userId, courseId);
             const progress = progressResult[0]?.completed_lections || 0;

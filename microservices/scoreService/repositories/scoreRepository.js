@@ -6,36 +6,42 @@ class ScoreRepository {
         return this.query(sql, [userId]);
     }
 
-    static async updateLectionScore(userId, lectionId, newLectionScore) {
-        const sqlSelect = `SELECT lection_score FROM lection_scores WHERE lection_id = ? AND user_id = ?`;
+    static async updateLectionScore(userId, lectionName, lectionScore) {
+        try {
+            const sqlGetLectionId = `SELECT lection_id FROM lections WHERE lection_name = ?`;
+            const lectionResult = await this.query(sqlGetLectionId, [lectionName]);
+            const lectionId = lectionResult[0]?.lection_id;
 
-        const existingScoreResult = await this.query(sqlSelect, [lectionId, userId]);
-        const existingScore = existingScoreResult[0]?.lection_score;
+            if (!lectionId) {
+                throw new Error('Lection not found');
+            }
 
-        if (existingScore === undefined) {
-            const sqlInsert = `
-                INSERT INTO lection_scores (lection_id, user_id, lection_score)
-                VALUES (?, ?, ?)`;
-            return this.query(sqlInsert, [lectionId, userId, newLectionScore]);
-        } else if (newLectionScore > existingScore) {
-            const sqlUpdate = `
-                UPDATE lection_scores SET lection_score = ? 
-                WHERE lection_id = ? AND user_id = ?`;
-            return this.query(sqlUpdate, [newLectionScore, lectionId, userId]);
-        } else {
-            return { message: 'Lection score not updated because the new score is not greater than the existing score' };
+            const sqlSelect = `SELECT lection_score FROM lection_scores WHERE lection_id = ? AND user_id = ?`;
+            const existingScoreResult = await this.query(sqlSelect, [lectionId, userId]);
+            const existingScore = existingScoreResult[0]?.lection_score;
+
+            if (existingScore === undefined) {
+                const sqlInsert = `INSERT INTO lection_scores (lection_id, user_id, lection_score) VALUES (?, ?, ?)`;
+                return this.query(sqlInsert, [lectionId, userId, lectionScore]);
+            } else if (lectionScore > existingScore) {
+                const sqlUpdate = `UPDATE lection_scores SET lection_score = ? WHERE lection_id = ? AND user_id = ?`;
+                return this.query(sqlUpdate, [lectionScore, lectionId, userId]);
+            } else {
+                return { message: 'Lection score not updated because the new score is not greater than the existing score' };
+            }
+        } catch (error) {
+            throw new Error(`Error updating lection score: ${error.message}`);
         }
     }
 
-    static calculateCourseScore(lectionId, userId) {
+    static calculateCourseScore(lectionName, userId) {
         const sql = `
             SELECT l.course_id, SUM(ls.lection_score) AS total_course_score
             FROM lection_scores ls
             JOIN lections l ON ls.lection_id = l.lection_id
-            WHERE l.course_id = (SELECT course_id FROM lections WHERE lection_id = ?)
-            AND ls.user_id = ?
+            WHERE l.lection_name = ? AND ls.user_id = ?
             GROUP BY l.course_id`;
-        return this.query(sql, [lectionId, userId]);
+        return this.query(sql, [lectionName, userId]);
     }
 
     static updateCourseScore(userId, courseId, courseScore) {
@@ -62,10 +68,9 @@ class ScoreRepository {
         return this.query(sql, [userId]);
     }
 
+    // Methode zur Aktualisierung des Gesamtscores
     static updateUserTotalScore(userId, totalScore) {
-        const sql = `
-            INSERT INTO scores (user_id, score) VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE score = ?`;
+        const sql = `INSERT INTO scores (user_id, score) VALUES (?, ?) ON DUPLICATE KEY UPDATE score = ?`;
         return this.query(sql, [userId, totalScore, totalScore]);
     }
 
