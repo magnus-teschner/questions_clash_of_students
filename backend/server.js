@@ -460,6 +460,40 @@ app.get('/course-progress', (req, res) => {
     });
 });
 
+app.post('/score-submission', (req, res, next) => {
+  const { user, course, lection, final_score } = req.body;
+  const sendScoreSubmissionData = {
+    userId: user,
+    courseId: course,
+    lectionName: lection,
+    score: final_score
+  };
+  const url = `http://${scoreService}:${scorePort}/score/update-lection-score`;
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(sendScoreSubmissionData)
+  })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => {
+          throw new Error(err.message);
+        });
+      }
+      return response.json();
+    })
+    .then(data => {
+      res.status(200).json(data);
+    })
+    .catch(error => {
+      console.error('Error updating lection score and course progress:', error);
+      res.status(500).json({ error: 'Failed to update lection score and course progress' });
+    });
+});
+
 app.get('/course-members', async (req, res) => {
   const courseId = req.query.id;
   const courseMembers = await makeGetRequest(`http://${courseService}:${coursePort}/course/${courseId}/members`, {})
