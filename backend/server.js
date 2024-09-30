@@ -361,10 +361,6 @@ app.get('/courses', (req, res) => {
     return res.status(401).json({ message: 'User not authenticated' });
   }
 
-  const queryParams = new URLSearchParams({
-    user_id: req.user.user_id
-  });
-
   let url = `http://${courseService}:${coursePort}/courses/?user_id=${req.user.user_id}`;
 
   fetch(url, {
@@ -372,15 +368,9 @@ app.get('/courses', (req, res) => {
   })
     .then(response => response.json())
     .then(data => {
-      // Data vom Microservice in der Antwort enthalten
-      const enrolledCourses = data.enrolledCourses || [];
-      const nonEnrolledCourses = data.nonEnrolledCourses || [];
-
-      res.render('courses', {
-        user: req.user,
-        enrolledCourses: enrolledCourses,
-        nonEnrolledCourses: nonEnrolledCourses
-      });
+      const enrolledCourses = data.enrolledCourses;
+      const nonEnrolledCourses = data.nonEnrolledCourses;
+      return res.render('courses', { user: req.user, enrolledCourses: enrolledCourses, nonEnrolledCourses: nonEnrolledCourses });
     })
     .catch(error => {
       console.error('Error fetching courses from microservice:', error);
