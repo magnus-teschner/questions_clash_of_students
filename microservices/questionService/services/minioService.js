@@ -21,7 +21,7 @@ class MinioService {
             const filename = `${uuidv4()}.${fileType}`;
 
             await minioClient.putObject(bucket, filename, buffer);
-            return `http://${endPoint}:${port}/${bucket}/${filename}`;
+            return `http://localhost:${port}/${bucket}/${filename}`;
         } catch (error) {
             throw new Error(error);
         }
