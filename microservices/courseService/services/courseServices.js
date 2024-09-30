@@ -56,6 +56,17 @@ class CourseService {
         return CourseRepository.enrollCourse(user_id, course_id);
     }
 
+    static async getCourseProgress(userId) {
+        const progressData = await CourseRepository.getCourseProgress(userId);
+    
+        return progressData.map(course => {
+          return {
+            ...course,
+            calculatedProgress: course.progress * 12.5 
+          };
+        });
+      }
+
     static async unenrollCourse(user_id, course_id) {
         return CourseRepository.unenrollCourse(user_id, course_id);
     }
