@@ -358,7 +358,7 @@ app.get('/manage-questions', async (req, res) => {
 
 app.get('/courses', (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ message: 'User not authenticated' });
+    return res.render('courses', { user: undefined, enrolledCourses: undefined, nonEnrolledCourses: undefined });
   }
 
   let url = `http://${courseService}:${coursePort}/courses/?user_id=${req.user.user_id}`;
