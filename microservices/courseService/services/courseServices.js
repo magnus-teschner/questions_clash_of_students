@@ -15,6 +15,12 @@ class CourseService {
         return await CourseRepository.getCoursesAfterProgram(userId, programId);
     }
 
+    static async getMembers(courseId) {
+        return await CourseRepository.getMembers(courseId);
+    }
+
+
+
     static async createLections(courseId) {
         for (let lectionName = 1; lectionName < 9; lectionName++) {
             await CourseRepository.createLection(courseId, lectionName);

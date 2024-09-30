@@ -486,22 +486,13 @@ app.get('/course-progress', (req, res) => {
   });
 });
 
-app.get('/course-members', (req, res) => {
+app.get('/course-members', async (req, res) => {
   const courseId = req.query.id;
-  const userId = req.user.user_id;
-  const query = `SELECT cm.*, a.firstname, a.lastname, a.email
-    FROM course_members cm
-    JOIN accounts a ON cm.user_id = a.user_id
-    WHERE cm.course_id = ?
-  `;
-
-  con.query(query, [courseId, userId], (error, results) => {
-    if (error) {
-      return res.status(500).json({ error: 'Database query error' });
-    }
-    console.log(results);
-    res.json(results);
-  });
+  const courseMembers = await makeGetRequest(`http://${courseService}:${coursePort}/course/${courseId}/members`, {})
+  if (courseMembers.error) {
+    return res.status(courseMembers.status).send(courseMembers.data.error)
+  };
+  return res.send(courseMembers.data);
 });
 
 app.delete('/delete-course-member', (req, res) => {
