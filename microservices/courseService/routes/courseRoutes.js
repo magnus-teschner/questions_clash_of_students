@@ -8,7 +8,7 @@ router.get('/courses', CourseController.getAllCourses);
 router.post('/enroll-course', CourseController.enrollCourse);
 router.get('/course-progress', CourseController.getCourseProgress);
 router.post('/unenroll-course', CourseController.unenrollCourse);
-router.delete('course/:courseId/user/:userId', CourseController.deleteMember);
+router.delete('/course/:courseId/user/:userId', CourseController.deleteMember);
 
 //prof
 router.get('/programs/:programId/user/:userId/courses', CourseController.getCoursesAfterProgram)

@@ -501,12 +501,12 @@ app.get('/course-members', async (req, res) => {
   const courseId = req.query.id;
   const courseMembers = await makeGetRequest(`http://${courseService}:${coursePort}/course/${courseId}/members`, {})
   if (courseMembers.error) {
-    return res.status(courseMembers.status).send(courseMembers.data.error)
+    return res.send([])
   };
   return res.send(courseMembers.data);
 });
 
-app.delete('/delete-course-member', (req, res) => {
+app.delete('/delete-course-member', async (req, res) => {
   const { course_id, user_id } = req.body;
 
   // Check if both course_id and user_id are provided
@@ -514,7 +514,7 @@ app.delete('/delete-course-member', (req, res) => {
     return res.status(400).json({ error: 'course_id and user_id are required' });
   }
 
-  const courseMemberDeletion = makeDeleteRequest(`http://${courseService}:${coursePort}/course/${course_id}/user/${user_id}`, {})
+  const courseMemberDeletion = await makeDeleteRequest(`http://${courseService}:${coursePort}/course/${course_id}/user/${user_id}`, {})
   if (courseMemberDeletion.error) {
     return res.status(courseMemberDeletion.status).send(courseMemberDeletion.data.error)
   }
