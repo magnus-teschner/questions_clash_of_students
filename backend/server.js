@@ -148,7 +148,6 @@ passport.use('stud',
         return done(null, false, { message: "Incorrect password" })
       }
       const score = await makeGetRequest(`http://${scoreService}:${scorePort}/score/user/${user_id}`, {});
-      console.log(score);
       if (score.error) {
         return done(null, false, { message: score.data.error })
       }
@@ -226,17 +225,19 @@ passport.deserializeUser(async (email, done) => {
     const emailAccount = account.data.email;
     const role = account.data.role;
     if (role === "student") {
-      const query_score = "SELECT score FROM scores WHERE user_id = ?";
-      const account_id = [user_id];
-      con.query(query_score, account_id, (err, accountScore) => {
-        if (err) {
-          return done(err);
-        }
-
-        const score = accountScore.length > 0 ? accountScore[0].score : 0;
-        let user = { user_id: user_id, firstname: firstname, lastname: lastname, email: emailAccount, score: score };
-        return done(null, user);
-      });
+      const score = await makeGetRequest(`http://${scoreService}:${scorePort}/score/user/${user_id}`, {});
+      if (score.error) {
+        return done(score.data.error)
+      }
+      let retrieved_score = score.data.totalScore;
+      let user = {
+        user_id: user_id,
+        firstname: firstname,
+        lastname: lastname,
+        email: emailAccount,
+        score: retrieved_score,
+      };
+      return done(null, user);
     }
     let user = { user_id: user_id, firstname: firstname, lastname: lastname, email: emailAccount, score: null };
     return done(null, user);
