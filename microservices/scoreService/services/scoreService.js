@@ -61,7 +61,8 @@ class ScoreService {
     static async getUserTotalScore(userId) {
         try {
             const result = await ScoreRepository.getUserTotalScore(userId);
-            return result[0]?.score || null;
+            console.log(result);
+            return result[0].score;
         } catch (error) {
             throw new Error(`Error fetching user total score: ${error.message}`);
         }

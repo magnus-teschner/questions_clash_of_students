@@ -147,25 +147,20 @@ passport.use('stud',
       if (!match) {
         return done(null, false, { message: "Incorrect password" })
       }
-
-      let query_score = "SELECT score FROM scores WHERE user_id =?";
-      const id_account = [user_id];
-
-      con.query(query_score, id_account, (err, accountScore) => {
-        if (err) {
-          return done(err);
-        }
-        const score = accountScore[0].score;
-        let user = {
-          user_id: user_id,
-          firstname: firstname,
-          lastname: lastname,
-          email: emailAccount,
-          score: score,
-        };
-        return done(null, user);
-      });
-
+      const score = await makeGetRequest(`http://${scoreService}:${scorePort}/score/user/${user_id}`, {});
+      console.log(score);
+      if (score.error) {
+        return done(null, false, { message: score.data.error })
+      }
+      let retrieved_score = score.data.totalScore;
+      let user = {
+        user_id: user_id,
+        firstname: firstname,
+        lastname: lastname,
+        email: emailAccount,
+        score: retrieved_score,
+      };
+      return done(null, user);
     } catch (err) {
       return done(err);
     }
