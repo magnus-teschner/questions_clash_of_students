@@ -106,13 +106,11 @@ document.querySelectorAll('.play-btn').forEach(btn => {
     // Define the base URL
     var url = 'http://localhost:8080';
     const selectedProgram = btn.closest('.course-item').querySelector('.info-content span').innerText; // Adjust selector if necessary
-    const selectedCourse = btn.closest('.course-item').querySelector('.course-title').innerText; // Adjust selector if necessary
-    const professorEmail = btn.closest('.course-item').querySelector(`input[type="hidden"]`).value; // Get the hidden email
+    const selectedCourseId = btn.closest('.course-item').getAttribute('data-course-id');
     // Define the data to send in the POST request
     const postData = {
       program: selectedProgram,
-      course: selectedCourse,
-      professorEmail: professorEmail
+      course: selectedCourseId
     };
     console.log(postData);
 
@@ -126,7 +124,7 @@ document.querySelectorAll('.play-btn').forEach(btn => {
     })
       .then(response => response.json())
       .then(data => {
-        const result = encodeURIComponent(data.token);
+        const result = data.token.data.token;
 
         // Append the result as a URL parameter
         const newUrl = `${url}?token=${result}`;
