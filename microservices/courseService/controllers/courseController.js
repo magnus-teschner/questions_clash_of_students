@@ -107,6 +107,18 @@ class CourseController {
         }
     }
 
+    static async getCourseProgress(req, res) {
+        const userId = req.query.user_id;
+    
+        try {
+          const progressData = await CourseService.getCourseProgress(userId);
+          return res.status(200).json(progressData);
+        } catch (error) {
+          console.error('Error fetching course progress:', error);
+          return res.status(500).send('Internal Server Error');
+        }
+      }
+
     static async unenrollCourse(req, res) {
         const { user_id, course_id } = req.body;
 

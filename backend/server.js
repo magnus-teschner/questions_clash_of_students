@@ -358,7 +358,7 @@ app.get('/manage-questions', async (req, res) => {
 
 app.get('/courses', (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ message: 'User not authenticated' });
+    return res.render('courses', { user: undefined, enrolledCourses: undefined, nonEnrolledCourses: undefined });
   }
 
   let url = `http://${courseService}:${coursePort}/courses/?user_id=${req.user.user_id}`;
@@ -445,22 +445,19 @@ app.post('/unenroll-course', (req, res) => {
 });
 
 app.get('/course-progress', (req, res) => {
-  if (!req.user) {
-    return res.status(401).send('No User signed in!');
-  }
+  const url = `http://${courseService}:${coursePort}/course-progress/?user_id=${req.user.user_id}`;
 
-  const userId = req.user.user_id;
-
-  const query_progress = 'SELECT course_id, progress, course_score FROM course_members WHERE user_id = ?';
-
-  con.query(query_progress, [userId], (err, results) => {
-    if (err) {
-      console.error('Error fetching course progress:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    res.status(200).json(results);
-  });
+  fetch(url, {
+    method: 'GET',
+  })
+    .then(response => response.json())
+    .then(data => {
+      res.status(200).json(data);
+    })
+    .catch(error => {
+      console.error('Error fetching course progress from microservice:', error);
+      next(error);
+    });
 });
 
 app.get('/course-members', async (req, res) => {

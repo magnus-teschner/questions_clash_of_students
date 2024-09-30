@@ -70,6 +70,11 @@ class CourseRepository {
         return this.query(query, [userId]);
     }
 
+    static getCourseProgress(userId) {
+        const query = 'SELECT course_id, progress, course_score FROM course_members WHERE user_id = ?';
+        return this.query(query, [userId]);
+      }
+
     static enrollCourse(user_id, course_id) {
         const query = `INSERT INTO course_members (user_id, course_id, progress, course_score) VALUES (?, ?, 0, 0)`;
         return this.query(query, [user_id, course_id]);

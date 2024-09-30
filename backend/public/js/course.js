@@ -77,31 +77,24 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   fetch('/course-progress')
-    .then(response => response.json())
-    .then(data => {
-      console.log(data);
-      const progressBars = document.querySelectorAll('.progress-bar');
+  .then(response => response.json())
+  .then(data => {
+    const progressBars = document.querySelectorAll('.progress-bar');
 
-      data.forEach((course, index) => {
-        const progress = calculateProgress(course.progress, 100);
-        progressBars[index].style.width = progress.toFixed(0) + '%';
-        progressBars[index].textContent = progress.toFixed(0) + '%';
+    data.forEach((course, index) => {
+      const progress = course.calculatedProgress;
+      progressBars[index].style.width = progress.toFixed(0) + '%';
+      progressBars[index].textContent = progress.toFixed(0) + '%';
 
-        if (progress === 0) {
-          progressBars[index].style.width = 0 + '%';
-          progressBars[index].textContent = 0 + '%';
-        }
-      });
-    })
-    .catch(error => {
-      console.error('Error fetching course progress:', error);
+      if (progress === 0) {
+        progressBars[index].style.width = 0 + '%';
+        progressBars[index].textContent = 0 + '%';
+      }
     });
-
-  function calculateProgress(currentPoints, maxPoints) {
-    if (maxPoints === 0) return 0;
-    if (currentPoints === 0) return 0;
-    return (currentPoints / maxPoints) * 100;
-  }
+  })
+  .catch(error => {
+    console.error('Error fetching course progress:', error);
+  });
 
   window.enrollCourse = enrollCourse;
   window.unenrollCourse = unenrollCourse;
@@ -113,13 +106,11 @@ document.querySelectorAll('.play-btn').forEach(btn => {
     // Define the base URL
     var url = 'http://localhost:8080';
     const selectedProgram = btn.closest('.course-item').querySelector('.info-content span').innerText; // Adjust selector if necessary
-    const selectedCourse = btn.closest('.course-item').querySelector('.course-title').innerText; // Adjust selector if necessary
-    const professorEmail = btn.closest('.course-item').querySelector(`input[type="hidden"]`).value; // Get the hidden email
+    const selectedCourseId = btn.closest('.course-item').getAttribute('data-course-id');
     // Define the data to send in the POST request
     const postData = {
       program: selectedProgram,
-      course: selectedCourse,
-      professorEmail: professorEmail
+      course: selectedCourseId
     };
     console.log(postData);
 
@@ -133,7 +124,7 @@ document.querySelectorAll('.play-btn').forEach(btn => {
     })
       .then(response => response.json())
       .then(data => {
-        const result = encodeURIComponent(data.token);
+        const result = data.token.data.token;
 
         // Append the result as a URL parameter
         const newUrl = `${url}?token=${result}`;
