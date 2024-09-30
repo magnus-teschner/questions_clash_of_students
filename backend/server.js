@@ -47,6 +47,9 @@ coursePort = process.env.COURSEPORT || 5003;
 scoreService = process.env.SCORESERVICE || "localhost";
 scorePort = process.env.SCOREPORT || 5002;
 
+const rankingService = process.env.RANKINGSERVICE || 'localhost';
+const rankingPort = process.env.RANKINGPORT || 5004;
+
 
 //common functions
 const axios = require('axios');
@@ -485,137 +488,33 @@ app.delete('/delete-course-member', (req, res) => {
   return res.status(200).send("Member deleted successfully")
 });
 
-app.get('/ranking', (req, res, next) => {
-  const courseQuery = `SELECT DISTINCT course_name, course_id FROM courses`;
-
+app.get('/ranking', (req, res) => {
   const selectedCourse = req.query.course || 'all';
-  const selectedLection = req.query.lection || null;
+  const selectedLection = req.query.lection || '';
 
-  let rankingQuery;
-  let queryParams = [];
-  let lections = [];
-
-  if (selectedCourse === 'all') {
-    // Gesamtranking (alle Kurse)
-    rankingQuery = `
-      SELECT a.user_id, a.firstname, a.lastname, s.score
-      FROM accounts a
-      JOIN scores s ON a.user_id = s.user_id
-      ORDER BY s.score DESC
-    `;
-  } else {
-    // Kursbasiertes Ranking
-    rankingQuery = `
-      SELECT a.user_id, a.firstname, a.lastname, cm.course_score, c.course_name
-      FROM accounts a
-      JOIN course_members cm ON a.user_id = cm.user_id
-      JOIN courses c ON cm.course_id = c.course_id
-      WHERE c.course_name = ?
-    `;
-    queryParams = [selectedCourse];
-
-    if (selectedLection) {
-      rankingQuery += `
-        AND EXISTS (
-          SELECT 1 
-          FROM lections l 
-          WHERE l.course_id = c.course_id
-          AND l.lection_name = ?
-        )
-      `;
-      queryParams.push(selectedLection);
-    }
-
-    // Sortiere nach Kurs-Score
-    rankingQuery += ` ORDER BY cm.course_score DESC`;
+  if (!req.user) {
+    return res.render('ranking', { user: undefined, rankingList: [], courses: [], lections: [] });
   }
 
-  const lectionQuery = `
-    SELECT lection_id, lection_name 
-    FROM lections 
-    WHERE course_id = (
-      SELECT course_id FROM courses WHERE course_name = ?
-    )
-  `;
+  const url = `http://${rankingService}:${rankingPort}/ranking?course=${selectedCourse}&lection=${selectedLection}`;
 
-  const getCourses = new Promise((resolve, reject) => {
-    con.query(courseQuery, [], (err, courses) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(courses);
-      }
-    });
-  });
-
-  const getLections = new Promise((resolve, reject) => {
-    if (selectedCourse !== 'all') {
-      con.query(lectionQuery, [selectedCourse], (err, lectionRows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(lectionRows);
-        }
-      });
-    } else {
-      resolve([]);
-    }
-  });
-
-  const getRanking = new Promise((resolve, reject) => {
-    con.query(rankingQuery, queryParams, (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(rows);
-      }
-    });
-  });
-
-  Promise.all([getCourses, getLections, getRanking])
-    .then(([courses, lectionRows, rankingRows]) => {
-      lections = lectionRows;
-
-      let rankingList;
-      if (selectedCourse === 'all') {
-        // Ranking für alle Kurse
-        rankingList = rankingRows.sort((a, b) => b.score - a.score).map((user, index, sortedUsers) => {
-          const rank = index > 0 && sortedUsers[index - 1].score === user.score ? sortedUsers[index - 1].rank : index + 1;
-          return {
-            user_id: user.user_id,
-            firstname: user.firstname,
-            lastname: user.lastname,
-            score: user.score,
-            rank: rank
-          };
-        });
-      } else {
-        // Ranking für den ausgewählten Kurs (und ggf. Lection)
-        rankingList = rankingRows.sort((a, b) => b.course_score - a.course_score).map((user, index, sortedUsers) => {
-          const rank = index > 0 && sortedUsers[index - 1].course_score === user.course_score ? sortedUsers[index - 1].rank : index + 1;
-          return {
-            user_id: user.user_id,
-            firstname: user.firstname,
-            lastname: user.lastname,
-            course_score: user.course_score,
-            course_name: user.course_name,
-            rank: rank
-          };
-        });
-      }
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      const { rankingList, courses, lections } = data;
 
       res.render('ranking', {
         user: req.user,
-        rankingList: rankingList,
-        courses: courses,
-        lections: lections,
-        selectedCourse: selectedCourse,
-        selectedLection: selectedLection
+        rankingList,
+        courses,
+        lections,
+        selectedCourse,
+        selectedLection
       });
     })
-    .catch(err => {
-      console.error('Error fetching data:', err);
-      next(err);
+    .catch(error => {
+      console.error('Error fetching ranking from microservice:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
     });
 });
 
