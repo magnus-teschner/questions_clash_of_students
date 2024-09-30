@@ -9,7 +9,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use('/', rankingRoutes);
 
-const port = process.env.PORT || 5004;
+const port = process.env.PORT || 80;
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });

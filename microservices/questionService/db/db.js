@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 const config_mysql = {
     user: "admin",
     password: "admin",
-    host: "localhost",
+    host: process.env.DB,
     database: "clashOfStudents",
     waitForConnections: true,
     connectionLimit: 10,

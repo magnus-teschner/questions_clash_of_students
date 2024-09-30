@@ -9,7 +9,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use('/', userManagementRoutes);
 
-const port = process.env.PORT || 1000;
+const port = process.env.PORT || 80;
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });

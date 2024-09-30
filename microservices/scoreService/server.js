@@ -10,7 +10,7 @@ app.use(express.urlencoded({ extended: false }));
 // Use the score routes
 app.use('/score', scoreRoutes);
 
-const port = process.env.PORT || 5002;
+const port = process.env.PORT || 80;
 app.listen(port, () => {
     console.log(`ScoreService running on port ${port}`);
 });

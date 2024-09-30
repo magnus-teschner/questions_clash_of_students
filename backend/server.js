@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const multer = require("multer");
 const app = express();
-const port = 1999;
+const port = 80;
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const mysql = require('mysql2');
@@ -30,25 +30,25 @@ app.use(express.urlencoded({ extended: false }));
 
 //microservices
 emailService = process.env.EMAILSERVICE || "localhost";
-emailPort = process.env.EMAILPORT || 1001;
+emailPort = process.env.EMAILPORT || 80;
 
 userManagementService = process.env.USERSERVICE || "localhost";
-userManagementPort = process.env.USERPORT || 1000;
+userManagementPort = process.env.USERPORT || 80;
 
 jwtService = process.env.JWTSERVICE || "localhost";
-jwtPort = process.env.JWTPORT || 1002;
+jwtPort = process.env.JWTPORT || 80;
 
 questionService = process.env.QUESTIONSERVICE || "localhost";
-questionPort = process.env.JWTPORT || 1003;
+questionPort = process.env.JWTPORT || 80;
 
 courseService = process.env.COURSESERVICE || "localhost";
-coursePort = process.env.COURSEPORT || 5003;
+coursePort = process.env.COURSEPORT || 80;
 
 scoreService = process.env.SCORESERVICE || "localhost";
-scorePort = process.env.SCOREPORT || 5002;
+scorePort = process.env.SCOREPORT || 80;
 
-const rankingService = process.env.RANKINGSERVICE || 'localhost';
-const rankingPort = process.env.RANKINGPORT || 5004;
+rankingService = process.env.RANKINGSERVICE || 'localhost';
+rankingPort = process.env.RANKINGPORT || 80;
 
 
 //common functions
@@ -110,7 +110,7 @@ const makeDeleteRequest = async (url, data = {}, headers = { 'Content-Type': 'ap
 const config_mysql = {
   user: "admin",
   password: "admin",
-  host: "127.0.0.1",
+  host: process.env.DB,
   database: "clashOfStudents"
 };
 
@@ -1041,14 +1041,14 @@ app.post('/reset-password', async (req, res, next) => {
 });
 
 app.post('/jwt', async (req, res) => {
-  const { program, course, professorEmail } = req.body;
+  const { program, course } = req.body;
   const jwtGenerationData = {
     email: req.user.email,
     firstname: req.user.firstname,
     lastname: req.user.lastname,
     program: program,
     course: course,
-    professor_email: professorEmail
+    professorEmail: "placeholder@gmail.com"
   };
   const jwt = await makePostRequest(`http://${jwtService}:${jwtPort}/jwt`, jwtGenerationData);
   if (jwt.error) {
