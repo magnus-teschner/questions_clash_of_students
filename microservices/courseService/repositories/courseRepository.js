@@ -32,6 +32,15 @@ class CourseRepository {
         return this.query(query, [programId, userId]);
     }
 
+    static async getMembers(courseId) {
+        const query = `SELECT cm.*, a.firstname, a.lastname, a.email
+            FROM course_members cm
+            JOIN accounts a ON cm.user_id = a.user_id
+            WHERE cm.course_id = ?
+        `;
+        return this.query(query, [courseId]);
+    }
+
     static async getLections(courseId) {
         const query = `
             Select * from lections where course_id = ?

@@ -24,6 +24,21 @@ class CourseController {
         }
     }
 
+    static async getMembers(req, res) {
+        try {
+            const { courseId } = req.params;
+
+            const members = await CourseService.getMembers(courseId);
+            if (!members.length) {
+                return res.status(404).json({ error: "No members found" });
+            }
+            res.json(members);
+        } catch (error) {
+            res.status(500).json({ error: 'An error occurred while retrieving members for a course' });
+            console.error(error);
+        }
+    }
+
     static async getCoursesAfterProgram(req, res) {
         try {
             const { userId, programId } = req.params;

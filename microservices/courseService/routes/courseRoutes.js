@@ -11,7 +11,8 @@ router.delete('course/:courseId/user/:userId', CourseController.deleteMember);
 
 //prof
 router.get('/programs/:programId/user/:userId/courses', CourseController.getCoursesAfterProgram)
-router.get('/course/:courseId/lections', CourseController.getLections)
+router.get('/course/:courseId/lections', CourseController.getLections);
+router.get('/course/:courseId/members', CourseController.getMembers)
 router.put('/rename-course', CourseController.renameCourse);
 router.put('/course/move', CourseController.moveCourse);
 router.delete('/delete-course', CourseController.deleteCourse);
