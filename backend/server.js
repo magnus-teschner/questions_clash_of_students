@@ -285,7 +285,7 @@ app.delete('/delete-member', (req, res) => {
 app.put('/rename-course', (req, res) => {
   const user_id = req.user.user_id;
   const course_id = req.body.course_id;
-  const new_course_name = req.body;
+  const new_course_name = req.body.new_course_name;
 
   let url = `http://${courseService}:${coursePort}/rename-course`;
 
@@ -297,8 +297,9 @@ app.put('/rename-course', (req, res) => {
     body: JSON.stringify({ user_id, course_id, new_course_name }),  // Übergabe der Daten
   })
     .then(response => {
+      console.log(response);
       if (response.ok) {
-        res.status(200).send('Course renamed successfully');
+        return res.status(200).send('Course renamed successfully');
       } else {
         return response.text().then(text => res.status(response.status).send(text));
       }
@@ -316,10 +317,10 @@ app.put('/move-course', (req, res) => {
     return res.status(401).send('No User signed in!');
   }
 
-  const userId = req.user.email;
+  const userId = req.user.user_id;  // Assuming you want to use user_id instead of email
 
-  // Update the program in the course table
-  const query_update_course = 'UPDATE course SET program_name = ? WHERE id = ? AND user = ?';
+  // Update the program_id in the courses table
+  const query_update_course = 'UPDATE courses SET program_id = ? WHERE course_id = ? AND creator = ?';
   const values_course = [new_program, course_id, userId];
 
   con.query(query_update_course, values_course, (err, result) => {
@@ -332,21 +333,10 @@ app.put('/move-course', (req, res) => {
       return res.status(404).send('Course not found or not authorized to move this course');
     }
 
-    // Update the program in the questions table
-    const query_update_questions = 'UPDATE questions SET program = ? WHERE course = (SELECT course_name FROM courses WHERE id = ?)';
-    const values_questions = [new_program, course_id];
-    console.log(values_questions);
-
-    con.query(query_update_questions, values_questions, (err, result) => {
-      if (err) {
-        console.error('Error updating program in questions:', err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-      return res.status(200).send('Course moved and questions updated successfully');
-    });
+    return res.status(200).send('Course moved successfully');
   });
 });
+
 
 app.get("/log-out", (req, res, next) => {
   req.logout((err) => {

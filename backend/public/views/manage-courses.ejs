@@ -15,7 +15,7 @@
                 <p class="drag-and-drop-info">Drag and drop courses to change program</p>
                 <% programsWithCourses.forEach(program=> { %>
                     <div id="<%= program.program_name.replace(/\s+/g, '-').toLowerCase() %>" class="program-dropzone"
-                        ondrop="drop(event, '<%= program.program_name %>')" ondragover="allowDrop(event)">
+                        ondrop="drop(event, '<%= program.program_id %>')" ondragover="allowDrop(event)">
                         <h1>
                             <%= program.program_name %>
                         </h1>

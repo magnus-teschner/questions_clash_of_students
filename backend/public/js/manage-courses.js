@@ -152,7 +152,7 @@ function drag(event) {
     event.dataTransfer.setData("text", event.target.id);
 }
 
-function drop(event, programName) {
+function drop(event, programId) {
     event.preventDefault();
     var data = event.dataTransfer.getData("text");
     var courseElement = document.getElementById(data);
@@ -163,7 +163,7 @@ function drop(event, programName) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ course_id: courseId, new_program: programName })
+        body: JSON.stringify({ course_id: courseId, new_program: programId })
     })
         .then(response => {
             if (response.ok) {
@@ -177,3 +177,4 @@ function drop(event, programName) {
             alert('Failed to move course');
         });
 }
+
