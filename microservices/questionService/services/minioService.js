@@ -1,7 +1,7 @@
 const Minio = require('minio');
 const { v4: uuidv4 } = require('uuid');
 
-const endPoint = "localhost";
+const endPoint = process.env.MINIO;
 const port = 9000;
 const bucket = "questions";
 
