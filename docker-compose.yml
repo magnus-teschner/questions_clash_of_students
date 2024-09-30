@@ -3,7 +3,7 @@ version: '3'
 services:
   mysqldb:
     image: mysql:5.7
-#    platform: linux/x86_64
+    #    platform: linux/x86_64
     environment:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: clashOfStudents
@@ -94,6 +94,14 @@ services:
     environment:
       DB: mysqldb
 
+  ranking_service:
+    build: ./microservices/rankingService
+    ports:
+      - "5004:80"
+    restart: always
+    environment:
+      DB: mysqldb
+
   backend_service:
     build: ./backend
     ports:
@@ -107,7 +115,7 @@ services:
       QUESTIONSERVICE: question_service
       SCORESERVICE: score_service
       USERSERVICE: user_management_service
-
+      RANKINGSERVICE: ranking_service
 
 volumes:
   dbdata:

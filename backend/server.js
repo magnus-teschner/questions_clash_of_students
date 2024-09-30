@@ -47,8 +47,8 @@ coursePort = process.env.COURSEPORT || 80;
 scoreService = process.env.SCORESERVICE || "localhost";
 scorePort = process.env.SCOREPORT || 80;
 
-const rankingService = process.env.RANKINGSERVICE || 'localhost';
-const rankingPort = process.env.RANKINGPORT || 5004;
+rankingService = process.env.RANKINGSERVICE || 'localhost';
+rankingPort = process.env.RANKINGPORT || 80;
 
 
 //common functions
@@ -1041,14 +1041,14 @@ app.post('/reset-password', async (req, res, next) => {
 });
 
 app.post('/jwt', async (req, res) => {
-  const { program, course, professorEmail } = req.body;
+  const { program, course } = req.body;
   const jwtGenerationData = {
     email: req.user.email,
     firstname: req.user.firstname,
     lastname: req.user.lastname,
     program: program,
     course: course,
-    professor_email: professorEmail
+    professorEmail: "placeholder@gmail.com"
   };
   const jwt = await makePostRequest(`http://${jwtService}:${jwtPort}/jwt`, jwtGenerationData);
   if (jwt.error) {
