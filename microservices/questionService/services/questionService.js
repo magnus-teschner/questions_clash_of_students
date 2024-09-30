@@ -11,8 +11,8 @@ class QuestionService {
         return await QuestionRepository.getQuestionsByUser(userId);
     }
 
-    static async getQuestion(courseId, lectionId, position) {
-        const result = await QuestionRepository.getQuestion(courseId, lectionId, position);
+    static async getQuestion(courseId, lectionName, position) {
+        const result = await QuestionRepository.getQuestion(courseId, lectionName, position);
         return result[0];
     }
 

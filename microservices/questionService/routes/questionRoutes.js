@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.get('/programs', QuestionController.getAllPrograms);
 router.get('/questions/:userId', QuestionController.getQuestionsByUser);
-router.get('/question', QuestionController.getQuestion);
+router.get('/course/:courseId/lection/:lectionName/position/:position/question', QuestionController.getQuestion);
 router.post('/question', QuestionController.addQuestion);
 router.put('/question', QuestionController.updateQuestion);
 router.get('/lection/:lectionId/unused-positions', QuestionController.getUnusedPositions);

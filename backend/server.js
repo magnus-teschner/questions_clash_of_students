@@ -4,7 +4,6 @@ const path = require('path');
 const multer = require("multer");
 const app = express();
 const port = 1999;
-const port_question_service = 2000;
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const mysql = require('mysql2');
@@ -28,13 +27,6 @@ app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
-question_creator_service = process.env.QUESTIONCREATOR;
-question_creator_service = "127.0.0.1";
-mailjet_public_key = process.env.PUBLICMAIL;
-mailjet_private_key = process.env.PRIVATEMAIL;
-mailjet_public_key = "6a2924e64b4c454bbcdf6580e44e9ca2";
-mailjet_private_key = "9b2b92a8e47833cfaeb1488d47dc1790";
-backend = "127.0.0.1"
 
 //microservices
 emailService = process.env.EMAILSERVICE || "localhost";
@@ -112,7 +104,6 @@ const makeDeleteRequest = async (url, data = {}, headers = { 'Content-Type': 'ap
   }
 };
 
-
 const config_mysql = {
   user: "admin",
   password: "admin",
@@ -156,25 +147,19 @@ passport.use('stud',
       if (!match) {
         return done(null, false, { message: "Incorrect password" })
       }
-
-      let query_score = "SELECT score FROM scores WHERE user_id =?";
-      const id_account = [user_id];
-
-      con.query(query_score, id_account, (err, accountScore) => {
-        if (err) {
-          return done(err);
-        }
-        const score = accountScore[0].score;
-        let user = {
-          user_id: user_id,
-          firstname: firstname,
-          lastname: lastname,
-          email: emailAccount,
-          score: score,
-        };
-        return done(null, user);
-      });
-
+      const score = await makeGetRequest(`http://${scoreService}:${scorePort}/score/user/${user_id}`, {});
+      if (score.error) {
+        return done(null, false, { message: score.data.error })
+      }
+      let retrieved_score = score.data.totalScore;
+      let user = {
+        user_id: user_id,
+        firstname: firstname,
+        lastname: lastname,
+        email: emailAccount,
+        score: retrieved_score,
+      };
+      return done(null, user);
     } catch (err) {
       return done(err);
     }
@@ -240,17 +225,19 @@ passport.deserializeUser(async (email, done) => {
     const emailAccount = account.data.email;
     const role = account.data.role;
     if (role === "student") {
-      const query_score = "SELECT score FROM scores WHERE user_id = ?";
-      const account_id = [user_id];
-      con.query(query_score, account_id, (err, accountScore) => {
-        if (err) {
-          return done(err);
-        }
-
-        const score = accountScore.length > 0 ? accountScore[0].score : 0;
-        let user = { user_id: user_id, firstname: firstname, lastname: lastname, email: emailAccount, score: score };
-        return done(null, user);
-      });
+      const score = await makeGetRequest(`http://${scoreService}:${scorePort}/score/user/${user_id}`, {});
+      if (score.error) {
+        return done(score.data.error)
+      }
+      let retrieved_score = score.data.totalScore;
+      let user = {
+        user_id: user_id,
+        firstname: firstname,
+        lastname: lastname,
+        email: emailAccount,
+        score: retrieved_score,
+      };
+      return done(null, user);
     }
     let user = { user_id: user_id, firstname: firstname, lastname: lastname, email: emailAccount, score: null };
     return done(null, user);
@@ -374,10 +361,6 @@ app.get('/courses', (req, res) => {
     return res.status(401).json({ message: 'User not authenticated' });
   }
 
-  const queryParams = new URLSearchParams({
-    user_id: req.user.user_id
-  });
-
   let url = `http://${courseService}:${coursePort}/courses/?user_id=${req.user.user_id}`;
 
   fetch(url, {
@@ -385,15 +368,9 @@ app.get('/courses', (req, res) => {
   })
     .then(response => response.json())
     .then(data => {
-      // Data vom Microservice in der Antwort enthalten
-      const enrolledCourses = data.enrolledCourses || [];
-      const nonEnrolledCourses = data.nonEnrolledCourses || [];
-
-      res.render('courses', {
-        user: req.user,
-        enrolledCourses: enrolledCourses,
-        nonEnrolledCourses: nonEnrolledCourses
-      });
+      const enrolledCourses = data.enrolledCourses;
+      const nonEnrolledCourses = data.nonEnrolledCourses;
+      return res.render('courses', { user: req.user, enrolledCourses: enrolledCourses, nonEnrolledCourses: nonEnrolledCourses });
     })
     .catch(error => {
       console.error('Error fetching courses from microservice:', error);
@@ -966,31 +943,6 @@ app.post('/add_course', async (req, res) => {
 });
 
 
-
-
-app.get('/get_question', (req, res) => {
-
-  const queryParams = new URLSearchParams({
-    course: req.query.course,
-    lection: req.query.lection,
-    position: req.query.position
-  });
-  // Construct the URL with parameters
-  let url = `http://${question_creator_service}:${port_question_service}/get_question/?${queryParams}`;
-
-  // Make the GET request
-  fetch(url, {
-    method: 'GET',
-  })
-    .then(response => response.json())
-    .then(data => res.send(data))
-    .catch(error => {
-      console.error('Error:', error);
-      return res.status(500).send('Internal Server Error');
-    });
-});
-
-
 app.get('/get_courses/:program_id', async (req, res) => {
   let user = req.user;
   const user_id = user.user_id;
@@ -1021,28 +973,15 @@ app.get('/get_positions/:lection_id', async (req, res) => {
   return res.status(200).send(lections.data)
 });
 
-app.get('/api/questions/:user/:program/:course/:lection/:position', (req, res) => {
+app.get('/api/questions/:user/:program/:course/:lection/:position', async (req, res) => {
+
   const { user, program, course, lection, position } = req.params;
+  const question = await makeGetRequest(`http://${questionService}:${questionPort}/course/${course}/lection/${lection}/position/${position}/question/`);
+  if (question.error) {
+    return res.status(question.status).send(question.data.error);
+  }
 
-  const query = `
-    SELECT * FROM questions
-    WHERE user = ? AND program = ? AND course = ? AND lection = ? AND position = ?
-  `;
-
-  console.log(user, program, course, lection, position);
-
-  con.query(query, [user, program, course, lection, position], (err, result) => {
-    if (err) {
-      console.error('Error fetching question:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.length === 0) {
-      return res.status(404).json({ message: 'Question not found' });
-    }
-
-    res.json(result[0]);
-  });
+  return res.json(question.data)
 });
 
 app.get('/reset-password-request', (req, res) => {
