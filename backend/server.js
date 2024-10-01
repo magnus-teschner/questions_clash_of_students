@@ -725,10 +725,12 @@ app.post("/sign-up", async (req, res, next) => {
   }
   const user_id = accountCreationResponse.data.user_id;
 
-  const createScoreResponse = await makePostRequest(`http://${scoreService}:${scorePort}/score/user/${user_id}/score`, {});
-  console.log(createScoreResponse);
-  if (createScoreResponse.error) {
-    return res.status(createScoreResponse.status).send(createScoreResponse.data.error);
+  if (role === "student") {
+    const createScoreResponse = await makePostRequest(`http://${scoreService}:${scorePort}/score/user/${user_id}/score`, {});
+    console.log(createScoreResponse);
+    if (createScoreResponse.error) {
+      return res.status(createScoreResponse.status).send(createScoreResponse.data.error);
+    }
   }
 
   if (role === "professor") {

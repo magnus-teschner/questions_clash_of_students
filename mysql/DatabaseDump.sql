@@ -251,5 +251,4 @@ INSERT INTO `questions` (`user_id`, `question_type`, `frage`, `answer_a`, `answe
 (2, 'multiple-choice', 'Which cloud service type doesnt require installation of software?', 'SaaS', 'IaaS', 'PaaS', 'FaaS', 'SaaS', 9, NULL, 8);
 
 INSERT INTO `scores` (`user_id`, `score`) VALUES
-(1, 0),
-(2, 0);
+(1, 0);
