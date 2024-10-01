@@ -19,6 +19,7 @@ const { type } = require('os');
 
 app.use(express.static('public'));
 app.use(express.json());
+app.use(cors());
 
 app.set("views", 'public/views');
 app.set("view engine", "ejs");

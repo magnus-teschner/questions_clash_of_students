@@ -11,6 +11,7 @@
     "node-mailjet": "^6.0.5",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "cors": "^2.8.5"
   }
 }
