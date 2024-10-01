@@ -1045,7 +1045,7 @@ app.post('/reset-password', async (req, res, next) => {
 app.post('/jwt', async (req, res) => {
   const { program, course } = req.body;
   const jwtGenerationData = {
-    email: req.user.email,
+    email: req.user.user_id,
     firstname: req.user.firstname,
     lastname: req.user.lastname,
     program: program,
