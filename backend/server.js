@@ -4,6 +4,7 @@ const path = require('path');
 const multer = require("multer");
 const app = express();
 const port = 80;
+const cors = require('cors');
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const mysql = require('mysql2');
